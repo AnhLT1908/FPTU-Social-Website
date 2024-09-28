@@ -9,10 +9,40 @@ const GOOGLE_CLIENT_ID =
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [validated, setValidated] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log({ email, password });
+    if (validateForm()) {
+      // Handle login logic if form is valid
+      console.log({ email, password });
+    } else {
+      setValidated(true); // Set validated state to true to show errors
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Email validation (basic regex for email format)
+    if (!email) {
+      newErrors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Invalid email format.";
+    }
+
+    // Password validation (min length 6)
+    if (!password) {
+      newErrors.password = "Password is required.";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+
+    // If no errors, return true
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleGoogleSuccess = (credentialResponse) => {
@@ -66,7 +96,7 @@ const LoginForm = () => {
                   ></div>
                 </div>
 
-                <Form onSubmit={handleLogin}>
+                <Form noValidate validated={validated} onSubmit={handleLogin}>
                   <Form.Group className="mb-3" controlId="formEmail">
                     <Form.Control
                       type="email"
@@ -74,8 +104,16 @@ const LoginForm = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      style={{ borderRadius: "20px", height: "60px", backgroundColor: "#d7d6d6"}}
+                      isInvalid={!!errors.email}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.email}
+                    </Form.Control.Feedback>
                   </Form.Group>
 
                   <Form.Group controlId="formPassword" className="mt-3">
@@ -85,16 +123,29 @@ const LoginForm = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      style={{ borderRadius: "20px", height: "60px", backgroundColor: "#d7d6d6" }}
+                      isInvalid={!!errors.password}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.password}
+                    </Form.Control.Feedback>
                   </Form.Group>
 
                   <div className="mt-3">
-                    <a href="/forgot-password" style={{ textDecoration: "none"}}>Forgot Password?</a>
+                    <a href="/forgot-password" style={{ textDecoration: "none" }}>
+                      Forgot Password?
+                    </a>
                   </div>
 
                   <div className="mt-3">
-                    New to our community? <a href="/signup" style={{ textDecoration: "none"}}>Sign up</a>
+                    New to our community?{" "}
+                    <a href="/register" style={{ textDecoration: "none" }}>
+                      Sign up
+                    </a>
                   </div>
 
                   <Button
