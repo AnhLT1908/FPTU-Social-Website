@@ -43,7 +43,7 @@ const CreateUPForm = () => {
 
   // Function to navigate back to the signup page
   const handleBack = () => {
-    navigate("/signup");
+    navigate("/register");
   };
 
   return (
