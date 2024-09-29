@@ -7,8 +7,9 @@
   border-color: #00000033;
   border-style: solid;
   border-bottom-width: 0.0625rem;
-  height: 56px;
+  height: var(--header-height);
   flex-wrap: nowrap;
+  background-color: #ffffffff;
 }
 .header-navbar .search-bar-section > div:first-child {
   width: 100%;
