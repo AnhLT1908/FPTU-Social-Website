@@ -80,7 +80,6 @@ const HomePage = () => {
   return (
     <Container fluid>
       <Row className="d-flex mt-3">
-        <Col md={2}></Col>
         <Col md={10}>
           <Row className="d-flex mt-5">
             <Col md={3} className="d-flex">
@@ -206,6 +205,7 @@ const HomePage = () => {
             </Col>
           </Row>
         </Col>
+        <Col md={2}></Col>
       </Row>
     </Container>
   );

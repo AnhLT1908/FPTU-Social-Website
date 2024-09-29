@@ -5,7 +5,7 @@ function Header() {
   return (
     <nav className='d-flex px-md-2 align-items-center header-navbar'>
       <a href='/' className='nav-logo m-0'>
-        <img href='/' src='/images/272b5beba3a377fd2eb2.jpg' width={50} />
+        <img href='/' src='/images/logo.jpg' width={50} />
       </a>
       <div className='search-bar-section d-flex flex-grow-1 justify-content-stretch py-2'>
         <div className='d-flex justify-content-stretch mx-xl-auto d-xl-block'>
@@ -86,7 +86,7 @@ function Header() {
             >
               <span className='d-flex justify-content-center align-items-center'>
                 <img
-                  src='/images/272b5beba3a377fd2eb2.jpg'
+                  src='/images/logo.jpg'
                   width={32}
                   height={32}
                   style={{ borderRadius: '624.9375rem' }}
@@ -101,7 +101,7 @@ function Header() {
                 <a class='dropdown-item' href='#'>
                   <span className='dropdown-item-icon'>
                     <img
-                      src='/images/272b5beba3a377fd2eb2.jpg'
+                      src='/images/logo.jpg'
                       alt='User Avatar for u/sjdkdk48'
                     />
                   </span>
