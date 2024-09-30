@@ -1,6 +1,11 @@
 import React from 'react';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import '../styles/header.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faEllipsisVertical,
+  faMessage,
+} from '@fortawesome/free-solid-svg-icons';
 function Header() {
   return (
     <nav className='d-flex px-md-2 align-items-center header-navbar'>
@@ -59,26 +64,119 @@ function Header() {
               <span>Create</span>
             </span>
           </button>
-          <button>
-            <span className='d-flex align-items-center justify-content-center'>
-              <svg
-                rpl=''
-                fill='currentColor'
-                height='20'
-                icon-name='notification-outline'
-                viewBox='0 0 20 20'
-                width='20'
-                xmlns='http://www.w3.org/2000/svg'
-              >
-                <path d='M11 18h1a2 2 0 0 1-4 0h3Zm8-3.792v.673A1.12 1.12 0 0 1 17.883 16H2.117A1.12 1.12 0 0 1 1 14.881v-.673a3.947 3.947 0 0 1 1.738-3.277A2.706 2.706 0 0 0 3.926 8.7V7.087a6.07 6.07 0 0 1 12.138 0l.01 1.613a2.7 2.7 0 0 0 1.189 2.235A3.949 3.949 0 0 1 19 14.208Zm-1.25 0a2.7 2.7 0 0 0-1.188-2.242A3.956 3.956 0 0 1 14.824 8.7V7.088a4.819 4.819 0 1 0-9.638 0v1.615a3.956 3.956 0 0 1-1.738 3.266 2.7 2.7 0 0 0-1.198 2.239v.542h15.5v-.542Z'></path>
-              </svg>
-            </span>
-          </button>
+          <div className='dropdown notification-section d-flex align-items-center justify-content-center'>
+            <button
+              className='btn dropdown-toggle notification-btn'
+              type='button'
+              id='dropdownMenuButton2'
+              data-bs-toggle='dropdown'
+              aria-expanded='false'
+              data-bs-auto-close='outside'
+            >
+              <span className='d-flex justify-content-center align-items-center'>
+                <svg
+                  rpl=''
+                  fill='currentColor'
+                  height='20'
+                  icon-name='notification-outline'
+                  viewBox='0 0 20 20'
+                  width='20'
+                  xmlns='http://www.w3.org/2000/svg'
+                >
+                  <path d='M11 18h1a2 2 0 0 1-4 0h3Zm8-3.792v.673A1.12 1.12 0 0 1 17.883 16H2.117A1.12 1.12 0 0 1 1 14.881v-.673a3.947 3.947 0 0 1 1.738-3.277A2.706 2.706 0 0 0 3.926 8.7V7.087a6.07 6.07 0 0 1 12.138 0l.01 1.613a2.7 2.7 0 0 0 1.189 2.235A3.949 3.949 0 0 1 19 14.208Zm-1.25 0a2.7 2.7 0 0 0-1.188-2.242A3.956 3.956 0 0 1 14.824 8.7V7.088a4.819 4.819 0 1 0-9.638 0v1.615a3.956 3.956 0 0 1-1.738 3.266 2.7 2.7 0 0 0-1.198 2.239v.542h15.5v-.542Z'></path>
+                </svg>
+              </span>
+            </button>
+            <ul
+              className='dropdown-menu dropdown-menu-end'
+              aria-labelledby='dropdownMenuButton2'
+            >
+              <div className='notification-header text-center py-1 mb-2 border-bottom border-primary border-2'>
+                Notifications
+              </div>
+              <div className='notification-content'>
+                <li className='d-flex'>
+                  <a className='dropdown-item-notification' href='#'>
+                    <span className='dropdown-item-icon'>
+                      <FontAwesomeIcon icon={faMessage} />
+                    </span>
+                    <span className='dropdown-item-name d-flex flex-column'>
+                      <span className='notification-activity'>
+                        This user replied to your comment in r/test-community
+                      </span>
+                      <span className='notification-hints max-lines'>
+                        Go see your comments on r/test-community: "This is just
+                        to test limited words length"
+                      </span>
+                    </span>
+                  </a>
+                  <button>
+                    <span>
+                      <FontAwesomeIcon icon={faEllipsisVertical} />
+                    </span>
+                  </button>
+                </li>
+                <li className='d-flex'>
+                  <a className='dropdown-item-notification' href='#'>
+                    <span className='dropdown-item-icon'>
+                      <FontAwesomeIcon icon={faMessage} />
+                    </span>
+                    <span className='dropdown-item-name d-flex flex-column'>
+                      <span className='notification-activity'>
+                        This user replied to your comment in r/test-community
+                      </span>
+                      <span className='notification-hints max-lines'>
+                        Go see your comments on r/test-community: "This is just
+                        to test limited words length"
+                      </span>
+                    </span>
+                  </a>
+                  <button>
+                    <span>
+                      <FontAwesomeIcon icon={faEllipsisVertical} />
+                    </span>
+                  </button>
+                </li>
+                <li className='d-flex'>
+                  <a className='dropdown-item-notification' href='#'>
+                    <span className='dropdown-item-icon'>
+                      <FontAwesomeIcon icon={faMessage} />
+                    </span>
+                    <span className='dropdown-item-name d-flex flex-column'>
+                      <span className='notification-activity'>
+                        This user replied to your comment in r/test-community
+                      </span>
+                      <span className='notification-hints max-lines'>
+                        Go see your comments on r/test-community: "This is just
+                        to test limited words length"
+                      </span>
+                    </span>
+                  </a>
+                  <button>
+                    <span>
+                      <FontAwesomeIcon icon={faEllipsisVertical} />
+                    </span>
+                  </button>
+                </li>
+                <a
+                  tabindex='0'
+                  className='btn btn-lg btn-danger'
+                  role='button'
+                  data-bs-toggle='popover'
+                  data-bs-trigger='focus'
+                  title='Dismissible popover'
+                  data-bs-content="And here's some amazing content. It's very engaging. Right?"
+                >
+                  Dismissible popover
+                </a>
+              </div>
+            </ul>
+          </div>
         </div>
         <div className='profile-settings'>
           <div class='dropdown'>
             <button
-              class='btn dropdown-toggle profile-btn'
+              className='btn dropdown-toggle profile-btn'
               type='button'
               id='dropdownMenuButton1'
               data-bs-toggle='dropdown'
@@ -94,11 +192,11 @@ function Header() {
               </span>
             </button>
             <ul
-              class='dropdown-menu dropdown-menu-end'
+              className='dropdown-menu dropdown-menu-end'
               aria-labelledby='dropdownMenuButton1'
             >
               <li>
-                <a class='dropdown-item' href='#'>
+                <a className='dropdown-item' href='#'>
                   <span className='dropdown-item-icon'>
                     <img
                       src='/images/logo.jpg'
@@ -120,7 +218,7 @@ function Header() {
                 </a>
               </li>
               <li>
-                <a class='dropdown-item' href='#'>
+                <a className='dropdown-item' href='#'>
                   <span className='dropdown-item-icon'>
                     <svg
                       rpl=''
@@ -134,13 +232,11 @@ function Header() {
                       <path d='M11.991 10.625H1v-1.25h10.991l-1.933-1.933.884-.884 3 3a.624.624 0 0 1 0 .884l-3 3-.884-.884 1.933-1.933ZM15.375 1h-9.75A2.629 2.629 0 0 0 3 3.625v.792h1.25v-.792A1.377 1.377 0 0 1 5.625 2.25h9.75a1.377 1.377 0 0 1 1.375 1.375v12.75a1.377 1.377 0 0 1-1.375 1.375h-9.75a1.377 1.377 0 0 1-1.375-1.375v-.792H3v.792A2.63 2.63 0 0 0 5.625 19h9.75A2.63 2.63 0 0 0 18 16.375V3.625A2.63 2.63 0 0 0 15.375 1Z'></path>
                     </svg>
                   </span>
-                  <span className='dropdown-item-name'>
-                    Log Out
-                  </span>
+                  <span className='dropdown-item-name'>Log Out</span>
                 </a>
               </li>
               <li>
-                <a class='dropdown-item' href='#'>
+                <a className='dropdown-item' href='#'>
                   Something else here
                 </a>
               </li>
