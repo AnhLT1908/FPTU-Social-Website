@@ -1,0 +1,30 @@
+:root {
+  --color-button-plain-text: #181c1f;
+  --color-secondary: #21272a;
+  --color-secondary-weak: #576f76;
+  --color-neutral-border: #00000033;
+  --color-neutral-border-weak: #00000019;
+  --color-neutral-background-selected: #e5ebee;
+  --color-neutral-background-hover: #f6f8f9;
+  --color-neutral-background-active: #00000026;
+  --color-dropdown-link-hover-bg: #f8f9fa;
+  --header-height: 56px;
+}
+main {
+  padding-top: 56px;
+  display: grid;
+  grid-template-columns: 272px 1fr;
+}
+main .content {
+  grid-column-start: 2;
+  order: 2;
+  display: flex;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.max-lines {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
