@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Image, Row } from "react-bootstrap";
+import { Col, Container, Image, Row, Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faThumbsUp,
   faThumbsDown,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
+
+import { Link } from "react-router-dom";
 
 import img1 from "../images/postImage/images_postId1.jpg";
 import img2 from "../images/postImage/images_postId2.jpg";
@@ -22,6 +24,8 @@ const HomePage = () => {
   const [post, setPost] = useState([]);
   const [activeButton, setActiveButton] = useState(null);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:9999/post`)
@@ -77,11 +81,28 @@ const HomePage = () => {
     });
   };
 
+  const handleImageClick = (image) => {
+    setModalImage(image);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setModalImage(null);
+  };
+
   return (
     <Container fluid>
-      <Row className="d-flex mt-3">
-        <Col md={10}>
-          <Row className="d-flex mt-5">
+      <Row className="d-flex mt-3 mb-3">
+        <Col md={2}></Col>
+        <Col
+          md={8}
+          style={{
+            borderRight: "2px solid #dddddd",
+            borderLeft: "2px solid #dddddd"
+          }}
+        >
+          <Row className="d-flex">
             <Col md={3} className="d-flex">
               {buttons.map((button, index) => (
                 <h3
@@ -108,40 +129,56 @@ const HomePage = () => {
           </Row>
 
           {post.map((item, index) => (
-            <Row className="mt-2 mb-5" key={item.id}>
+            <Row
+              className="mt-2 mb-5"
+              key={item.id}
+              style={{ borderBottom: "2px solid #dddddd", margin: "0 10px" }}
+            >
               <Col md={12}>
                 <Row className="d-flex">
                   <Col md={2}>
                     <Image
                       src={images[index]}
                       alt={`post-${index + 1}`}
-                      style={{ width: "100%", borderRadius: "10px" }}
+                      style={{
+                        width: "100%",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                      }}
                       fluid
+                      onClick={() => handleImageClick(images[index])}
                     />
                   </Col>
-                  <Col md={10} className="d-flex flex-column justify-content-between">
+                  <Col
+                    md={10}
+                    className="d-flex flex-column justify-content-between"
+                  >
                     <Row className="d-flex">
-                      <Col md={2}>
-                        <h5>{item.userId}</h5>
+                      <Col md={6}>
+                        <h5>
+                          By {item.userName} in {item.communityName}
+                        </h5>
                       </Col>
-                      <Col md={4} className="d-flex">
+                      <Col md={6} className="d-flex">
                         <Row>
                           <Col md={2}>
                             <FontAwesomeIcon icon={faClock} />
                           </Col>
                           <Col md={10}>
-                            <p>One year ago</p>
+                            <p>{item.timeCreate}</p>
                           </Col>
                         </Row>
                       </Col>
                     </Row>
-                    <Row>
+                    <Row className="d-flex mb-3">
                       <Col md={12}>
-                        <h3>{item.title}</h3>
+                        <Link to={`/post/${item.id}`}>
+                          <h4>{item.title}</h4>
+                        </Link>
                       </Col>
                     </Row>
                     <Row className="d-flex">
-                      <Col md={1} className="d-flex">
+                      <Col md={1}>
                         <Row>
                           <Col md={2}>
                             <FontAwesomeIcon
@@ -159,7 +196,7 @@ const HomePage = () => {
                         </Row>
                       </Col>
 
-                      <Col md={1}>
+                      <Col md={2}>
                         <Row>
                           <Col md={2}>
                             <FontAwesomeIcon
@@ -177,7 +214,7 @@ const HomePage = () => {
                         </Row>
                       </Col>
 
-                      <Col md={2}>
+                      <Col md={3}>
                         <h5>{item.comment} Comment</h5>
                       </Col>
 
@@ -200,13 +237,28 @@ const HomePage = () => {
           ))}
 
           <Row>
-            <Col m={12}  className="d-flex justify-content-center">
-                <h3><a style={{textDecoration: 'none'}} href="#">No more content</a></h3>
+            <Col md={12} className="d-flex justify-content-center">
+              <h3>
+                <a style={{ textDecoration: "none" }} href="#">
+                  No more content
+                </a>
+              </h3>
             </Col>
           </Row>
         </Col>
         <Col md={2}></Col>
       </Row>
+
+      <Modal show={showModal} onHide={handleCloseModal} centered>
+        <Modal.Body>
+          <Image src={modalImage} fluid style={{ width: "100%" }} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
