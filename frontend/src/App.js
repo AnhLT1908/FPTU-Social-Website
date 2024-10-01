@@ -11,6 +11,7 @@ import RegisterForm from './components/Register';
 import CreateUPForm from './components/CreateUsernamePassword';
 import ResetPasswordForm from './components/ForgotPassword';
 import Layout from './components/Layout';
+import CommunityPage from './components/CommunityWall';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path='/post/:id' element={<PostDetail />}/>
             <Route path='/login' element={<LoginForm />} />
             <Route path='/register' element={<RegisterForm />} />
+            <Route path='/community' element={<CommunityPage />}/>
             <Route
               path='/create-username-password'
               element={<CreateUPForm />}

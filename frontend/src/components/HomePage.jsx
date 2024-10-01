@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Image, Row, Modal, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faThumbsUp,
-  faThumbsDown,
-  faClock,
-} from "@fortawesome/free-solid-svg-icons";
-
+import { Col, Container, Image, Row, Modal, Button, Card, Dropdown } from "react-bootstrap";
+import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
 import img1 from "../images/postImage/images_postId1.jpg";
 import img2 from "../images/postImage/images_postId2.jpg";
 import img3 from "../images/postImage/images_postId3.jpg";
@@ -21,63 +14,50 @@ import img9 from "../images/postImage/images_postId9.jpg";
 import img10 from "../images/postImage/images_postId10.jpg";
 
 const HomePage = () => {
-  const [post, setPost] = useState([]);
-  const [activeButton, setActiveButton] = useState(null);
-  const [hoveredButton, setHoveredButton] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
+  const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
+
   useEffect(() => {
-    fetch(`http://localhost:9999/post`)
+    fetch("http://localhost:9999/post")
       .then((res) => res.json())
       .then((data) => {
-        const postWithReactions = data.map((item) => ({
+        const postsWithReactions = data.map((item) => ({
           ...item,
           likes: item.reactions.likes,
           dislikes: item.reactions.dislikes,
           liked: false,
           disliked: false,
         }));
-        setPost(postWithReactions);
+        setPosts(postsWithReactions);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
   }, []);
 
-  const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
+  const handleReaction = (index, type) => {
+    setPosts((prevPosts) => {
+      const updatedPosts = [...prevPosts];
+      const post = updatedPosts[index];
 
-  const buttons = ["Hot", "Top", "New"];
-
-  const handleLike = (index) => {
-    setPost((prevPost) => {
-      const updatedPost = [...prevPost];
-      if (updatedPost[index].liked) {
-        updatedPost[index].likes -= 1;
-      } else {
-        if (updatedPost[index].disliked) {
-          updatedPost[index].dislikes -= 1;
-          updatedPost[index].disliked = false;
+      if (type === "like") {
+        post.liked ? post.likes-- : post.likes++;
+        if (post.disliked) {
+          post.dislikes--;
+          post.disliked = false;
         }
-        updatedPost[index].likes += 1;
-      }
-      updatedPost[index].liked = !updatedPost[index].liked;
-      return updatedPost;
-    });
-  };
-
-  const handleDislike = (index) => {
-    setPost((prevPost) => {
-      const updatedPost = [...prevPost];
-      if (updatedPost[index].disliked) {
-        updatedPost[index].dislikes -= 1;
+        post.liked = !post.liked;
       } else {
-        if (updatedPost[index].liked) {
-          updatedPost[index].likes -= 1;
-          updatedPost[index].liked = false;
+        post.disliked ? post.dislikes-- : post.dislikes++;
+        if (post.liked) {
+          post.likes--;
+          post.liked = false;
         }
-        updatedPost[index].dislikes += 1;
+        post.disliked = !post.disliked;
       }
-      updatedPost[index].disliked = !updatedPost[index].disliked;
-      return updatedPost;
+
+      return updatedPosts;
     });
   };
 
@@ -92,166 +72,94 @@ const HomePage = () => {
   };
 
   return (
-    <Container fluid>
-      <Row className="d-flex mt-3 mb-3">
-        <Col md={2}></Col>
-        <Col
-          md={8}
-          style={{
-            borderRight: "2px solid #dddddd",
-            borderLeft: "2px solid #dddddd"
-          }}
-        >
-          <Row className="d-flex">
-            <Col md={3} className="d-flex">
-              {buttons.map((button, index) => (
-                <h3
-                  key={index}
-                  onClick={() => setActiveButton(button)}
-                  onMouseEnter={() => setHoveredButton(button)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                  style={{
-                    marginRight: "10px",
-                    padding: "5px 10px",
-                    backgroundColor:
-                      activeButton === button || hoveredButton === button
-                        ? "gray"
-                        : "transparent",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    color: activeButton === button ? "white" : "black",
-                  }}
-                >
-                  {button}
-                </h3>
-              ))}
+    <Container>
+      <Row className="mt-2 mb-2">
+        <Col md={12}>
+          <Row className="mb-2">
+            <Col>
+              <Dropdown>
+                <Dropdown.Toggle variant="light">Hot</Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item>New</Dropdown.Item>
+                  <Dropdown.Item>Top</Dropdown.Item>
+                  <Dropdown.Item>Rising</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </Col>
           </Row>
 
-          {post.map((item, index) => (
-            <Row
-              className="mt-2 mb-5"
-              key={item.id}
-              style={{ borderBottom: "2px solid #dddddd", margin: "0 10px" }}
-            >
-              <Col md={12}>
-                <Row className="d-flex">
-                  <Col md={2}>
-                    <Image
-                      src={images[index]}
-                      alt={`post-${index + 1}`}
-                      style={{
-                        width: "100%",
-                        borderRadius: "10px",
-                        cursor: "pointer",
-                      }}
-                      fluid
-                      onClick={() => handleImageClick(images[index])}
-                    />
-                  </Col>
-                  <Col
-                    md={10}
-                    className="d-flex flex-column justify-content-between"
-                  >
-                    <Row className="d-flex">
-                      <Col md={6}>
-                        <h5>
-                          By {item.userName} in {item.communityName}
-                        </h5>
-                      </Col>
-                      <Col md={6} className="d-flex">
-                        <Row>
-                          <Col md={2}>
-                            <FontAwesomeIcon icon={faClock} />
-                          </Col>
-                          <Col md={10}>
-                            <p>{item.timeCreate}</p>
-                          </Col>
-                        </Row>
-                      </Col>
-                    </Row>
-                    <Row className="d-flex mb-3">
-                      <Col md={12}>
-                        <Link to={`/post/${item.id}`}>
-                          <h4>{item.title}</h4>
-                        </Link>
-                      </Col>
-                    </Row>
-                    <Row className="d-flex">
-                      <Col md={1}>
-                        <Row>
-                          <Col md={2}>
-                            <FontAwesomeIcon
-                              icon={faThumbsUp}
-                              onClick={() => handleLike(index)}
-                              style={{
-                                cursor: "pointer",
-                                color: item.liked ? "blue" : "black",
-                              }}
-                            />
-                          </Col>
-                          <Col md={2}>
-                            <h5>{item.likes}</h5>
-                          </Col>
-                        </Row>
-                      </Col>
+          {posts.map((post, index) => (
+            <Card key={index} className="mb-3 p-3">
+              <Row>
+                <Col>
+                  <p>
+                    <strong>{post.communityName}</strong> • {post.timeCreate}
+                  </p>
+                  <p className="mt-n2">{post.userName}</p>
+                </Col>
+                <Col className="d-flex justify-content-end">
+                  <Dropdown>
+                    <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item>Save</Dropdown.Item>
+                      <Dropdown.Item>Report</Dropdown.Item>
+                      <Dropdown.Item>Hide</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Col>
+              </Row>
 
-                      <Col md={2}>
-                        <Row>
-                          <Col md={2}>
-                            <FontAwesomeIcon
-                              icon={faThumbsDown}
-                              onClick={() => handleDislike(index)}
-                              style={{
-                                cursor: "pointer",
-                                color: item.disliked ? "red" : "black",
-                              }}
-                            />
-                          </Col>
-                          <Col md={2}>
-                            <h5>{item.dislikes}</h5>
-                          </Col>
-                        </Row>
-                      </Col>
+              <Row>
+                <Col md={8}>
+                  <Link to={`post/${post.id}`}>
+                    <h5>{post.title}</h5>
+                  </Link>
+                </Col>
+                <Col md={4}>
+                  <Image
+                    src={images[index]}
+                    alt={`post-${index + 1}`}
+                    fluid
+                    style={{ width: "100%", borderRadius: "10px", cursor: "pointer" }}
+                    onClick={() => handleImageClick(images[index])}
+                  />
+                </Col>
+              </Row>
 
-                      <Col md={3}>
-                        <h5>{item.comment} Comment</h5>
-                      </Col>
-
-                      <Col md={1}>
-                        <h5>Share</h5>
-                      </Col>
-
-                      <Col md={1}>
-                        <h5>Save</h5>
-                      </Col>
-
-                      <Col md={1}>
-                        <h5>Report</h5>
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
+              <div className="d-flex align-items-center mt-3">
+                <Button variant={post.liked ? "success" : "light"} onClick={() => handleReaction(index, "like")}>
+                  <FaArrowUp />
+                </Button>
+                <span className="mx-2">{post.likes}</span>
+                <Button variant={post.disliked ? "danger" : "light"} onClick={() => handleReaction(index, "dislike")}>
+                  <FaArrowDown />
+                </Button>
+                <span className="mx-2">{post.dislikes}</span>
+                <Button variant="light">
+                  <FaComment /> {post.comments}
+                </Button>
+                <Button variant="light">
+                  <FaShare /> Share
+                </Button>
+              </div>
+            </Card>
           ))}
 
           <Row>
-            <Col md={12} className="d-flex justify-content-center">
+            <Col className="text-center">
               <h3>
-                <a style={{ textDecoration: "none" }} href="#">
+                <a href="#" style={{ textDecoration: "none" }}>
                   No more content
                 </a>
               </h3>
             </Col>
           </Row>
         </Col>
-        <Col md={2}></Col>
       </Row>
 
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Body>
-          <Image src={modalImage} fluid style={{ width: "100%" }} />
+          <Image src={modalImage} fluid />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
