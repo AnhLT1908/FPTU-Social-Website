@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Router, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
+import PostDetail from './components/PostDetail';
 
 import LoginForm from './components/Login';
 import RegisterForm from './components/Register';
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Layout/>}>
             <Route path='/' element={<HomePage />} />
+            <Route path='/post/:id' element={<PostDetail />}/>
             <Route path='/login' element={<LoginForm />} />
             <Route path='/register' element={<RegisterForm />} />
             <Route
