@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Image, Row, Modal, Button, Card, Dropdown } from "react-bootstrap";
+import {
+  Col,
+  Container,
+  Image,
+  Row,
+  Modal,
+  Button,
+  Card,
+  Dropdown,
+} from "react-bootstrap";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import img1 from "../images/postImage/images_postId1.jpg";
@@ -95,7 +104,9 @@ const HomePage = () => {
                   <p>
                     <strong>{post.communityName}</strong> • {post.timeCreate}
                   </p>
-                  <p className="mt-n2">{post.userName}</p>
+                  <Link to={`profile/${post.id}`}>
+                    <p className="mt-n2">{post.userName}</p>
+                  </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
                   <Dropdown>
@@ -112,7 +123,7 @@ const HomePage = () => {
               <Row>
                 <Col md={8}>
                   <Link to={`post/${post.id}`}>
-                    <h5>{post.title}</h5>
+                    <h2>{post.title}</h2>
                   </Link>
                 </Col>
                 <Col md={4}>
@@ -120,18 +131,29 @@ const HomePage = () => {
                     src={images[index]}
                     alt={`post-${index + 1}`}
                     fluid
-                    style={{ width: "100%", borderRadius: "10px", cursor: "pointer" }}
+                    style={{
+                      width: "100%",
+                      height: "75%",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                    }}
                     onClick={() => handleImageClick(images[index])}
                   />
                 </Col>
               </Row>
 
-              <div className="d-flex align-items-center mt-3">
-                <Button variant={post.liked ? "success" : "light"} onClick={() => handleReaction(index, "like")}>
+              <div className="d-flex align-items-center">
+                <Button
+                  variant={post.liked ? "success" : "light"}
+                  onClick={() => handleReaction(index, "like")}
+                >
                   <FaArrowUp />
                 </Button>
                 <span className="mx-2">{post.likes}</span>
-                <Button variant={post.disliked ? "danger" : "light"} onClick={() => handleReaction(index, "dislike")}>
+                <Button
+                  variant={post.disliked ? "danger" : "light"}
+                  onClick={() => handleReaction(index, "dislike")}
+                >
                   <FaArrowDown />
                 </Button>
                 <span className="mx-2">{post.dislikes}</span>
@@ -159,7 +181,7 @@ const HomePage = () => {
 
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Body>
-          <Image src={modalImage} fluid />
+          <Image src={modalImage} style={{width: '100%'}} fluid />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
