@@ -23,8 +23,8 @@ import { Link, useParams } from "react-router-dom";
 import background from "../images/postImage/background.png";
 import image1 from "../images/postImage/images_postId1.jpg";
 
-const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+const UserPostProfile = () => {
+  const [activeTab, setActiveTab] = useState("posts");
   const [postDetail, setPostDetail] = useState({
     id: "",
     title: "",
@@ -162,26 +162,28 @@ const UserProfile = () => {
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                  <Link>
+                  <Link to={`/profile/${postDetail.id}`}>
                     <Button
                       className="btn"
                       variant="light"
                       style={{
-                        backgroundColor:
-                          activeTab === "overview" ? "#c9d7de" : "#ffffff",
                         border: "none",
                         borderRadius: "30px",
                       }}
                       onClick={() => setActiveTab("overview")}
                     >
-                      <h6 style={{ marginTop: "5px" }}>Overview</h6>
+                      <h6 style={{ marginTop: "5px", color: "black" }}>
+                        Overview
+                      </h6>
                     </Button>
                   </Link>
-                  <Link to={`/profile/${postDetail.id}/posts`}>
+                  <Link>
                     <Button
-                      className="btn"
                       variant="light"
+                      className="btn"
                       style={{
+                        backgroundColor:
+                          activeTab === "posts" ? "#c9d7de" : "#ffffff",
                         border: "none",
                         borderRadius: "30px",
                       }}
@@ -207,18 +209,6 @@ const UserProfile = () => {
               </Row>
               <Row className="mt-2">
                 <Col md={12} className="d-flex">
-                  <Button
-                    className="btn"
-                    variant="light"
-                    style={{
-                      borderRadius: "18px",
-                      border: "1px solid black",
-                      fontWeight: "bold",
-                      marginRight: "5px",
-                    }}
-                  >
-                    Create Post
-                  </Button>
                   <div>
                     <Dropdown>
                       <Dropdown.Toggle
@@ -418,4 +408,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default UserPostProfile;
