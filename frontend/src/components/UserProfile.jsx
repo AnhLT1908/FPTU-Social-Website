@@ -268,10 +268,10 @@ const UserProfile = () => {
                   alt=""
                   fluid
                   style={{
-                    width: "100%",
-                    height: "75%",
+                    width: "75%",
                     borderRadius: "10px",
                     cursor: "pointer",
+                    float: "right",
                   }}
                   onClick={() => handleImageClick(image1)}
                 />
@@ -372,7 +372,7 @@ const UserProfile = () => {
                           Customize your profile
                         </p>
                       </div>
-                      <div style={{ marginLeft: "160px" }}>
+                      <div style={{ marginLeft: "140px" }}>
                         <Button
                           variant="light"
                           className="btn"
@@ -381,7 +381,7 @@ const UserProfile = () => {
                             borderRadius: "30px",
                           }}
                         >
-                          <Link>
+                          <Link to={`/setting`}>
                             <h6 style={{ marginTop: "5px" }}>Go to setting</h6>
                           </Link>
                         </Button>
