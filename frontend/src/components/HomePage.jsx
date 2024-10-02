@@ -132,10 +132,10 @@ const HomePage = () => {
                     alt={`post-${index + 1}`}
                     fluid
                     style={{
-                      width: "100%",
-                      height: "75%",
+                      width: "50%",
                       borderRadius: "10px",
                       cursor: "pointer",
+                      float: "right",
                     }}
                     onClick={() => handleImageClick(images[index])}
                   />
@@ -181,7 +181,7 @@ const HomePage = () => {
 
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Body>
-          <Image src={modalImage} style={{width: '100%'}} fluid />
+          <Image src={modalImage} style={{ width: "100%" }} fluid />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>

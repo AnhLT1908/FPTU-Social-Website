@@ -23,8 +23,8 @@ import { Link, useParams } from "react-router-dom";
 import background from "../images/postImage/background.png";
 import image1 from "../images/postImage/images_postId1.jpg";
 
-const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+const UserSavedPost = () => {
+  const [activeTab, setActiveTab] = useState("saved");
   const [postDetail, setPostDetail] = useState({
     id: "",
     title: "",
@@ -162,25 +162,25 @@ const UserProfile = () => {
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                  <Link>
+                  <Link to={`/profile/${postDetail.id}`}>
                     <Button
                       className="btn"
                       variant="light"
                       style={{
-                        backgroundColor:
-                          activeTab === "overview" ? "#c9d7de" : "#ffffff",
                         border: "none",
                         borderRadius: "30px",
                       }}
                       onClick={() => setActiveTab("overview")}
                     >
-                      <h6 style={{ marginTop: "5px" }}>Overview</h6>
+                      <h6 style={{ marginTop: "5px", color: "black" }}>
+                        Overview
+                      </h6>
                     </Button>
                   </Link>
                   <Link to={`/profile/${postDetail.id}/posts`}>
                     <Button
-                      className="btn"
                       variant="light"
+                      className="btn"
                       style={{
                         border: "none",
                         borderRadius: "30px",
@@ -190,11 +190,13 @@ const UserProfile = () => {
                       <h6 style={{ marginTop: "5px" }}>Posts</h6>
                     </Button>
                   </Link>
-                  <Link to={`/profile/${postDetail.id}/saved`}>
+                  <Link>
                     <Button
                       className="btn"
                       variant="light"
                       style={{
+                        backgroundColor:
+                          activeTab === "saved" ? "#c9d7de" : "#ffffff",
                         border: "none",
                         borderRadius: "30px",
                       }}
@@ -207,18 +209,6 @@ const UserProfile = () => {
               </Row>
               <Row className="mt-2">
                 <Col md={12} className="d-flex">
-                  <Button
-                    className="btn"
-                    variant="light"
-                    style={{
-                      borderRadius: "18px",
-                      border: "1px solid black",
-                      fontWeight: "bold",
-                      marginRight: "5px",
-                    }}
-                  >
-                    Create Post
-                  </Button>
                   <div>
                     <Dropdown>
                       <Dropdown.Toggle
@@ -239,72 +229,11 @@ const UserProfile = () => {
             </CardBody>
           </Card>
 
-          <Card key={postDetail.id} className="mt-3 p-3">
-            <Row>
-              <Col>
-                <p>
-                  <strong>{postDetail.communityName}</strong> •{" "}
-                  {postDetail.timeCreate}
-                </p>
-                <p className="mt-n2">{postDetail.userName}</p>
-              </Col>
-              <Col className="d-flex justify-content-end">
-                <Dropdown>
-                  <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item>Save</Dropdown.Item>
-                    <Dropdown.Item>Report</Dropdown.Item>
-                    <Dropdown.Item>Hide</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={8}>
-                <Link to={`/post/${postDetail.id}`}>
-                  <h2>{postDetail.title}</h2>
-                </Link>
-              </Col>
-              <Col md={4}>
-                <Image
-                  src={image1}
-                  alt=""
-                  fluid
-                  style={{
-                    width: "75%",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    float: "right",
-                  }}
-                  onClick={() => handleImageClick(image1)}
-                />
-              </Col>
-            </Row>
-
-            <div className="d-flex align-items-center">
-              <Button
-                variant={postDetail.liked ? "success" : "light"}
-                onClick={() => handleLike(postDetail.id)}
-              >
-                <FaArrowUp />
-              </Button>
-              <span className="mx-2">{postDetail.reactions.likes}</span>
-              <Button
-                variant={postDetail.disliked ? "danger" : "light"}
-                onClick={() => handleDislike(postDetail.id)}
-              >
-                <FaArrowDown />
-              </Button>
-              <span className="mx-2">{postDetail.reactions.dislikes}</span>
-              <Button variant="light">
-                <FaComment /> {postDetail.comments}
-              </Button>
-              <Button variant="light">
-                <FaShare /> Share
-              </Button>
-            </div>
-          </Card>
+          <Row>
+            <Col md={12} className="d-flex justify-content-center mt-5">
+              <h4>Looks like you haven't saved anything yet</h4>
+            </Col>
+          </Row>
         </Col>
 
         <Col md={4}>
@@ -326,25 +255,30 @@ const UserProfile = () => {
                       position: "relative",
                     }}
                   >
-                    <Link
-                      to={`/setting`}
-                      className="d-flex justify-content-center align-items-center"
-                    >
-                      <FaPlus style={{ color: "white" }} />
-                    </Link>
+                    <FaPlus />
                   </Button>
                   <Row>
                     <Col md={12}>
                       <h5>AnhLTHE172031</h5>
                       <Button
-                        variant="light"
+                        className="btn d-flex justify-content-center align-items-center"
+                        variant="secondary"
                         style={{
-                          backgroundColor: "#c9d7de",
-                          borderRadius: "30px",
-                          marginTop: "5px",
+                          borderRadius: "100px",
+                          width: "30px",
+                          height: "30px",
+                          padding: "5px 5px",
+                          marginTop: "-30px",
+                          float: "right",
+                          position: "relative",
                         }}
                       >
-                        <FaShare /> Share
+                        <Link
+                          to={`/setting`}
+                          className="d-flex justify-content-center align-items-center"
+                        >
+                          <FaPlus style={{ color: "white" }} />
+                        </Link>
                       </Button>
                     </Col>
                   </Row>
@@ -418,4 +352,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default UserSavedPost;
