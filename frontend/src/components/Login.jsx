@@ -3,8 +3,7 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
-const GOOGLE_CLIENT_ID =
-  "838027680646-ojcsa5po17k2c7a2qnqhksfup166meef.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
