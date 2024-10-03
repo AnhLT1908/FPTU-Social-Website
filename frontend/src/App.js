@@ -13,8 +13,6 @@ import ResetPasswordForm from "./components/ForgotPassword";
 import Layout from "./components/Layout";
 import UserProfile from "./components/UserProfile";
 import SettingProfile from "./components/SettingProfle";
-import UserPostProfile from "./components/UserPostProfile";
-import UserSavedPost from "./components/UserSavedPost";
 
 function App() {
   return (
@@ -27,8 +25,6 @@ function App() {
             <Route path="/login" element={<LoginForm />} />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/profile/:id" element={<UserProfile />} />
-            <Route path="/profile/:id/posts" element={<UserPostProfile />} />
-            <Route path="/profile/:id/saved" element={<UserSavedPost />} />
             <Route path="/setting" element={<SettingProfile />} />
             <Route
               path="/create-username-password"

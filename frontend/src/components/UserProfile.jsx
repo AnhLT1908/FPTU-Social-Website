@@ -144,12 +144,7 @@ const UserProfile = () => {
                         position: "relative",
                       }}
                     >
-                      <Link
-                        to={`/setting`}
-                        className="d-flex justify-content-center align-items-center"
-                      >
-                        <FaPlus style={{ color: "white" }} />
-                      </Link>
+                      <FaPlus />
                     </Button>
                   </div>
                   <div>
@@ -162,47 +157,48 @@ const UserProfile = () => {
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                  <Link>
-                    <Button
-                      className="btn"
-                      variant="light"
-                      style={{
-                        backgroundColor:
-                          activeTab === "overview" ? "#c9d7de" : "#ffffff",
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("overview")}
-                    >
+                  <Button
+                    className="btn"
+                    style={{
+                      backgroundColor:
+                        activeTab === "overview" ? "#c9d7de" : "#ffffff",
+                      border: "none",
+                      borderRadius: "30px",
+                    }}
+                    onClick={() => setActiveTab("overview")}
+                  >
+                    <Link>
                       <h6 style={{ marginTop: "5px" }}>Overview</h6>
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${postDetail.id}/posts`}>
-                    <Button
-                      className="btn"
-                      variant="light"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("posts")}
-                    >
+                    </Link>
+                  </Button>
+                  <Button
+                    className="btn"
+                    style={{
+                      backgroundColor:
+                        activeTab === "posts" ? "#c9d7de" : "#ffffff",
+                      border: "none",
+                      borderRadius: "30px",
+                    }}
+                    onClick={() => setActiveTab("posts")}
+                  >
+                    <Link>
                       <h6 style={{ marginTop: "5px" }}>Posts</h6>
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${postDetail.id}/saved`}>
-                    <Button
-                      className="btn"
-                      variant="light"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("saved")}
-                    >
+                    </Link>
+                  </Button>
+                  <Button
+                    className="btn"
+                    style={{
+                      backgroundColor:
+                        activeTab === "saved" ? "#c9d7de" : "#ffffff",
+                      border: "none",
+                      borderRadius: "30px",
+                    }}
+                    onClick={() => setActiveTab("saved")}
+                  >
+                    <Link>
                       <h6 style={{ marginTop: "5px" }}>Saved</h6>
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </Col>
               </Row>
               <Row className="mt-2">
@@ -326,12 +322,7 @@ const UserProfile = () => {
                       position: "relative",
                     }}
                   >
-                    <Link
-                      to={`/setting`}
-                      className="d-flex justify-content-center align-items-center"
-                    >
-                      <FaPlus style={{ color: "white" }} />
-                    </Link>
+                    <FaPlus />
                   </Button>
                   <Row>
                     <Col md={12}>

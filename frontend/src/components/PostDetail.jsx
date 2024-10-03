@@ -125,11 +125,7 @@ const PostDetail = () => {
                       <strong>{postDetail.communityName}</strong> •{" "}
                       {postDetail.timeCreate}
                     </p>
-                    <p style={{ marginTop: "-20px" }}>
-                      <Link to={`/profile/${postDetail.id}`}>
-                        {postDetail.userName}
-                      </Link>
-                    </p>
+                    <p style={{ marginTop: "-20px" }}>{postDetail.userName}</p>
                   </Col>
                   <Col className="d-flex justify-content-end align-items-center">
                     <Dropdown>
