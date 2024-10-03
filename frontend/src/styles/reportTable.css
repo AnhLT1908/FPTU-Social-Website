@@ -1,0 +1,134 @@
+/* reportTableStyles.css */
+
+/* Container styles */
+.container {
+    background-color: #f8f9fa; /* Light background for container */
+    padding: 20px; /* Add padding around the container */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Table styles */
+.table {
+    border-collapse: separate; /* Separate border model */
+    border-spacing: 0; /* No spacing between cells */
+    border-radius: 10px; /* Rounded table corners */
+    overflow: hidden; /* Clip content at rounded corners */
+}
+
+.table thead th {
+    background-color: #156eb5; /* Header background color */
+    color: white; /* White text */
+    text-align: center; /* Center align text */
+    border-bottom: 2px solid #d2e0fb; /* Border color */
+    padding: 15px; /* Add padding */
+    font-size: 14px; /* Font size for header */
+}
+
+.table tbody tr {
+    background-color: #ffffff; /* White background for rows */
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+.table tbody tr:nth-of-type(odd) {
+    background-color: #f2f2f2; /* Alternate row color */
+}
+
+.table tbody tr:hover {
+    background-color: #d2e0fb; /* Light blue background on hover */
+}
+
+.table tbody td {
+    padding: 12px; /* Add padding inside table cells */
+    vertical-align: middle; /* Center-align vertically */
+    font-size: 13px; /* Font size for cell content */
+}
+
+/* Button styles */
+.button-primary, .button-danger {
+    font-size: 12px; /* Set font size for buttons */
+    border: none; /* Remove default border */
+    padding: 8px 12px; /* Add padding */
+    border-radius: 5px; /* Rounded corners */
+    margin-right: 5px; /* Space between buttons */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+}
+
+.button-primary {
+    background-color: #156eb5; /* Primary button color */
+    color: white; /* White text */
+}
+
+.button-primary:hover {
+    background-color: #104a7a; /* Darker blue on hover */
+    color: #ffffff;
+}
+
+.button-danger {
+    background-color: #d9534f; /* Danger button color */
+    color: white;
+}
+
+.button-danger:hover {
+    background-color: #c9302c; /* Darker red on hover */
+    color: #ffffff;
+}
+
+/* Pagination styles */
+.pagination {
+    margin-top: 20px; /* Space above pagination */
+}
+
+.pagination .page-item .page-link {
+    font-size: 12px; /* Set font size for pagination links */
+    padding: 5px 10px; /* Adjust padding */
+    border: none; /* Remove default border */
+    color: #156eb5; /* Text color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #d2e0fb; /* Light blue on hover */
+    color: #156eb5; /* Keep text color */
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #156eb5; /* Active page color */
+    color: white; /* White text */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* statusStyles.css */
+
+/* Base icon styles */
+/* CSS for centering the status icon */
+.status-icon-container {
+    display: flex; /* Enable flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100%; /* Ensure container takes full height */
+}
+
+.status-icon {
+    font-size: 1.2rem; /* Set icon size */
+}
+
+
+/* Online status styles */
+.status-icon.online {
+    color: #28a745; /* Green for online */
+}
+
+/* Offline status styles */
+.status-icon.offline {
+    color: #dc3545; /* Red for offline */
+}
+
+/* Optional: Icon size variations */
+.status-icon.small {
+    font-size: 1rem; /* Small icon size */
+}
+
+.status-icon.large {
+    font-size: 1.5rem; /* Large icon size */
+}
