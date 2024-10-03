@@ -1,6 +1,6 @@
 import "./App.css";
 import React from "react";
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
@@ -13,28 +13,31 @@ import ResetPasswordForm from "./components/ForgotPassword";
 import Layout from "./components/Layout";
 import UserProfile from "./components/UserProfile";
 import SettingProfile from "./components/SettingProfle";
+import Dashboard from "./components/Dashboard";
+import DetailReport from "./components/DetailReport";
+import UserManagement from "./components/ManageUser";
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/post/:id" element={<PostDetail />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            <Route path="/profile/:id" element={<UserProfile />} />
-            <Route path="/setting" element={<SettingProfile />} />
-            <Route
-              path="/create-username-password"
-              element={<CreateUPForm />}
-            />
-            <Route path="/forgot-password" element={<ResetPasswordForm />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+      <div className="App">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/post/:id" element={<PostDetail />} />
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/register" element={<RegisterForm />} />
+              <Route path="/profile/:id" element={<UserProfile />} />
+              <Route path="/setting" element={<SettingProfile />} />
+              <Route path="/create-username-password" element={<CreateUPForm />} />
+              <Route path="/forgot-password" element={<ResetPasswordForm />} />
+            </Route>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/report/:id" element={<DetailReport />} />
+            <Route path="/users" element={<UserManagement />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
   );
 }
 

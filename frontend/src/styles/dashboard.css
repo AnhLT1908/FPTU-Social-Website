@@ -1,0 +1,33 @@
+.custom-card {
+    margin-bottom: 20px; /* Add space between cards */
+    border: none; /* Remove default border */
+    border-radius: 50px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    
+  /* Add subtle shadow */
+}
+
+.card-body {
+    padding: 20px; /* Increase padding for better spacing */
+    text-align: center; /* Center the text */
+    background-color: #D2E0FB; /* Light background color */
+    border-radius: 10px; /* Match the border radius of the card */
+}
+
+.card-title {
+    font-size: 1.2rem; /* Increase font size */
+    font-weight: bold; /* Make the title bold */
+    color: #156eb5; /* Keep the existing color */
+    margin-bottom: 10px; /* Add space between title and text */
+}
+
+.card-text {
+    font-size: 1.5rem; /* Increase the font size of the card text */
+    color: #156eb5;
+    font-weight: bold/* Same color as the title */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    transition: all 0.3s ease; /* Smooth transition */
+}

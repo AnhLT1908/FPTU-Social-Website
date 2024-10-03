@@ -1,0 +1,31 @@
+/* sidebarAdmin.css */
+
+.sidebar-admin {
+    background-color: #D2E0FB;
+    height: 100vh;
+    padding: 15px;
+}
+
+.sidebar-admin h4 {
+    color: #156eb5;
+    margin-bottom: 20px;
+}
+
+.sidebar-admin .nav-link {
+    color: #104a7a;
+    padding: 10px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-admin .nav-link:hover {
+    background-color: #156eb5;
+    color: #ffffff;
+    border-radius: 5px;
+}
+
+.sidebar-admin .nav-link.active {
+    background-color: #104a7a;
+    color: white;
+    border-radius: 5px;
+}
