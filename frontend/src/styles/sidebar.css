@@ -1,0 +1,80 @@
+a {
+  text-decoration: none;
+  color: var(--color-secondary);
+}
+li {
+  list-style: none;
+}
+.left-sidebar {
+  display: block;
+  border-right: 0.0625rem solid var(--color-neutral-border);
+  isolation: isolate;
+  order: -9999;
+  font-size: 14px;
+  background: white !important;
+}
+.left-sidebar nav {
+  scrollbar-width: thin;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: sticky;
+  position: -webkit-sticky;
+  top: var(--header-height);
+  padding-right: 1rem;
+  padding-left: 1rem;
+  height: calc(calc(calc(1dvh * 100)) - var(--header-height) - 1px);
+}
+.left-sidebar nav hr {
+  display: block;
+  margin: 0.75rem auto;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--color-neutral-border);
+  background-color: transparent;
+  border-color: var(--color-neutral-border-weak);
+  opacity: 1;
+}
+.left-sidebar sidebar-top-section li a {
+}
+.left-sidebar li a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 1rem;
+  border-radius: 8px;
+}
+.left-sidebar li a:not(.selected):hover {
+  background-color: var(--color-neutral-background-hover);
+}
+.left-sidebar li a:not(.selected):active {
+  background-color: var(--color-neutral-background-active);
+}
+.left-sidebar li a.selected {
+  background-color: var(--color-neutral-background-selected);
+}
+.left-sidebar li a .icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+}
+.left-sidebar .accordion .accordion-button,
+.accordion-button.collapsed {
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-secondary-weak);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.left-sidebar .accordion .accordion-button:after,
+.accordion-button.collapsed:after {
+  background-position: center;
+  background-size: 1em;
+}
+.left-sidebar .accordion .accordion-body {
+  padding: 0;
+}
+.left-sidebar .accordion .accordion-body li a img {
+  border-radius: 624.9375rem;
+}
