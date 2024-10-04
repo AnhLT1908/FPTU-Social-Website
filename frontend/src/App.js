@@ -18,6 +18,10 @@ import DetailReport from "./components/DetailReport";
 import UserManagement from "./components/ManageUser";
 import UserPostProfile from "./components/UserPostProfile";
 import UserSavedPost from "./components/UserSavedPost";
+import CommunityPage from "./components/CommunityWall";
+import CreateCommunity from "./components/CreateCommunity";
+import CreatePost from "./components/CreatePost";
+import EditPost from "./components/EditPost";
 
 function App() {
   return (
@@ -32,12 +36,17 @@ function App() {
             <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="/profile/:id/posts" element={<UserPostProfile />} />
             <Route path="/profile/:id/saved" element={<UserSavedPost />} />
+            
             <Route path="/setting" element={<SettingProfile />} />
             <Route
               path="/create-username-password"
               element={<CreateUPForm />}
             />
             <Route path="/forgot-password" element={<ResetPasswordForm />} />
+            <Route path="/community" element={<CommunityPage />}/>
+            <Route path="/create-community" element={<CreateCommunity />} />
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/edit-post" element={<EditPost />} />
           </Route>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/report/:id" element={<DetailReport />} />

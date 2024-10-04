@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button, Image, Modal } from "react-bootstrap";
-import CommunityDetails from "./SmallCommunity/CommunityDetails";
-import CommunityStyle from "./SmallCommunity/CommunityStyle";
-import CommunityTopics from "./SmallCommunity/CommunityTopics";
-import CommunityType from "./SmallCommunity/CommunityType";
+import CommunityDetails from "./SubCMPNTCreateCommunity/CommunityDetails";
+import CommunityStyle from "./SubCMPNTCreateCommunity/CommunityStyle";
+import CommunityTopics from "./SubCMPNTCreateCommunity/CommunityTopics";
+import CommunityType from "./SubCMPNTCreateCommunity/CommunityType";
 
 const CreateCommunity = () => {
   const [communityName, setCommunityName] = useState("");
