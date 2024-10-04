@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import {
+  Button,
   Card,
   CardBody,
   CardImg,
@@ -11,13 +12,39 @@ import {
   FormGroup,
   FormLabel,
   FormSelect,
+  FormText,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
   Row,
 } from "react-bootstrap";
 
 import background from "../images/postImage/background.png";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaPen } from "react-icons/fa";
 
 const SettingProfile = () => {
+  const [show1, setShow1] = useState(false);
+  const [show2, setShow2] = useState(false);
+  const [password, setPassword] = useState("123456789");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleClose1 = () => setShow1(false);
+  const handleShow1 = () => setShow1(true);
+  const handleClose2 = () => setShow2(false);
+  const handleShow2 = () => setShow2(true);
+
+  const handleSavePassword = () => {
+    if (newPassword === confirmPassword) {
+      setPassword(newPassword);
+      handleClose2();
+    } else {
+      alert("Passwords do not match!");
+    }
+  };
+
   const districts = [
     "Ba Dinh",
     "Hoan Kiem",
@@ -79,9 +106,13 @@ const SettingProfile = () => {
                     </FormGroup>
                   </Form>
                   <Form>
-                    <FormGroup className="mt-3" controlId="password">
+                    <FormGroup
+                      className="mt-3"
+                      controlId="password"
+                      onClick={handleShow2}
+                    >
                       <FormLabel>Password</FormLabel>
-                      <FormControl type="password" value="123456789" />
+                      <FormControl type="password" value={password} readOnly />
                     </FormGroup>
                   </Form>
                   <Form>
@@ -109,6 +140,7 @@ const SettingProfile = () => {
                         type="radio"
                         label="Male"
                         name="gender"
+                        checked
                       />
                       <FormCheck
                         inline
@@ -138,10 +170,48 @@ const SettingProfile = () => {
                   </Form>
                 </CardBody>
               </Card>
+              <Row className="mt-3">
+                <Col md={12}>
+                  <Button
+                    style={{ float: "right", marginLeft: "10px" }}
+                    className="btn"
+                    variant="secondary"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    style={{ float: "right" }}
+                    className="btn"
+                    variant="success"
+                  >
+                    Save
+                  </Button>
+                </Col>
+              </Row>
             </Col>
             <Col md={3}>
               <Card>
-                <CardImg src={background} variant="top"/>
+                <CardImg src={background} variant="top" />
+                <Button
+                  variant="secondary"
+                  style={{
+                    position: "relative",
+                    marginTop: "-15px",
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "100px",
+                    marginLeft: "250px",
+                  }}
+                  onClick={handleShow1}
+                >
+                  <FaPen
+                    style={{
+                      padding: "1px",
+                      marginLeft: "-5px",
+                      marginTop: "-10px",
+                    }}
+                  />
+                </Button>
                 <CardBody>
                   <Row>
                     <Col className="d-flex justify-content-center">
@@ -156,16 +226,35 @@ const SettingProfile = () => {
                           marginTop: "-50px",
                         }}
                       />
+                      <Button
+                        variant="secondary"
+                        style={{
+                          position: "absolute",
+                          marginLeft: "50px",
+                          width: "30px",
+                          height: "30px",
+                          borderRadius: "100px",
+                        }}
+                        onClick={handleShow1}
+                      >
+                        <FaPen
+                          style={{
+                            padding: "1px",
+                            marginLeft: "-5px",
+                            marginTop: "-10px",
+                          }}
+                        />
+                      </Button>
                     </Col>
                   </Row>
                   <Row>
                     <Col>
-                        <Form>
-                            <FormGroup>
-                                <FormLabel>Bio</FormLabel>
-                                <FormControl as="textarea"></FormControl>
-                            </FormGroup>
-                        </Form>
+                      <Form>
+                        <FormGroup>
+                          <FormLabel>Bio</FormLabel>
+                          <FormControl as="textarea"></FormControl>
+                        </FormGroup>
+                      </Form>
                     </Col>
                   </Row>
                 </CardBody>
@@ -174,6 +263,72 @@ const SettingProfile = () => {
           </Row>
         </Col>
       </Row>
+
+      <Modal show={show1} onHide={handleClose1}>
+        <ModalHeader closeButton>
+          <ModalTitle>Change Image</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <FormControl type="file" />
+              <FormText>Formats: JPG, PNG</FormText>
+              <FormText style={{ float: "right" }}>Max size: 500 KB</FormText>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button className="btn" variant="secondary" onClick={handleClose1}>
+            Cancel
+          </Button>
+          <Button className="btn" variant="primary" onClick={handleClose1}>
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal show={show2} onHide={handleClose2}>
+        <ModalHeader closeButton>
+          <ModalTitle>Change Password</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <FormControl
+                className="mb-3"
+                type="password"
+                placeholder="Current password *"
+                value={password}
+                readOnly
+              />
+              <FormControl
+                className="mb-3"
+                type="password"
+                placeholder="New password *"
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <FormControl
+                className="mb-3"
+                type="password"
+                placeholder="Confirm password *"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button className="btn" variant="secondary" onClick={handleClose2}>
+            Cancel
+          </Button>
+          <Button
+            className="btn"
+            variant="primary"
+            onClick={handleSavePassword}
+          >
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
     </Container>
   );
 };
