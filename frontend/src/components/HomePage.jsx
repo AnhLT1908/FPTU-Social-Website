@@ -10,7 +10,7 @@ import {
   Dropdown,
 } from "react-bootstrap";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import img1 from "../images/postImage/images_postId1.jpg";
 import img2 from "../images/postImage/images_postId2.jpg";
 import img3 from "../images/postImage/images_postId3.jpg";
@@ -26,6 +26,7 @@ const HomePage = () => {
   const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
+  const navigate = useNavigate();
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
@@ -101,9 +102,11 @@ const HomePage = () => {
             <Card key={index} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <p>
-                    <strong>{post.communityName}</strong> • {post.timeCreate}
-                  </p>
+                  <Link to={"/community/2"}>
+                    <p>
+                      <strong>{post.communityName}</strong> • {post.timeCreate}
+                    </p>
+                  </Link>
                   <Link to={`profile/${post.id}`}>
                     <p className="mt-n2">{post.userName}</p>
                   </Link>
@@ -115,6 +118,9 @@ const HomePage = () => {
                       <Dropdown.Item>Save</Dropdown.Item>
                       <Dropdown.Item>Report</Dropdown.Item>
                       <Dropdown.Item>Hide</Dropdown.Item>
+                      <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
+                        Edit
+                      </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </Col>

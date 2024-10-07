@@ -99,7 +99,7 @@ function Sidebar() {
                     <span className="icon">
                       <img src="/images/logo.jpg" width={32} height={32} />
                     </span>
-                    <span className="name">f/annoucement</span>
+                    <span className="name">r/Japan</span>
                   </Link>
                 </li>
               </div>
@@ -134,7 +134,7 @@ function Sidebar() {
                     <span className="icon">
                       <img src="/images/logo.jpg" width={32} height={32} />
                     </span>
-                    <span className="name">f/annoucement</span>
+                    <span className="name">r/Japan</span>
                   </Link>
                 </li>
               </div>

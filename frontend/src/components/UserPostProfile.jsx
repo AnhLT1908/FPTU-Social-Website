@@ -19,7 +19,7 @@ import {
   FaArrowDown,
   FaComment,
 } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
 import image1 from "../images/postImage/images_postId1.jpg";
 
@@ -42,6 +42,7 @@ const UserPostProfile = () => {
   });
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const { id } = useParams();
 
@@ -232,10 +233,12 @@ const UserPostProfile = () => {
           <Card key={postDetail.id} className="mt-3 p-3">
             <Row>
               <Col>
-                <p>
-                  <strong>{postDetail.communityName}</strong> •{" "}
-                  {postDetail.timeCreate}
-                </p>
+                <Link to={"/community/2"}>
+                  <p>
+                    <strong>{postDetail.communityName}</strong> •{" "}
+                    {postDetail.timeCreate}
+                  </p>
+                </Link>
                 <p className="mt-n2">{postDetail.userName}</p>
               </Col>
               <Col className="d-flex justify-content-end">
@@ -245,6 +248,9 @@ const UserPostProfile = () => {
                     <Dropdown.Item>Save</Dropdown.Item>
                     <Dropdown.Item>Report</Dropdown.Item>
                     <Dropdown.Item>Hide</Dropdown.Item>
+                    <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
+                      Edit
+                    </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </Col>
