@@ -4,8 +4,9 @@ import CommunityDetails from "./SubCMPNTCreateCommunity/CommunityDetails";
 import CommunityStyle from "./SubCMPNTCreateCommunity/CommunityStyle";
 import CommunityTopics from "./SubCMPNTCreateCommunity/CommunityTopics";
 import CommunityType from "./SubCMPNTCreateCommunity/CommunityType";
-
+import { useNavigate } from "react-router-dom";
 const CreateCommunity = () => {
+  const navigate = useNavigate();
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
   const [banner, setBanner] = useState(null);
@@ -153,7 +154,11 @@ const CreateCommunity = () => {
           </Button>
           <Button
             variant="primary"
-            onClick={() => alert("Community successfully created!")}
+            onClick={() => {
+              alert("Community successfully created!");
+              setShowPreview(false);
+              navigate("/");
+            }}
           >
             Create Community
           </Button>

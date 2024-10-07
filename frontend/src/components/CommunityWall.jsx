@@ -11,8 +11,9 @@ import {
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
 const CommunityPage = () => {
+  const navigate = useNavigate();
   const [showHighlights, setShowHighlights] = useState(false);
   const [voteStatus, setVoteStatus] = useState(null);
   const handleUpvote = () => {
@@ -55,6 +56,12 @@ const CommunityPage = () => {
                   <Dropdown.Item>Rising</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
+              <Button
+                variant={voteStatus === "up" ? "success" : "light"}
+                onClick={() => navigate("/create-post")}
+              >
+                Create post
+              </Button>
             </div>
           </Card>
 
@@ -90,6 +97,9 @@ const CommunityPage = () => {
                     <Dropdown.Item>Save</Dropdown.Item>
                     <Dropdown.Item>Report</Dropdown.Item>
                     <Dropdown.Item>Hide</Dropdown.Item>
+                    <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
+                      Edit
+                    </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </Col>
