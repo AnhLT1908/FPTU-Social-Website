@@ -6,6 +6,8 @@ import {
   faEllipsisVertical,
   faMessage,
 } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
+
 function Header() {
   return (
     <nav className='d-flex px-md-2 align-items-center header-navbar'>
@@ -42,7 +44,7 @@ function Header() {
       </div>
       <div className='header-right-section'>
         {/* As Guest */}
-        {/* <button className='login-button'>Log In</button> */}
+        <Link to='/login' className='login-button'>Log In</Link>
 
         {/* As Logged in user */}
         <div className='tools-wrapper'>
