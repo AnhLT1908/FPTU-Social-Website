@@ -2,29 +2,33 @@ import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
-const GOOGLE_CLIENT_ID =
-  "838027680646-ojcsa5po17k2c7a2qnqhksfup166meef.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [validated, setValidated] = useState(false);
+  
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleLogin = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle login logic if form is valid
+      // Handle successful form submission
       console.log({ email, password });
+      // Redirect to /create-username-password
+      navigate("/create-username-password");
     } else {
-      setValidated(true); // Set validated state to true to show errors
+      setValidated(true); // Show validation errors
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Email validation (basic regex for email format)
     if (!email) {
       newErrors.email = "Email is required.";
@@ -41,6 +45,8 @@ const RegisterForm = () => {
   const handleGoogleSuccess = (credentialResponse) => {
     const details = jwtDecode(credentialResponse.credential);
     console.log("Logged in user:", details);
+    // Redirect after Google login success
+    navigate("/create-username-password");
   };
 
   const handleGoogleError = () => {
@@ -50,13 +56,14 @@ const RegisterForm = () => {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Container
+        fluid
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "100vh" }}
       >
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="" alt="Logo" className="mb-3" />
+              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }} />
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
@@ -111,7 +118,7 @@ const RegisterForm = () => {
 
                   <div className="mt-3">
                     Already a member?{" "}
-                    <a href="/login" style={{ textDecoration: "none" }}>
+                    <a href="/login" style={{ textDecoration: "none", color: "#0086c9" }}>
                       Log in
                     </a>
                   </div>

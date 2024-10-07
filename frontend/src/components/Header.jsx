@@ -6,7 +6,7 @@ import {
   faEllipsisVertical,
   faMessage,
 } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Header() {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ function Header() {
       </div>
       <div className="header-right-section">
         {/* As Guest */}
-        {/* <button className='login-button'>Log In</button> */}
+        <Link to='/login' className='login-button'>Log In</Link>
 
         {/* As Logged in user */}
         <div className="tools-wrapper">
