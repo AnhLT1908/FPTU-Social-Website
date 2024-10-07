@@ -1,0 +1,55 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title Your Account Password
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #007bff;
+        color: #ffffff;
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px 5px 0 0;
+      }
+      .content {
+        padding: 20px;
+      }
+      .footer {
+        text-align: center;
+        padding: 10px;
+        font-size: 0.8em;
+        color: #666666;
+      }
+  body
+    .container
+      .header
+        h1 Welcome to Your Edunext Courses!
+      .content
+        p Hello #{firstName},
+        p Congratulations! Your account has been created successfully. Here is your auto-generated password:
+        p
+          strong #{password}
+        p Please log in using this password and change it at your earliest convenience to ensure your account's security.
+        p If you have any questions, feel free to contact our support team.
+        p Best regards,
+        p FPT University
+      .footer
+        p This is an automated email, please do not reply.
+        p &copy; #{new Date().getFullYear()} FPT University. All rights reserved.
