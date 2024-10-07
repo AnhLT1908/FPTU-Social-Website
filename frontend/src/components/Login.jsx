@@ -55,14 +55,15 @@ const LoginForm = () => {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Container
+      <Container 
+        fluid
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "100vh" }}
       >
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="" alt="Logo" className="mb-3" />
+              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
@@ -135,14 +136,14 @@ const LoginForm = () => {
                   </Form.Group>
 
                   <div className="mt-3">
-                    <a href="/forgot-password" style={{ textDecoration: "none" }}>
+                    <a href="/forgot-password" style={{ textDecoration: "none", color: "#0086c9" }}>
                       Forgot Password?
                     </a>
                   </div>
 
                   <div className="mt-3">
                     New to our community?{" "}
-                    <a href="/register" style={{ textDecoration: "none" }}>
+                    <a href="/register" style={{ textDecoration: "none", color: "#0086c9" }}>
                       Sign up
                     </a>
                   </div>
