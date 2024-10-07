@@ -42,11 +42,11 @@ function App() {
             <Route path="/profile/:id/saved" element={<UserSavedPost />} />
 
             <Route path="/setting" element={<SettingProfile />} />
-            
-            <Route path="/community" element={<CommunityPage />} />
+
+            <Route path="/community/:id" element={<CommunityPage />} />
             <Route path="/create-community" element={<CreateCommunity />} />
             <Route path="/create-post" element={<CreatePost />} />
-            <Route path="/edit-post" element={<EditPost />} />
+            <Route path="/edit-post/:id" element={<EditPost />} />
           </Route>
 
           <Route path="/dashboard" element={<Dashboard />} />
