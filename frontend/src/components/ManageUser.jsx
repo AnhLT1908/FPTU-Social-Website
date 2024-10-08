@@ -1,19 +1,34 @@
 
 import React, { useState } from 'react';
 import { Table, Button, Form, InputGroup, Pagination, Card, Row, Col } from 'react-bootstrap';
-import LayoutWithSidebar from './LayoutWithSidebar'; // Adjust the import path based on your project structure
+import LayoutWithSidebar from './LayoutWithSidebar';
+import '../styles/dashboard.css';// Adjust the import path based on your project structure
 // Import the CSS file
 
 const UserManagement = () => {
     const [users, setUsers] = useState([
         { id: 1, username: 'admin', email: 'admin@example.com', role: 'Admin', status: 'Active' },
         { id: 2, username: 'user1', email: 'user1@example.com', role: 'User', status: 'Inactive' },
-        // Other users...
+        { id: 3, username: 'user2', email: 'user2@example.com', role: 'User', status: 'Active' },
+        { id: 4, username: 'user3', email: 'user3@example.com', role: 'User', status: 'Active' },
+        { id: 5, username: 'user4', email: 'user4@example.com', role: 'User', status: 'Inactive' },
+        { id: 6, username: 'user5', email: 'user5@example.com', role: 'User', status: 'Active' },
+        { id: 7, username: 'user6', email: 'user6@example.com', role: 'User', status: 'Inactive' },
+        { id: 8, username: 'user7', email: 'user7@example.com', role: 'User', status: 'Active' },
+        { id: 9, username: 'user8', email: 'user8@example.com', role: 'User', status: 'Active' },
+        { id: 10, username: 'user9', email: 'user9@example.com', role: 'User', status: 'Inactive' },
+        { id: 11, username: 'user10', email: 'user10@example.com', role: 'User', status: 'Active' },
+        { id: 12, username: 'user11', email: 'user11@example.com', role: 'User', status: 'Inactive' },
+        { id: 13, username: 'user12', email: 'user12@example.com', role: 'User', status: 'Active' },
+        { id: 14, username: 'user13', email: 'user13@example.com', role: 'User', status: 'Inactive' },
+        { id: 15, username: 'user14', email: 'user14@example.com', role: 'User', status: 'Active' },
+        { id: 16, username: 'user15', email: 'user15@example.com', role: 'User', status: 'Inactive' },
     ]);
+    
 
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [usersPerPage] = useState(3);
+    const [usersPerPage] = useState(5);
 
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
@@ -57,34 +72,34 @@ const UserManagement = () => {
                 {/* Statistics */}
                 <Row className="mb-4">
                     <Col md={3}>
-                        <Card className="text-center user-card">
-                            <Card.Body>
-                                <Card.Title>Total Accounts</Card.Title>
-                                <Card.Text className="user-count">{totalUsers}</Card.Text>
+                        <Card className="text-center dashboard-custom-card">
+                            <Card.Body className="dashboard-card-body">
+                                <Card.Title className="dashboard-card-title">Total Accounts</Card.Title>
+                                <Card.Text className="dashboard-card-text">{totalUsers}</Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
                     <Col md={3}>
-                        <Card className="text-center user-card">
-                            <Card.Body>
-                                <Card.Title>Active Accounts</Card.Title>
-                                <Card.Text className="user-count">{activeUsers}</Card.Text>
+                        <Card className="text-center dashboard-custom-card">
+                            <Card.Body className="dashboard-card-body">
+                                <Card.Title className="dashboard-card-title">Active Accounts</Card.Title>
+                                <Card.Text className="dashboard-card-text">{activeUsers}</Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
                     <Col md={3}>
-                        <Card className="text-center user-card">
-                            <Card.Body>
-                                <Card.Title>Inactive Accounts</Card.Title>
-                                <Card.Text className="user-count">{inactiveUsers}</Card.Text>
+                        <Card className="text-center dashboard-custom-card">
+                            <Card.Body className="dashboard-card-body">
+                                <Card.Title className="dashboard-card-title">Inactive Accounts</Card.Title>
+                                <Card.Text className="dashboard-card-text">{inactiveUsers}</Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
                     <Col md={3}>
-                        <Card className="text-center user-card">
-                            <Card.Body>
-                                <Card.Title>Admin</Card.Title>
-                                <Card.Text className="user-count">{adminUsers}</Card.Text>
+                        <Card className="text-center dashboard-custom-card">
+                            <Card.Body className="dashboard-card-body">
+                                <Card.Title className="dashboard-card-title">Admin</Card.Title>
+                                <Card.Text className="dashboard-card-text">{adminUsers}</Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
