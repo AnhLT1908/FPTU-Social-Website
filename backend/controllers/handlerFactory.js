@@ -45,11 +45,12 @@ exports.factoryGetOne = (Model, popOptions) =>
     }
     res.status(200).json(doc);
   });
-exports.factoryGetAll = (Model) =>
+exports.factoryGetAll = (Model, filter) =>
   catchAsync(async (req, res, next) => {
+    if (!filter) filter = {};
     // For nested route
-    let filter = {};
-    // if (req.params.tourId) filter = { tour: req.params.tourId };
+    if (req.params.communityId) filter.communityId = req.params.communityId;
+    if (req.params.postId) filter.postId = req.params.postId;
     const features = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()

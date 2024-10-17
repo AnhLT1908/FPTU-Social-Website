@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Subscription = require('./subscriptionModel');
+const User = require('./userModel');
 const communitySchema = new mongoose.Schema(
   {
     name: {
@@ -21,8 +23,14 @@ const communitySchema = new mongoose.Schema(
       enum: ['private', 'restricted', 'public'],
       default: 'public',
     },
-    memberCount: Number,
-    postCount: Number,
+    memberCount: { type: Number, default: 1 },
+    postCount: { type: Number, default: 0 },
+    joinRequests: [
+      {
+        userId: { type: mongoose.Schema.ObjectId, ref: 'User' },
+        reason: { type: String },
+      },
+    ],
     communityRule: String,
     isActive: {
       type: Boolean,
@@ -36,5 +44,26 @@ const communitySchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// MIDDLEWARES
+communitySchema.pre(/^find/, function (next) {
+  this.find({ isActive: { $ne: false } });
+  next();
+});
+communitySchema.post('save', async function (doc, next) {
+  try {
+    await User.findByIdAndUpdate(doc.createdBy, {
+      $push: { moderatorCommunities: doc._id },
+    });
+    await Subscription.create({
+      userId: doc.createdBy,
+      communityId: doc._id,
+      role: 'moderator',
+    });
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 const Community = mongoose.model('Community', communitySchema);
 module.exports = Community;

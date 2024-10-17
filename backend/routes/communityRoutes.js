@@ -10,6 +10,10 @@ router
   .route('/:id')
   .get(communityController.getCommunityById)
   .patch(protect, communityController.updateCommunity)
-  .delete(protect, communityController.deleteCommunity);
+  .delete(
+    protect,
+    communityController.isModerator,
+    communityController.deleteCommunity
+  );
 
 module.exports = router;
