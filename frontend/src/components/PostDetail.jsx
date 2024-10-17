@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Col,
@@ -100,6 +100,7 @@ const PostDetail = () => {
   };
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
+  const navigate = useNavigate();
   const imageIndex = parseInt(id) - 1;
 
   return (
@@ -121,10 +122,12 @@ const PostDetail = () => {
               <Col md={12}>
                 <Row className="mb-2">
                   <Col>
-                    <p>
-                      <strong>{postDetail.communityName}</strong> •{" "}
-                      {postDetail.timeCreate}
-                    </p>
+                    <Link to={"/community/2"}>
+                      <p>
+                        <strong>{postDetail.communityName}</strong> •{" "}
+                        {postDetail.timeCreate}
+                      </p>
+                    </Link>
                     <p style={{ marginTop: "-20px" }}>
                       <Link to={`/profile/${postDetail.id}`}>
                         {postDetail.userName}
@@ -140,6 +143,9 @@ const PostDetail = () => {
                         <Dropdown.Item>Save</Dropdown.Item>
                         <Dropdown.Item>Report</Dropdown.Item>
                         <Dropdown.Item>Hide</Dropdown.Item>
+                        <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
+                          Edit
+                        </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </Col>

@@ -44,13 +44,14 @@ const ResetPasswordForm = () => {
 
   return (
       <Container
+        fluid
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "100vh" }}
       >
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="" alt="Logo" className="mb-3" />
+              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
@@ -83,7 +84,7 @@ const ResetPasswordForm = () => {
                   </Form.Group>
 
                   <div className="mt-5">
-                    <a href="/login" style={{ textDecoration: "none" }}>
+                    <a href="/login" style={{ textDecoration: "none", color: "#0086c9" }}>
                       Need help?
                     </a>
                   </div>

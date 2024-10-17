@@ -261,24 +261,14 @@ const UserSavedPost = () => {
                     <Col md={12}>
                       <h5>AnhLTHE172031</h5>
                       <Button
-                        className="btn d-flex justify-content-center align-items-center"
-                        variant="secondary"
+                        variant="light"
                         style={{
-                          borderRadius: "100px",
-                          width: "30px",
-                          height: "30px",
-                          padding: "5px 5px",
-                          marginTop: "-30px",
-                          float: "right",
-                          position: "relative",
+                          backgroundColor: "#c9d7de",
+                          borderRadius: "30px",
+                          marginTop: "5px",
                         }}
                       >
-                        <Link
-                          to={`/setting`}
-                          className="d-flex justify-content-center align-items-center"
-                        >
-                          <FaPlus style={{ color: "white" }} />
-                        </Link>
+                        <FaShare /> Share
                       </Button>
                     </Col>
                   </Row>

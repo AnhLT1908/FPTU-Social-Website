@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Form, Button, Dropdown, Tabs, Tab } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 const EditPost = ({ initialData }) => {
+  const navigate = useNavigate();
   // Sử dụng state để quản lý dữ liệu bài đăng
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -116,7 +117,9 @@ const EditPost = ({ initialData }) => {
 
         <div className="d-flex justify-content-between">
           <Button variant="secondary">Cancel</Button>
-          <Button variant="primary">Save Changes</Button>
+          <Button variant="primary" onClick={() => navigate("/community/2")}>
+            Save Changes
+          </Button>
         </div>
       </Form>
     </Container>

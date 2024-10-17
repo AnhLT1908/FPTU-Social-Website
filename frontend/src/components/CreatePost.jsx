@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Form, Button, Dropdown, Tabs, Tab } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 const CreatePost = () => {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedTab, setSelectedTab] = useState("text");
@@ -101,7 +102,9 @@ const CreatePost = () => {
 
         <div className="d-flex justify-content-between">
           <Button variant="secondary">Cancel</Button>
-          <Button variant="primary">Post</Button>
+          <Button variant="primary" onClick={() => navigate("/community/1")}>
+            Post
+          </Button>
         </div>
       </Form>
     </Container>

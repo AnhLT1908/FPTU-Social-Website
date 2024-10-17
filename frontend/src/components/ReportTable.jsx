@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Table, Button, Pagination, Form, InputGroup, Col, Row } from 'react-bootstrap';
-import '../styles/reportTable.css'
-
-
+import { useNavigate } from 'react-router-dom'; // Sử dụng useNavigate thay vì useHistory
+import '../styles/reportTable.css';
 
 const ReportTable = () => {
+    const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
     // Dữ liệu giả về danh sách báo cáo
     const [reports, setReports] = useState([
         { id: 1, user: 'Nguyễn Văn A', reason: 'Spam', date: '2024-09-29', status: 'Chưa xử lý' },
@@ -24,13 +24,12 @@ const ReportTable = () => {
     const indexOfFirstReport = indexOfLastReport - reportsPerPage;
 
     // Lọc và tìm kiếm báo cáo
-    const filteredReports = reports
-        .filter((report) => {
-            return (
-                report.user.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                (filterStatus ? report.status === filterStatus : true)
-            );
-        });
+    const filteredReports = reports.filter((report) => {
+        return (
+            report.user.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (filterStatus ? report.status === filterStatus : true)
+        );
+    });
 
     const currentReports = filteredReports.slice(indexOfFirstReport, indexOfLastReport);
     const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
@@ -42,16 +41,24 @@ const ReportTable = () => {
     const handleClick = (number) => setCurrentPage(number);
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
-        setCurrentPage(1);
+        setCurrentPage(1); // Reset về trang đầu tiên khi tìm kiếm
     };
     const handleFilterChange = (event) => {
         setFilterStatus(event.target.value);
-        setCurrentPage(1);
+        setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi bộ lọc
     };
 
+    const handleViewDetail = (id) => {
+        navigate(`/report/${id}`); // Sử dụng navigate thay cho history.push
+    };
+
+    const handleDelete = (id) => {
+        // Xử lý logic xóa bài báo cáo tại đây (xóa khỏi state hoặc gọi API)
+        const updatedReports = reports.filter((report) => report.id !== id);
+        setReports(updatedReports); // Cập nhật lại danh sách báo cáo
+    };
 
     return (
-
         <div className="container mt-4">
             {/* Thanh tìm kiếm và bộ lọc */}
             <Row className="mb-3">
@@ -67,12 +74,12 @@ const ReportTable = () => {
                 </Col>
                 <Col md={3}>
                     <Form.Group size="sm">
-                        <Form.Label className="me-2" style={{fontSize: '14px'}}>Trạng thái:</Form.Label>
+                        <Form.Label className="me-2" style={{ fontSize: '14px' }}>Trạng thái:</Form.Label>
                         <Form.Select
                             value={filterStatus}
                             onChange={handleFilterChange}
                             size="sm" // Thu nhỏ nút lọc
-                            style={{width: '150px', display: 'inline-block'}} // Giảm kích thước nút lọc
+                            style={{ width: '150px', display: 'inline-block' }} // Giảm kích thước nút lọc
                         >
                             <option value="">Tất cả</option>
                             <option value="Chưa xử lý">Chưa xử lý</option>
@@ -102,13 +109,23 @@ const ReportTable = () => {
                         <td>{report.reason}</td>
                         <td>{report.date}</td>
                         <td>{report.status}</td>
-                       
-
                         <td>
-                            <Button variant="primary" className="button-primary" size="sm">
+                            <Button
+                                variant="primary"
+                                className="button-primary me-2"
+                                size="sm"
+                                onClick={() => handleViewDetail(report.id)} // Sửa lỗi và sử dụng hàm để xử lý
+                            >
                                 Xem chi tiết
                             </Button>
-                            <Button variant="danger" className="button-danger" size="sm">Xóa</Button>
+                            <Button
+                                variant="danger"
+                                className="button-danger"
+                                size="sm"
+                                onClick={() => handleDelete(report.id)} // Hàm xóa bài báo cáo
+                            >
+                                Xóa
+                            </Button>
                         </td>
                     </tr>
                 ))}
@@ -128,8 +145,6 @@ const ReportTable = () => {
                 ))}
             </Pagination>
         </div>
-
-
     );
 };
 
