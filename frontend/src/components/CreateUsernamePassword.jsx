@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate, useLocation } from "react-router-dom"; // For navigation
 
 const CreateUPForm = () => {
   const [username, setUsername] = useState("");
@@ -9,12 +9,48 @@ const CreateUPForm = () => {
   const [validated, setValidated] = useState(false);
 
   const navigate = useNavigate(); // React Router hook for navigation
+  const location = useLocation(); // React Router hook for getting query parameters
+  const email = location.state?.email;
 
-  const handleLogin = (e) => {
+  console.log("User email: " + email);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle login logic if form is valid
-      console.log({ username, password });
+      try {
+        const response = await fetch(
+          "http://localhost:9999/api/v1/users/signup",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              username,
+              password,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          // Handle successful response
+          const data = await response.json();
+          console.log("Signup successful:", data);
+          // Redirect or show success message, e.g.:
+          navigate("/login"); // Redirect to login page
+        } else {
+          // Handle errors from the server
+          const errorData = await response.json();
+          console.error("Signup failed:", errorData);
+          setErrors({
+            form: errorData.message || "Signup failed. Please try again.",
+          });
+        }
+      } catch (error) {
+        console.error("Error during signup:", error);
+        setErrors({ form: "An error occurred. Please try again later." });
+      }
     } else {
       setValidated(true); // Set validated state to true to show errors
     }
@@ -55,14 +91,18 @@ const CreateUPForm = () => {
       <Row>
         <Col>
           <div className="text-center mb-4">
-            <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+            <img
+              src="../images/logo.jpg"
+              alt="Logo"
+              className="mb-3"
+              style={{ width: "100px" }}
+            />
             <h1>FPTU Social Website</h1>
             <p>The Internet Home Place, where many communities reside</p>
           </div>
 
           <Card className="p-4 shadow-sm" style={{ width: "500px" }}>
             <Card.Body>
-                
               {/* Back arrow */}
               <div
                 className="mb-4"
@@ -92,6 +132,22 @@ const CreateUPForm = () => {
               </h6>
 
               <Form noValidate validated={validated} onSubmit={handleLogin}>
+                {errors.form && (
+                  <div className="text-danger mb-3">{errors.form}</div>
+                )}
+
+                <Form.Group className="mb-3" controlId="formEmail">
+                  <Form.Control
+                    type="email"
+                    value={email}
+                    readOnly={true}
+                    style={{
+                      borderRadius: "20px",
+                      height: "60px",
+                      backgroundColor: "#d7d6d6",
+                    }}
+                  />
+                </Form.Group>
                 <Form.Group className="mb-3" controlId="username">
                   <Form.Control
                     type="username"
