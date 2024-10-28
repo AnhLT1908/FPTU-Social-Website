@@ -24,8 +24,10 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 const host = process.env.HOST || 'localhost';
-app.listen(port, host, () => {
+
+app.listen(port, () => {
   console.log(`App running on http://${host}:${port}`);
 });
+

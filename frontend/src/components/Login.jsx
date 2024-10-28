@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Adjusted import
+import { useNavigate } from "react-router-dom";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -10,33 +11,57 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [validated, setValidated] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle login logic if form is valid
-      console.log({ email, password });
+
       try {
-        
+        const response = await fetch("http://localhost:9999/api/v1/users/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === "success") {
+          console.log("Login successful", data.user);
+          
+          // Save token and user data
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+
+          // Redirect user after login
+          navigate("/");
+        } else {
+          console.error("Login failed", data.message);
+          setErrors({ form: data.message || "Login failed. Please check your credentials." });
+        }
       } catch (error) {
-        console.error("Error at login", error); 
+        console.error("Error logging in", error);
+        setErrors({ form: "An error occurred while logging in. Please try again." });
+        
       }
     } else {
-      setValidated(true); // Set validated state to true to show errors
+      setValidated(true);
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
-    // Email validation (basic regex for email format)
+
+    // Email validation
     if (!email) {
       newErrors.email = "Email is required.";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Invalid email format.";
     }
 
-    // Password validation (min length 6)
+    // Password validation
     if (!password) {
       newErrors.password = "Password is required.";
     } else if (password.length < 6) {
@@ -45,7 +70,6 @@ const LoginForm = () => {
 
     setErrors(newErrors);
 
-    // If no errors, return true
     return Object.keys(newErrors).length === 0;
   };
 
@@ -139,6 +163,10 @@ const LoginForm = () => {
                       {errors.password}
                     </Form.Control.Feedback>
                   </Form.Group>
+
+                  {errors.form && (
+                    <div className="text-danger mt-3">{errors.form}</div>
+                  )}
 
                   <div className="mt-3">
                     <a href="/forgot-password" style={{ textDecoration: "none", color: "#0086c9" }}>
