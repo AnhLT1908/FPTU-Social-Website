@@ -7,11 +7,12 @@ process.on('uncaughtException', (err) => {
 });
 dotenv.config({ path: './config.env' });
 const app = require('./app');
-const DB = process.env.LOCAL_DATABASE;
-// const DB = process.env.DATABASE.replace(
-//   '<password>',
-//   process.env.DATABASE_PASSWORD
-// );
+// const DB = process.env.LOCAL_DATABASE;
+const DB = process.env.DATABASE.replace(
+  '<password>',
+  process.env.DATABASE_PASSWORD
+);
+
 mongoose
   .connect(DB, {
     useNewUrlParser: true,
@@ -24,7 +25,7 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 9999;
 const host = process.env.HOST || 'localhost';
 
 app.listen(port, () => {

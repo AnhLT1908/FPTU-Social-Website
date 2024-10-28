@@ -20,26 +20,54 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-exports.signup = catchAsync(async (req, res, next) => {
+// Check if email already exists
+exports.checkEmail = catchAsync(async (req, res, next) => {
   const { email } = req.body;
 
-  // Check if email already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return next(new AppError('Email is already registered. Please use a different email.', 400));
   }
 
-  // Create new user without a random password
+  res.status(200).json({
+    status: 'success',
+    message: 'Email is available.',
+  });
+});
+
+// Check if student code already exists
+exports.checkStudentCode = catchAsync(async (req, res, next) => {
+  const { studentCode } = req.body;
+
+  const existingStudentCode = await User.findOne({ studentCode });
+  if (existingStudentCode) {
+    return next(new AppError('Student code is already registered. Please use a different student code.', 400));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Student Code is available.',
+  });
+});
+
+// Signup function
+exports.signup = catchAsync(async (req, res, next) => {
+  const { email, username, password, studentCode } = req.body;
+
+  // Create new user
   const newUser = await User.create({
     email,
-    // password will be assigned later
+    username,
+    password, 
+    studentCode
   });
-  
+
   res.status(200).json({
     status: 'success',
     message: 'Email registered successfully! Please create a username and password.',
   });
 });
+
 
 // New function to check if the username is taken
 exports.checkUsername = catchAsync(async (req, res, next) => {

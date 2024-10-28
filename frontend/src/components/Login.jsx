@@ -174,7 +174,7 @@ const LoginForm = () => {
 
                   <div className="mt-3">
                     New to our community?{" "}
-                    <a href="/register" style={{ textDecoration: "none", color: "#0086c9" }}>
+                    <a href="/signup" style={{ textDecoration: "none", color: "#0086c9" }}>
                       Sign up
                     </a>
                   </div>
