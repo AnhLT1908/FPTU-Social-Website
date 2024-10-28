@@ -18,7 +18,7 @@ const CreateUPForm = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:8080/check-username", {
+        const response = await fetch("http://localhost:9999/check-username", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -33,7 +33,7 @@ const CreateUPForm = () => {
         }
   
         // Proceed to sign up the user
-        const signupResponse = await fetch("http://localhost:8080/signup", {
+        const signupResponse = await fetch("http://localhost:9999/signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

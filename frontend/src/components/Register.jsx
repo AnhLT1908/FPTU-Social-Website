@@ -18,7 +18,7 @@ const RegisterForm = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:8080/api/v1/users/signup", {
+        const response = await fetch("http://localhost:9999/api/v1/users/signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
