@@ -10,14 +10,14 @@ const CreateCommunity = () => {
   const navigate = useNavigate();
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
-  const [banner, setBanner] = useState(null);
-  const [icon, setIcon] = useState(null);
+  const [banner, setBanner] = useState("");
+  const [icon, setIcon] = useState("");
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [communityType, setCommunityType] = useState("Public");
   const [isMature, setIsMature] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-
+  const [rule, setRule] = useState("");
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -40,12 +40,12 @@ const CreateCommunity = () => {
       let data = JSON.stringify({
         name: communityName,
         description: description,
-        createdBy: "67138908290ef9092c172bbf",
+        createdBy: "67138908290ef9092c172bbf", //thay bang id
         moderators: "67138908290ef9092c172bbf",
         logo: icon,
         background: banner,
         privacyType: communityType,
-        communityRule: "rule",
+        communityRule: rule,
       });
 
       let config = {
@@ -99,6 +99,8 @@ const CreateCommunity = () => {
       setCommunityName={setCommunityName}
       description={description}
       setDescription={setDescription}
+      rule={rule}
+      setRule={setRule}
     />,
     <CommunityStyle
       banner={banner}
