@@ -83,9 +83,15 @@ userSchema.pre('save', function (next) {
   next();
 });
 userSchema.pre(/^find/, function (next) {
-  this.find({ isActive: { $ne: false } });
+  // Apply filtering only if noIsActiveFilter is not set to true
+  if (!this.getOptions().noIsActiveFilter) {
+    this.find({ isActive: { $ne: false } });
+  }
   next();
 });
+
+
+
 userSchema.methods.correctPassword = async function (userPassword) {
   const correct = await bcrypt.compare(userPassword, this.password);
   return correct;

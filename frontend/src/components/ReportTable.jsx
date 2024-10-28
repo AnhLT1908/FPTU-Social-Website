@@ -1,72 +1,65 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Button, Pagination, Form, InputGroup, Col, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom'; // Sử dụng useNavigate thay vì useHistory
+import { useNavigate } from 'react-router-dom';
 import '../styles/reportTable.css';
+import { listReports } from '../services/ReportService';
 
 const ReportTable = () => {
-    const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
-    // Dữ liệu giả về danh sách báo cáo
-    const [reports, setReports] = useState([
-        { id: 1, user: 'Nguyễn Văn A', reason: 'Spam', date: '2024-09-29', status: 'Chưa xử lý' },
-        { id: 2, user: 'Trần Thị B', reason: 'Nội dung không phù hợp', date: '2024-09-28', status: 'Đã xử lý' },
-        { id: 3, user: 'Lê Văn C', reason: 'Xúc phạm', date: '2024-09-27', status: 'Chưa xử lý' },
-        { id: 4, user: 'Nguyễn Văn D', reason: 'Spam', date: '2024-09-26', status: 'Đã xử lý' },
-        { id: 5, user: 'Trần Thị E', reason: 'Xúc phạm', date: '2024-09-25', status: 'Chưa xử lý' },
-        { id: 6, user: 'Lê Văn F', reason: 'Nội dung không phù hợp', date: '2024-09-24', status: 'Chưa xử lý' },
-    ]);
+    const navigate = useNavigate();
 
+    const [reports, setReports] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState(''); // Bộ lọc trạng thái báo cáo
+    const [filterStatus, setFilterStatus] = useState('');
+    const [filterEntityType, setFilterEntityType] = useState(''); // Thêm loại thực thể
     const [currentPage, setCurrentPage] = useState(1);
-    const [reportsPerPage] = useState(3); // Số lượng báo cáo hiển thị trên mỗi trang
+    const [totalPages, setTotalPages] = useState(0);
+    const reportsPerPage = 5;
 
-    const indexOfLastReport = currentPage * reportsPerPage;
-    const indexOfFirstReport = indexOfLastReport - reportsPerPage;
+    const fetchReports = async () => {
+        try {
+            const data = await listReports(currentPage, reportsPerPage, filterStatus, filterEntityType, searchTerm);
+            setReports(data.data);
+            setTotalPages(data.totalPages);
+        } catch (error) {
+            console.error('Error fetching reports:', error);
+        }
+    };
 
-    // Lọc và tìm kiếm báo cáo
-    const filteredReports = reports.filter((report) => {
-        return (
-            report.user.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (filterStatus ? report.status === filterStatus : true)
-        );
-    });
-
-    const currentReports = filteredReports.slice(indexOfFirstReport, indexOfLastReport);
-    const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-    }
+    useEffect(() => {
+        fetchReports();
+    }, [currentPage, searchTerm, filterStatus, filterEntityType]);
 
     const handleClick = (number) => setCurrentPage(number);
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
-        setCurrentPage(1); // Reset về trang đầu tiên khi tìm kiếm
+        setCurrentPage(1);
     };
-    const handleFilterChange = (event) => {
+    const handleFilterStatusChange = (event) => {
         setFilterStatus(event.target.value);
-        setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi bộ lọc
+        setCurrentPage(1);
+    };
+    const handleFilterEntityTypeChange = (event) => {
+        setFilterEntityType(event.target.value);
+        setCurrentPage(1);
     };
 
     const handleViewDetail = (id) => {
-        navigate(`/report/${id}`); // Sử dụng navigate thay cho history.push
+        navigate(`/report/${id}`);
     };
 
     const handleDelete = (id) => {
-        // Xử lý logic xóa bài báo cáo tại đây (xóa khỏi state hoặc gọi API)
-        const updatedReports = reports.filter((report) => report.id !== id);
-        setReports(updatedReports); // Cập nhật lại danh sách báo cáo
+        const updatedReports = reports.filter((report) => report._id !== id);
+        setReports(updatedReports);
     };
 
     return (
         <div className="container mt-4">
-            {/* Thanh tìm kiếm và bộ lọc */}
             <Row className="mb-3">
                 <Col md={4}>
                     <InputGroup size="sm">
                         <Form.Control
                             type="text"
-                            placeholder="Tìm kiếm theo tên người dùng..."
+                            placeholder="Tìm kiếm theo mô tả..."
                             value={searchTerm}
                             onChange={handleSearch}
                         />
@@ -77,23 +70,40 @@ const ReportTable = () => {
                         <Form.Label className="me-2" style={{ fontSize: '14px' }}>Trạng thái:</Form.Label>
                         <Form.Select
                             value={filterStatus}
-                            onChange={handleFilterChange}
-                            size="sm" // Thu nhỏ nút lọc
-                            style={{ width: '150px', display: 'inline-block' }} // Giảm kích thước nút lọc
+                            onChange={handleFilterStatusChange}
+                            size="sm"
+                            style={{ width: '150px', display: 'inline-block' }}
                         >
                             <option value="">Tất cả</option>
-                            <option value="Chưa xử lý">Chưa xử lý</option>
-                            <option value="Đã xử lý">Đã xử lý</option>
+                            <option value="Waiting">Chưa xử lý</option>
+                            <option value="Approved">Đã xử lý</option>
+                            <option value="Cancel">Hủy</option>
+                        </Form.Select>
+                    </Form.Group>
+                </Col>
+                <Col md={3}>
+                    <Form.Group size="sm">
+                        <Form.Label className="me-2" style={{ fontSize: '14px' }}>Loại thực thể:</Form.Label>
+                        <Form.Select
+                            value={filterEntityType}
+                            onChange={handleFilterEntityTypeChange}
+                            size="sm"
+                            style={{ width: '150px', display: 'inline-block' }}
+                        >
+                            <option value="">Tất cả</option>
+                            <option value="Post">Bài viết</option>
+                            <option value="Comment">Bình luận</option>
+                            <option value="User">Người dùng</option>
                         </Form.Select>
                     </Form.Group>
                 </Col>
             </Row>
 
-            {/* Bảng danh sách báo cáo */}
             <Table striped bordered hover className="table">
                 <thead>
                 <tr>
                     <th>ID Bài Viết</th>
+                    <th>Loại</th>
                     <th>Người dùng</th>
                     <th>Lý do báo cáo</th>
                     <th>Ngày báo cáo</th>
@@ -102,45 +112,39 @@ const ReportTable = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {currentReports.map((report) => (
-                    <tr key={report.id}>
-                        <td>{report.id}</td>
-                        <td>{report.user}</td>
-                        <td>{report.reason}</td>
-                        <td>{report.date}</td>
+                {reports
+                .filter(report =>report.entityType==='Post' )
+                .map((report,key) => (
+                    <tr key={report._id}>
+                        <td>{key}</td>
+                        <td>{report.entityType}</td>
+                        <td>{report.userId?.username || "N/A"}</td>
+                        <td>{report.description}</td>
+                        <td>{new Date(report?.createdAt).toLocaleString()}</td>
                         <td>{report.status}</td>
                         <td>
                             <Button
                                 variant="primary"
-                                className="button-primary me-2"
                                 size="sm"
-                                onClick={() => handleViewDetail(report.id)} // Sửa lỗi và sử dụng hàm để xử lý
+                                onClick={() => handleViewDetail(report._id)}
                             >
                                 Xem chi tiết
                             </Button>
-                            <Button
-                                variant="danger"
-                                className="button-danger"
-                                size="sm"
-                                onClick={() => handleDelete(report.id)} // Hàm xóa bài báo cáo
-                            >
-                                Xóa
-                            </Button>
+                          
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </Table>
 
-            {/* Phân trang */}
             <Pagination size="sm" className="pagination justify-content-center">
-                {pageNumbers.map((number) => (
+                {[...Array(totalPages)].map((_, index) => (
                     <Pagination.Item
-                        key={number}
-                        active={number === currentPage}
-                        onClick={() => handleClick(number)}
+                        key={index + 1}
+                        active={index + 1 === currentPage}
+                        onClick={() => handleClick(index + 1)}
                     >
-                        {number}
+                        {index + 1}
                     </Pagination.Item>
                 ))}
             </Pagination>
