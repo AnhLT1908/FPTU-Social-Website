@@ -6,6 +6,7 @@ import CommunityTopics from "./SubCMPNTCreateCommunity/CommunityTopics";
 import CommunityType from "./SubCMPNTCreateCommunity/CommunityType";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 const CreateCommunity = () => {
   const navigate = useNavigate();
   const [communityName, setCommunityName] = useState("");
@@ -18,6 +19,9 @@ const CreateCommunity = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [rule, setRule] = useState("");
+  const [error, setError] = useState(null);
+  const token = localStorage.getItem("token");
+
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -31,45 +35,38 @@ const CreateCommunity = () => {
       setCurrentStep(currentStep - 1);
     }
   };
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
+    const data = JSON.stringify({
+      name: communityName,
+      description: description,
+      createdBy: "67138908290ef9092c172bbf", // replace with actual user ID
+      moderators: ["67138908290ef9092c172bbf"], // replace with actual moderator IDs
+      logo: icon,
+      background: banner,
+      privacyType: communityType,
+      communityRule: rule,
+      topics: selectedTopics,
+    });
+
     try {
-      alert("Community successfully created!");
+      const response = await axios.post(
+        "http://localhost:9999/api/v1/communities",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Community successfully created:", response.data);
       setShowPreview(false);
       navigate("/");
-
-      let data = JSON.stringify({
-        name: communityName,
-        description: description,
-        createdBy: "67138908290ef9092c172bbf", //thay bang id
-        moderators: "67138908290ef9092c172bbf",
-        logo: icon,
-        background: banner,
-        privacyType: communityType,
-        communityRule: rule,
-      });
-
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: "http://localhost:5173/api/v1/communities",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MTM4OTA4MjkwZWY5MDkyYzE3MmJiZiIsImlhdCI6MTczMDAxMjUzOSwiZXhwIjoxNzM3Nzg4NTM5fQ.pAk1_n2rHpiWjLyjwuCa371E6XamMP2aaR6RLO60ChU",
-        },
-        data: data,
-      };
-
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-          console.log(error);
-        });
     } catch (error) {
-      console.log(error);
+      console.error("Error creating community:", error);
+      console.log("data:", data);
+      setError("Failed to create community. Please try again.");
     }
   };
 
@@ -109,7 +106,11 @@ const CreateCommunity = () => {
       setIcon={setIcon}
       handleImageUpload={handleImageUpload}
     />,
-
+    <CommunityTopics
+      selectedTopics={selectedTopics}
+      setSelectedTopics={setSelectedTopics}
+      topicsList={topicsList}
+    />,
     <CommunityType
       communityType={communityType}
       setCommunityType={setCommunityType}
@@ -134,7 +135,7 @@ const CreateCommunity = () => {
           <Button
             variant="light"
             className="me-3"
-            onClick={() => alert("Community creation canceled")}
+            onClick={() => navigate("/")}
           >
             X
           </Button>
@@ -150,9 +151,6 @@ const CreateCommunity = () => {
         <Col md={10}>{steps[currentStep]}</Col>
       </Row>
 
-      {/* Button to open the modal */}
-
-      {/* Modal for preview */}
       <Modal
         show={showPreview}
         onHide={() => setShowPreview(false)}
@@ -197,6 +195,9 @@ const CreateCommunity = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {error && <p className="text-danger text-center mt-3">{error}</p>}
+
       <Container>
         <Row>
           <Col md={1}></Col>
