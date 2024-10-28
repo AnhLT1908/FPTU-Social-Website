@@ -43,7 +43,7 @@ const CommunityPage = () => {
                   objectFit: "cover",
                 }}
               />
-              <h1 className="ml-3">r/Japan</h1>
+              <h1 className="ml-3">f/FPTU</h1>
             </div>
             <div className="d-flex justify-content-between align-items-center">
               <Dropdown>
@@ -233,7 +233,7 @@ const CommunityPage = () => {
             className="mb-4 p-3"
             style={{ height: "85vh", overflowY: "auto" }}
           >
-            <h4>Japan</h4>
+            <h4>FPTU</h4>
             <p>
               This subreddit serves as a general hub to discuss most things
               Japanese and exchange information, **as well as to guide users to
