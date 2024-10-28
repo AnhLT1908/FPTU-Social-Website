@@ -6,6 +6,8 @@ const CommunityDetails = ({
   setCommunityName,
   description,
   setDescription,
+  rule,
+  setRule,
 }) => {
   return (
     <Container className="p-3 mb-4">
@@ -38,6 +40,16 @@ const CommunityDetails = ({
             placeholder="Enter description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group controlId="description" className="mb-3">
+          <Form.Label>Rule </Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={4}
+            placeholder="Enter RUle"
+            value={rule}
+            onChange={(e) => setRule(e.target.value)}
           />
         </Form.Group>
       </Form>

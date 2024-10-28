@@ -15,5 +15,5 @@ router
     communityController.isModerator,
     communityController.deleteCommunity
   );
-
+router.route('/join').post(communityController.addUserById);
 module.exports = router;

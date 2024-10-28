@@ -12,6 +12,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [showHighlights, setShowHighlights] = useState(false);
@@ -25,6 +26,33 @@ const CommunityPage = () => {
   };
   const toggleHighlights = () => {
     setShowHighlights(!showHighlights);
+  };
+  const handleJoin = () => {
+    alert("Joined community sucess!");
+    let data = JSON.stringify({
+      userId: "671df2d274687d48d0bdc4ed",
+      communityId: "671de826180594244866bf68",
+      role: "member",
+    });
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "http://localhost:5173/api/v1/communities/join",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
   return (
     <Container fluid className="mt-4">
@@ -56,12 +84,17 @@ const CommunityPage = () => {
                   <Dropdown.Item>Rising</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
-              <Button
-                variant={voteStatus === "up" ? "success" : "light"}
-                onClick={() => navigate("/create-post")}
-              >
-                Create post
-              </Button>
+              <ButtonGroup aria-label="Basic example">
+                <Button
+                  variant="light"
+                  onClick={() => navigate("/create-post")}
+                >
+                  Create Post
+                </Button>
+                <Button variant="light" onClick={handleJoin}>
+                  Join
+                </Button>
+              </ButtonGroup>
             </div>
           </Card>
 

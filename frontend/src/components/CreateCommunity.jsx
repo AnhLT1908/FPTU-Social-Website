@@ -5,18 +5,19 @@ import CommunityStyle from "./SubCMPNTCreateCommunity/CommunityStyle";
 import CommunityTopics from "./SubCMPNTCreateCommunity/CommunityTopics";
 import CommunityType from "./SubCMPNTCreateCommunity/CommunityType";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 const CreateCommunity = () => {
   const navigate = useNavigate();
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
-  const [banner, setBanner] = useState(null);
-  const [icon, setIcon] = useState(null);
+  const [banner, setBanner] = useState("");
+  const [icon, setIcon] = useState("");
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [communityType, setCommunityType] = useState("Public");
   const [isMature, setIsMature] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-
+  const [rule, setRule] = useState("");
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -28,6 +29,47 @@ const CreateCommunity = () => {
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+  const handleSubmit = () => {
+    try {
+      alert("Community successfully created!");
+      setShowPreview(false);
+      navigate("/");
+
+      let data = JSON.stringify({
+        name: communityName,
+        description: description,
+        createdBy: "67138908290ef9092c172bbf", //thay bang id
+        moderators: "67138908290ef9092c172bbf",
+        logo: icon,
+        background: banner,
+        privacyType: communityType,
+        communityRule: rule,
+      });
+
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "http://localhost:5173/api/v1/communities",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MTM4OTA4MjkwZWY5MDkyYzE3MmJiZiIsImlhdCI6MTczMDAxMjUzOSwiZXhwIjoxNzM3Nzg4NTM5fQ.pAk1_n2rHpiWjLyjwuCa371E6XamMP2aaR6RLO60ChU",
+        },
+        data: data,
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -57,6 +99,8 @@ const CreateCommunity = () => {
       setCommunityName={setCommunityName}
       description={description}
       setDescription={setDescription}
+      rule={rule}
+      setRule={setRule}
     />,
     <CommunityStyle
       banner={banner}
@@ -65,11 +109,7 @@ const CreateCommunity = () => {
       setIcon={setIcon}
       handleImageUpload={handleImageUpload}
     />,
-    <CommunityTopics
-      selectedTopics={selectedTopics}
-      setSelectedTopics={setSelectedTopics}
-      topicsList={topicsList}
-    />,
+
     <CommunityType
       communityType={communityType}
       setCommunityType={setCommunityType}
@@ -152,14 +192,7 @@ const CreateCommunity = () => {
           <Button variant="secondary" onClick={() => setShowPreview(false)}>
             Close
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              alert("Community successfully created!");
-              setShowPreview(false);
-              navigate("/");
-            }}
-          >
+          <Button variant="primary" onClick={handleSubmit}>
             Create Community
           </Button>
         </Modal.Footer>

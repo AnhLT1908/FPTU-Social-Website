@@ -52,7 +52,7 @@ module.exports = class Email {
       firstName: this.name,
       url: this.url,
       subject,
-      ...options
+      ...options,
     });
     const mailOptions = {
       from: this.from,
@@ -69,7 +69,10 @@ module.exports = class Email {
     }
   }
   async sendWelcome() {
-    await this.send('emailTemplate', 'Welcome to the FPT University Social Website');
+    await this.send(
+      'emailTemplate',
+      'Welcome to the FPT University Social Website'
+    );
   }
   async sendResetPassword() {
     await this.send(
