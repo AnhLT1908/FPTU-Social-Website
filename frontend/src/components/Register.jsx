@@ -20,7 +20,7 @@ const RegisterForm = () => {
       // Handle successful form submission
       console.log({ email, password });
       // Redirect to /create-username-password
-      navigate("/create-username-password");
+      navigate("/create-username-password", { state: { email } });
     } else {
       setValidated(true); // Show validation errors
     }

@@ -32,20 +32,23 @@ const HomePage = () => {
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
   useEffect(() => {
+
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
 
-    fetch("http://localhost:9999/post")
+    fetch("http://localhost:3000/post")
+
       .then((res) => res.json())
       .then((data) => {
-        const postsWithReactions = data.map((item) => ({
-          ...item,
-          likes: item.reactions.likes,
-          dislikes: item.reactions.dislikes,
-          liked: false,
-          disliked: false,
-        }));
-        setPosts(postsWithReactions);
+        // const postsWithReactions = data.map((item) => ({
+        //   ...item,
+        //   likes: item.reactions.likes,
+        //   dislikes: item.reactions.dislikes,
+        //   liked: false,
+        //   disliked: false,
+        // }));
+        console.log("Data: " + JSON.stringify(data));
+        setPosts(data);
       })
       .catch((error) => console.error(error));
   }, []);

@@ -54,7 +54,7 @@ const CreatePost = () => {
       </div>
 
       <Form>
-        <FormControl value={user.id} name="userId" hidden/>
+        {/* <FormControl value={user.id} name="userId" hidden/> */}
 
         <FormSelect
           className="mb-3"
