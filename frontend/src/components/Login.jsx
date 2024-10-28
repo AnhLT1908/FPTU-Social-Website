@@ -16,6 +16,11 @@ const LoginForm = () => {
     if (validateForm()) {
       // Handle login logic if form is valid
       console.log({ email, password });
+      try {
+        
+      } catch (error) {
+        console.error("Error at login", error); 
+      }
     } else {
       setValidated(true); // Set validated state to true to show errors
     }
