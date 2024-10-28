@@ -11,9 +11,11 @@ const {
   restrictTo,
   isLoggedIn,
   logout,
+  checkUsername
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
+router.post('/check-username', checkUsername);
 router.post('/login', login);
 router.get('/logout', logout);
 router.post('/is-logged-in', isLoggedIn);

@@ -14,47 +14,53 @@ const CreateUPForm = () => {
 
   console.log("User email: " + email);
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch(
-          "http://localhost:9999/api/v1/users/signup",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email,
-              username,
-              password,
-            }),
-          }
-        );
-
-        if (response.ok) {
+        const response = await fetch("http://localhost:8080/check-username", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          setErrors({ username: errorData.message || "Username already taken." });
+          return;
+        }
+  
+        // Proceed to sign up the user
+        const signupResponse = await fetch("http://localhost:8080/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, username, password }),
+        });
+  
+        if (signupResponse.ok) {
           // Handle successful response
-          const data = await response.json();
+          const data = await signupResponse.json();
           console.log("Signup successful:", data);
-          // Redirect or show success message, e.g.:
           navigate("/login"); // Redirect to login page
         } else {
           // Handle errors from the server
-          const errorData = await response.json();
+          const errorData = await signupResponse.json();
           console.error("Signup failed:", errorData);
-          setErrors({
-            form: errorData.message || "Signup failed. Please try again.",
-          });
+          setErrors({ form: errorData.message || "Signup failed. Please try again." });
         }
       } catch (error) {
         console.error("Error during signup:", error);
         setErrors({ form: "An error occurred. Please try again later." });
       }
     } else {
-      setValidated(true); // Set validated state to true to show errors
+      setValidated(true); // Show validation errors
     }
   };
+  
 
   const validateForm = () => {
     const newErrors = {};
@@ -131,7 +137,7 @@ const CreateUPForm = () => {
                 you get a name, you can't change it.
               </h6>
 
-              <Form noValidate validated={validated} onSubmit={handleLogin}>
+              <Form noValidate validated={validated} onSubmit={handleRegister}>
                 {errors.form && (
                   <div className="text-danger mb-3">{errors.form}</div>
                 )}
