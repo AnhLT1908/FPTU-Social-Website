@@ -16,6 +16,7 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+
       try {
         const response = await fetch("http://localhost:9999/api/v1/users/login", {
           method: "POST",
@@ -43,6 +44,7 @@ const LoginForm = () => {
       } catch (error) {
         console.error("Error logging in", error);
         setErrors({ form: "An error occurred while logging in. Please try again." });
+        
       }
     } else {
       setValidated(true);

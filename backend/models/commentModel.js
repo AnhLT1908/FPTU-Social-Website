@@ -16,7 +16,7 @@ commentSchema.post('save', async function (doc, next) {
   try {
     if (doc.parentId) {
       await Comment.findByIdAndUpdate(doc.parentId, {
-        $addToSet: { childrens: doc_id },
+        $addToSet: { childrens: doc._id },
       });
     }
     next();

@@ -14,13 +14,30 @@ const RegisterForm = () => {
   
   const navigate = useNavigate(); // Initialize navigate
 
-  const handleLogin = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle successful form submission
-      console.log({ email, password });
-      // Redirect to /create-username-password
-      navigate("/create-username-password", { state: { email } });
+      try {
+        const response = await fetch("http://localhost:9999/api/v1/users/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        });
+  
+        if (response.ok) {
+          // Email is valid and not taken, navigate to create username and password
+          navigate("/create-username-password", { state: { email } });
+        } else {
+          // Handle error from the server
+          const errorData = await response.json();
+          setErrors({ form: errorData.message || "Registration failed. Please try again." });
+        }
+      } catch (error) {
+        console.error("Error during registration:", error);
+        setErrors({ form: "An error occurred. Please try again later." });
+      }
     } else {
       setValidated(true); // Show validation errors
     }
@@ -96,7 +113,7 @@ const RegisterForm = () => {
                   ></div>
                 </div>
 
-                <Form noValidate validated={validated} onSubmit={handleLogin}>
+                <Form noValidate validated={validated} onSubmit={handleRegister}>
                   <Form.Group className="mb-3" controlId="formEmail">
                     <Form.Control
                       type="email"

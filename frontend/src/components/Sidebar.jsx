@@ -1,9 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/sidebar.css";
 import { Link, useLocation } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
 const sidebarPath = ["/", "/popular", "explore"];
+
 function Sidebar() {
   const { pathname } = useLocation();
+  const [community, setCommunity] = useState([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchCommunities = async () => {
+      try {
+        const response = await fetch("http://localhost:9999/api/v1/communities/", {
+          signal: controller.signal,
+        });
+        const data = await response.json();
+        setCommunity(data);
+        console.log("Community:", data);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Fetch error:", error);
+        }
+      }
+    };
+    fetchCommunities();
+    return () => controller.abort();
+  }, []);
 
   return (
     <nav className="pt-3">
@@ -129,14 +152,26 @@ function Sidebar() {
               aria-labelledby="flush-headingTwo"
             >
               <div class="accordion-body">
-                <li>
-                  <Link to={"/community/2"}>
-                    <span className="icon">
-                      <img src="/images/logo.jpg" width={32} height={32} />
-                    </span>
-                    <span className="name">f/FPTU</span>
-                  </Link>
-                </li>
+                  <li>
+                    <Link to={"/create-community"}>
+                      <span className="icon">
+                        <FaPlus
+                          style={{ marginLeft: "10px", marginRight: "5px" }}
+                        />
+                      </span>
+                      <span className="name">Create a new community</span>
+                    </Link>
+                  </li>
+                  <li>
+                    {community?.map((c) => (
+                      <Link to={"/community/2"}>
+                        <span className="icon">
+                          <img src="/images/logo.jpg" width={32} height={32} />
+                        </span>
+                        <span className="name">{`f/  ${c.name}`}</span>
+                      </Link>
+                    ))}
+                  </li>
               </div>
             </div>
           </div>

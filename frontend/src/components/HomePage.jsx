@@ -32,25 +32,22 @@ const HomePage = () => {
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
   useEffect(() => {
-
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
 
-    fetch("http://localhost:3000/post")
-
+    fetch("http://localhost:9999/api/v1/posts/")
       .then((res) => res.json())
       .then((data) => {
-        // const postsWithReactions = data.map((item) => ({
-        //   ...item,
-        //   likes: item.reactions.likes,
-        //   dislikes: item.reactions.dislikes,
-        //   liked: false,
-        //   disliked: false,
-        // }));
-        console.log("Data: " + JSON.stringify(data));
-        setPosts(data);
+        const postsWithReactions = data.map((item) => ({
+          ...item,
+          upVotes: item.upVotes || 0,
+          downVotes: item.downVotes || 0,
+          upVoted: false,
+          downVoted: false,
+        }));
+        setPosts(postsWithReactions);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => console.error("Error fetching posts:", error));
   }, []);
 
   const handleReaction = (index, type) => {
@@ -58,20 +55,20 @@ const HomePage = () => {
       const updatedPosts = [...prevPosts];
       const post = updatedPosts[index];
 
-      if (type === "like") {
-        post.liked ? post.likes-- : post.likes++;
-        if (post.disliked) {
-          post.dislikes--;
-          post.disliked = false;
+      if (type === "upVote") {
+        post.upVoted ? post.upVotes-- : post.upVotes++;
+        if (post.downVoted) {
+          post.downVotes--;
+          post.downVoted = false;
         }
-        post.liked = !post.liked;
+        post.upVoted = !post.upVoted;
       } else {
-        post.disliked ? post.dislikes-- : post.dislikes++;
-        if (post.liked) {
-          post.likes--;
-          post.liked = false;
+        post.downVoted ? post.downVotes-- : post.downVotes++;
+        if (post.upVoted) {
+          post.upVotes--;
+          post.upVoted = false;
         }
-        post.disliked = !post.disliked;
+        post.downVoted = !post.downVoted;
       }
 
       return updatedPosts;
@@ -95,9 +92,9 @@ const HomePage = () => {
           <Row className="mb-2">
             <Col>
               <Dropdown>
-                <Dropdown.Toggle variant="light">Hot</Dropdown.Toggle>
+                <Dropdown.Toggle variant="light">New</Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item>New</Dropdown.Item>
+                  <Dropdown.Item>Hot</Dropdown.Item>
                   <Dropdown.Item>Top</Dropdown.Item>
                   <Dropdown.Item>Rising</Dropdown.Item>
                 </Dropdown.Menu>
@@ -106,16 +103,17 @@ const HomePage = () => {
           </Row>
 
           {posts.map((post, index) => (
-            <Card key={index} className="mb-3 p-3">
+            <Card key={post._id} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <Link to={"/community/2"}>
+                  <Link to={`/community/${post.communityId}`}>
                     <p>
-                      <strong>{post.communityName}</strong> • {post.timeCreate}
+                      <strong>{"f/" + post.communityId.name || "Community Name"}</strong> •{" "}
+                      {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
-                  <Link to={`profile/${post.id}`}>
-                    <p className="mt-n2">{post.userName}</p>
+                  <Link to={`/profile/${post.userId}`}>
+                    <p className="mt-n2">{"u/" + post.userId.username || "Username"}</p>
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
@@ -125,7 +123,7 @@ const HomePage = () => {
                       <Dropdown.Item>Save</Dropdown.Item>
                       <Dropdown.Item>Report</Dropdown.Item>
                       <Dropdown.Item>Hide</Dropdown.Item>
-                      <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
+                      <Dropdown.Item onClick={() => navigate(`/edit-post/${post._id}`)}>
                         Edit
                       </Dropdown.Item>
                     </Dropdown.Menu>
@@ -135,13 +133,13 @@ const HomePage = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`post/${post.id}`}>
+                  <Link to={`/post/${post._id}`}>
                     <h2>{post.title}</h2>
                   </Link>
                 </Col>
                 <Col md={4}>
                   <Image
-                    src={images[index]}
+                    src={images[index % images.length]}
                     alt={`post-${index + 1}`}
                     fluid
                     style={{
@@ -150,28 +148,28 @@ const HomePage = () => {
                       cursor: "pointer",
                       float: "right",
                     }}
-                    onClick={() => handleImageClick(images[index])}
+                    onClick={() => handleImageClick(images[index % images.length])}
                   />
                 </Col>
               </Row>
 
               <div className="d-flex align-items-center">
                 <Button
-                  variant={post.liked ? "success" : "light"}
-                  onClick={() => handleReaction(index, "like")}
+                  variant={post.upVoted ? "success" : "light"}
+                  onClick={() => handleReaction(index, "upVote")}
                 >
                   <FaArrowUp />
                 </Button>
-                <span className="mx-2">{post.likes}</span>
+                <span className="mx-2">{post.upVotes}</span>
                 <Button
-                  variant={post.disliked ? "danger" : "light"}
-                  onClick={() => handleReaction(index, "dislike")}
+                  variant={post.downVoted ? "danger" : "light"}
+                  onClick={() => handleReaction(index, "downVote")}
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{post.dislikes}</span>
+                <span className="mx-2">{post.downVotes}</span>
                 <Button variant="light">
-                  <FaComment /> {post.comments}
+                  <FaComment /> {post.commentsCount || 0}
                 </Button>
                 <Button variant="light">
                   <FaShare /> Share
@@ -180,6 +178,7 @@ const HomePage = () => {
             </Card>
           ))}
 
+{/*************************************************** */}
           <Row>
             <Col className="text-center">
               <h3>

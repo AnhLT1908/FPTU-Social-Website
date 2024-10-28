@@ -9,6 +9,7 @@ const {
   factoryGetOne,
   factoryGetAll,
 } = require('./handlerFactory');
+
 // const multerStorage = multer.diskStorage({
 //   destination: (req, file, cb) => {
 //     cb(null, 'public/img/users');
@@ -18,6 +19,7 @@ const {
 //     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
 //   },
 // });
+
 const filterObj = (obj, ...excluded) => {
   const newObj = {};
   Object.keys(obj).forEach((el) => {
