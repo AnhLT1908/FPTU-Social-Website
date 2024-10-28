@@ -23,29 +23,14 @@ const CommunityStyle = ({
             className="mb-4 d-flex align-items-center"
           >
             <Form.Label className="me-3">Banner</Form.Label>
-            <div className="d-flex align-items-center">
-              <label
-                htmlFor="banner-upload"
-                className="btn btn-outline-secondary"
-              >
-                Add
-              </label>
-              <input
-                id="banner-upload"
-                type="file"
-                accept="image/*"
-                className="d-none"
-                onChange={(e) => handleImageUpload(e, "banner")}
-              />
-              {banner && (
-                <Image
-                  src={banner}
-                  alt="Banner Preview"
-                  className="ms-3"
-                  style={{ width: "50px", height: "50px" }}
-                />
-              )}
-            </div>
+
+            <Form.Control
+              as="textarea"
+              rows={1}
+              placeholder="Enter banner url"
+              value={banner}
+              onChange={(e) => setBanner(e.target.value)}
+            />
           </Form.Group>
 
           <Form.Group
@@ -53,29 +38,14 @@ const CommunityStyle = ({
             className="mb-4 d-flex align-items-center"
           >
             <Form.Label className="me-3">Icon</Form.Label>
-            <div className="d-flex align-items-center">
-              <label
-                htmlFor="icon-upload"
-                className="btn btn-outline-secondary"
-              >
-                Add
-              </label>
-              <input
-                id="icon-upload"
-                type="file"
-                accept="image/*"
-                className="d-none"
-                onChange={(e) => handleImageUpload(e, "icon")}
-              />
-              {icon && (
-                <Image
-                  src={icon}
-                  alt="Icon Preview"
-                  className="ms-3"
-                  style={{ width: "50px", height: "50px" }}
-                />
-              )}
-            </div>
+
+            <Form.Control
+              as="textarea"
+              rows={1}
+              placeholder="Enter logo url"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+            />
           </Form.Group>
         </Form>
       </Container>

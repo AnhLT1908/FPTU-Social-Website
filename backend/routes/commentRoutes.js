@@ -10,6 +10,7 @@ router
   .route('/:id')
   .get(commentController.getCommentById)
   .patch(protect, commentController.updateComment)
-  .delete(protect, commentController.deleteComment);
-
+  .delete(protect, commentController.deleteComment)
+  .post(protect, commentController.createChildrenComments);
+router.route('/get-by-post/:id').get(commentController.getCommentByPostId);
 module.exports = router;
