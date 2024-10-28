@@ -22,6 +22,7 @@ import CommunityPage from "./components/CommunityWall";
 import CreateCommunity from "./components/CreateCommunity";
 import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
+import HomeLogin from "./components/HomeLogin";
 
 function App() {
   return (
