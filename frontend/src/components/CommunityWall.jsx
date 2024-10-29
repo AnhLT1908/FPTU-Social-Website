@@ -11,12 +11,14 @@ import {
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [showHighlights, setShowHighlights] = useState(false);
   const [voteStatus, setVoteStatus] = useState(null);
+  const [post, setPost] = useState();
+  const { id } = useParams();
   const handleUpvote = () => {
     setVoteStatus(voteStatus === "up" ? null : "up");
   };
@@ -31,7 +33,7 @@ const CommunityPage = () => {
     alert("Joined community sucess!");
     let data = JSON.stringify({
       userId: "671df2d274687d48d0bdc4ed",
-      communityId: "671de826180594244866bf68",
+      communityId: id,
       role: "member",
     });
 
