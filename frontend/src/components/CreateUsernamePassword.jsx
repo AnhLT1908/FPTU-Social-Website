@@ -1,49 +1,96 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate, useLocation } from "react-router-dom";
 
 const CreateUPForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [studentCode, setStudentCode] = useState("");
   const [errors, setErrors] = useState({});
-  const [validated, setValidated] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // React Router hook for navigation
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
 
-  const handleLogin = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle login logic if form is valid
-      console.log({ username, password });
-    } else {
-      setValidated(true); // Set validated state to true to show errors
+      setLoading(true); // Set loading to true
+      try {
+        const response = await fetch("http://localhost:9999/api/v1/users/check-username", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          setErrors({ username: errorData.message || "Username already taken." });
+          return;
+        }
+
+        const responseStuCode = await fetch("http://localhost:9999/api/v1/users/check-student-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ studentCode }),
+        });
+
+        if (!responseStuCode.ok) {
+          const errorData = await response.json();
+          setErrors({ username: errorData.message || "Student Code already taken." });
+          return;
+        }
+
+        const signupResponse = await fetch("http://localhost:9999/api/v1/users/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, username, password, studentCode }),
+        });
+
+        if (signupResponse.ok) {
+          const data = await signupResponse.json();
+          console.log("Signup successful:", data);
+          navigate("/login");
+        } else {
+          const errorData = await signupResponse.json();
+          setErrors({ form: errorData.message || "Signup failed. Please try again." });
+        }
+      } catch (error) {
+        console.error("Error during signup:", error);
+        setErrors({ form: "An error occurred. Please try again later." });
+      } finally {
+        setLoading(false); // Reset loading state
+      }
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Username validation
     if (!username) {
       newErrors.username = "Username is required.";
     }
-
-    // Password validation (min length 6)
     if (!password) {
       newErrors.password = "Password is required.";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters.";
     }
+    if (!studentCode) {
+      newErrors.username = "Student Code is required.";
+    }
 
     setErrors(newErrors);
-
-    // If no errors, return true
     return Object.keys(newErrors).length === 0;
   };
 
-  // Function to navigate back to the signup page
   const handleBack = () => {
-    navigate("/register");
+    navigate("/signup");
   };
 
   return (
@@ -55,15 +102,13 @@ const CreateUPForm = () => {
       <Row>
         <Col>
           <div className="text-center mb-4">
-            <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+            <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }} />
             <h1>FPTU Social Website</h1>
             <p>The Internet Home Place, where many communities reside</p>
           </div>
 
           <Card className="p-4 shadow-sm" style={{ width: "500px" }}>
             <Card.Body>
-                
-              {/* Back arrow */}
               <div
                 className="mb-4"
                 style={{ cursor: "pointer" }}
@@ -91,8 +136,45 @@ const CreateUPForm = () => {
                 you get a name, you can't change it.
               </h6>
 
-              <Form noValidate validated={validated} onSubmit={handleLogin}>
-                <Form.Group className="mb-3" controlId="username">
+              <Form noValidate onSubmit={handleRegister}>
+                {errors.form && (
+                  <div className="text-danger mb-3">{errors.form}</div>
+                )}
+
+                <Form.Group className="mb-3" controlId="formEmail">
+                  <Form.Control
+                    type="email"
+                    value={email}
+                    readOnly={true}
+                    style={{
+                      borderRadius: "20px",
+                      height: "60px",
+                      backgroundColor: "#d7d6d6",
+                    }}
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="studentCode" className="mt-3">
+                  <Form.Control
+                    type="text"
+                    placeholder="Student Code *"
+                    value={studentCode}
+                    onChange={(e) => setStudentCode(e.target.value)}
+                    required
+                    isInvalid={!!errors.studentCode}
+                    style={{
+                      borderRadius: "20px",
+                      height: "60px",
+                      backgroundColor: "#d7d6d6",
+                    }}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.studentCode}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="mt-3" controlId="username">
                   <Form.Control
                     type="username"
                     placeholder="Username *"
@@ -133,13 +215,14 @@ const CreateUPForm = () => {
                 <Button
                   type="submit"
                   className="mt-4 w-100"
+                  disabled={loading} // Disable button while loading
                   style={{
                     borderRadius: "20px",
                     height: "45px",
                     backgroundColor: "#ff5e00",
                   }}
                 >
-                  Continue
+                  {loading ? "Loading..." : "Continue"}
                 </Button>
               </Form>
             </Card.Body>

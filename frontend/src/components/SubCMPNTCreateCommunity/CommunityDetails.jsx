@@ -20,7 +20,9 @@ const CommunityDetails = ({
       <Form>
         {/* Block for Community Name */}
         <Form.Group controlId="communityName" className="mb-3">
-          <Form.Label>Community name *</Form.Label>
+          <Form.Label>
+            Community name <span style={{ color: "red" }}>*</span>
+          </Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter community name"
@@ -33,7 +35,9 @@ const CommunityDetails = ({
 
         {/* Block for Description */}
         <Form.Group controlId="description" className="mb-3">
-          <Form.Label>Description *</Form.Label>
+          <Form.Label>
+            Description <span style={{ color: "red" }}>*</span>
+          </Form.Label>
           <Form.Control
             as="textarea"
             rows={4}
@@ -47,7 +51,7 @@ const CommunityDetails = ({
           <Form.Control
             as="textarea"
             rows={4}
-            placeholder="Enter RUle"
+            placeholder="Enter Rule"
             value={rule}
             onChange={(e) => setRule(e.target.value)}
           />
