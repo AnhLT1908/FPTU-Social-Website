@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { message } from 'antd';
-const token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MTcxMjM1ZjAwYTVlMTBjNDllZGZjYyIsImlhdCI6MTczMDAxNTU1OSwiZXhwIjoxNzM3NzkxNTU5fQ.3hBWs3Trkp7OlWbRIyVrhFz7wBkwSksIrNJLEiumk3c'
+const token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA0ZmY2ZWEzZTA4N2I3MDk2OGM1NSIsImlhdCI6MTczMDE3MDk0MiwiZXhwIjoxNzM3OTQ2OTQyfQ.t_KF9hficaDELynF5vfoI8YYfq3NeoyzGOKr7zaTodI';
 // Hàm lấy token từ localStorage và trả về header xác thực
 const getAuthHeader = () => ({
     'Content-Type': 'application/json',
