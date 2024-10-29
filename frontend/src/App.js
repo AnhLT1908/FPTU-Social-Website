@@ -23,7 +23,6 @@ import CreateCommunity from "./components/CreateCommunity";
 import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
 import ReportList from "./components/ReportList";
-
 function App() {
   return (
     <div className="App">
