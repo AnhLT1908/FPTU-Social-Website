@@ -113,10 +113,10 @@ const ReportTable = () => {
                 </thead>
                 <tbody>
                 {reports
-                .filter(report =>report.entityType==='Post' )
+                // .filter(report =>report.entityType==='Post' )
                 .map((report,key) => (
                     <tr key={report._id}>
-                        <td>{key}</td>
+                        <td>{key+1+(5*(currentPage-1))}</td>
                         <td>{report.entityType}</td>
                         <td>{report.userId?.username || "N/A"}</td>
                         <td>{report.description}</td>

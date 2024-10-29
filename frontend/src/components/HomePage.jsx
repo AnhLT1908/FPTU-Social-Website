@@ -111,12 +111,12 @@ const HomePage = () => {
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
                     <p>
-                      <strong>{"f/" + post.communityId.name || "Community Name"}</strong> •{" "}
+                      <strong>{"f/" + post.communityId?.name || "Community Name"}</strong> •{" "}
                       {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
                   <Link to={`/profile/${post.userId}`}>
-                    <p className="mt-n2">{"u/" + post.userId.username || "Username"}</p>
+                    <p className="mt-n2">{"u/" + post.userId?.username || "Username"}</p>
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
