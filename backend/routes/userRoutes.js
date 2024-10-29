@@ -12,10 +12,14 @@ const {
   isLoggedIn,
   logout,
   checkUsername,
-  getAllUsersPaginate
+  getAllUsersPaginate,
+  checkEmail,
+  checkStudentCode
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
+router.post('/check-email', checkEmail);
+router.post('/check-student-code', checkStudentCode);
 router.post('/check-username', checkUsername);
 router.post('/login', login);
 router.get('/logout', logout);

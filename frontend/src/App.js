@@ -30,7 +30,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterForm />} />
+          <Route path="/signup" element={<RegisterForm />} />
           <Route path="/forgot-password" element={<ResetPasswordForm />} />
           <Route path="/create-username-password" element={<CreateUPForm />}/>
           
