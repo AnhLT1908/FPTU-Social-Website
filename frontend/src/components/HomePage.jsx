@@ -28,13 +28,13 @@ const HomePage = () => {
   const [modalImage, setModalImage] = useState(null);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const token = localStorage.getItem("token");
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
-
     fetch("http://localhost:9999/api/v1/posts/")
       .then((res) => res.json())
       .then((data) => {
@@ -74,6 +74,9 @@ const HomePage = () => {
       return updatedPosts;
     });
   };
+
+  console.log(token)
+
 
   const handleImageClick = (image) => {
     setModalImage(image);

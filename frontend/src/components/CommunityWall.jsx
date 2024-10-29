@@ -113,7 +113,7 @@ const CommunityPage = () => {
     const config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "http://localhost:5173/api/v1/communities/join",
+      url: "http://localhost:9999/api/v1/communities/join",
       headers: {
         "Content-Type": "application/json",
       },

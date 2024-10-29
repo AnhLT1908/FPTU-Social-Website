@@ -11,10 +11,16 @@ const {
   restrictTo,
   isLoggedIn,
   logout,
-  checkUsername
+  checkUsername,
+  getAllUsersPaginate,
+  checkEmail,
+  checkStudentCode
+
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
+router.post('/check-email', checkEmail);
+router.post('/check-student-code', checkStudentCode);
 router.post('/check-username', checkUsername);
 router.post('/login', login);
 router.get('/logout', logout);
@@ -33,11 +39,14 @@ router.patch(
 );
 router.delete('/delete-me', userController.deleteMe);
 // Restrict To ADMIN Only
+router.get('/list',userController.getAllUsersPaginate)
+router.patch('/:id/toggle-active', userController.toggleUserActiveStatus);
 router.use(restrictTo('admin'));
 router
   .route('/')
   .get(userController.getAllUsers)
   .post(userController.createUser);
+
 router
   .route('/:id')
   .get(userController.getUserById)
