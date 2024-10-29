@@ -22,32 +22,41 @@ import img8 from "../images/postImage/images_postId8.jpg";
 import img9 from "../images/postImage/images_postId9.jpg";
 import img10 from "../images/postImage/images_postId10.jpg";
 
-const HomePage = () => {
+const HomeLogin = () => {
   const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
+  // Check if user is logged in
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
+    const storedUser = localStorage.getItem("user");
 
-    fetch("http://localhost:9999/api/v1/posts/")
+    if (!storedUser) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  // Retrieve user data
+  const user = JSON.parse(localStorage.getItem("user"));
+  const username = user ? user.username : "User";
+
+  useEffect(() => {
+    fetch("http://localhost:9999/post")
       .then((res) => res.json())
       .then((data) => {
         const postsWithReactions = data.map((item) => ({
           ...item,
-          upVotes: item.upVotes || 0,
-          downVotes: item.downVotes || 0,
-          upVoted: false,
-          downVoted: false,
+          likes: item.reactions.likes,
+          dislikes: item.reactions.dislikes,
+          liked: false,
+          disliked: false,
         }));
         setPosts(postsWithReactions);
       })
-      .catch((error) => console.error("Error fetching posts:", error));
+      .catch((error) => console.error(error));
   }, []);
 
   const handleReaction = (index, type) => {
@@ -55,20 +64,20 @@ const HomePage = () => {
       const updatedPosts = [...prevPosts];
       const post = updatedPosts[index];
 
-      if (type === "upVote") {
-        post.upVoted ? post.upVotes-- : post.upVotes++;
-        if (post.downVoted) {
-          post.downVotes--;
-          post.downVoted = false;
+      if (type === "like") {
+        post.liked ? post.likes-- : post.likes++;
+        if (post.disliked) {
+          post.dislikes--;
+          post.disliked = false;
         }
-        post.upVoted = !post.upVoted;
+        post.liked = !post.liked;
       } else {
-        post.downVoted ? post.downVotes-- : post.downVotes++;
-        if (post.upVoted) {
-          post.upVotes--;
-          post.upVoted = false;
+        post.disliked ? post.dislikes-- : post.dislikes++;
+        if (post.liked) {
+          post.likes--;
+          post.liked = false;
         }
-        post.downVoted = !post.downVoted;
+        post.disliked = !post.disliked;
       }
 
       return updatedPosts;
@@ -88,13 +97,17 @@ const HomePage = () => {
   return (
     <Container>
       <Row className="mt-2 mb-2">
+        <Col md={12} className="text-center mb-4">
+          <h2>Welcome, {username}!</h2>
+        </Col>
+
         <Col md={12}>
           <Row className="mb-2">
             <Col>
               <Dropdown>
-                <Dropdown.Toggle variant="light">New</Dropdown.Toggle>
+                <Dropdown.Toggle variant="light">Hot</Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item>Hot</Dropdown.Item>
+                  <Dropdown.Item>New</Dropdown.Item>
                   <Dropdown.Item>Top</Dropdown.Item>
                   <Dropdown.Item>Rising</Dropdown.Item>
                 </Dropdown.Menu>
@@ -103,17 +116,16 @@ const HomePage = () => {
           </Row>
 
           {posts.map((post, index) => (
-            <Card key={post._id} className="mb-3 p-3">
+            <Card key={index} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <Link to={`/community/${post.communityId}`}>
+                  <Link to={"/community/2"}>
                     <p>
-                      <strong>{"f/" + post.communityId.name || "Community Name"}</strong> •{" "}
-                      {new Date(post.createdAt).toLocaleString()}
+                      <strong>{post.communityName}</strong> • {post.timeCreate}
                     </p>
                   </Link>
-                  <Link to={`/profile/${post.userId}`}>
-                    <p className="mt-n2">{"u/" + post.userId.username || "Username"}</p>
+                  <Link to={`profile/${post.id}`}>
+                    <p className="mt-n2">{post.userName}</p>
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
@@ -123,7 +135,7 @@ const HomePage = () => {
                       <Dropdown.Item>Save</Dropdown.Item>
                       <Dropdown.Item>Report</Dropdown.Item>
                       <Dropdown.Item>Hide</Dropdown.Item>
-                      <Dropdown.Item onClick={() => navigate(`/edit-post/${post._id}`)}>
+                      <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
                         Edit
                       </Dropdown.Item>
                     </Dropdown.Menu>
@@ -133,13 +145,13 @@ const HomePage = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`/post/${post._id}`}>
+                  <Link to={`post/${post.id}`}>
                     <h2>{post.title}</h2>
                   </Link>
                 </Col>
                 <Col md={4}>
                   <Image
-                    src={images[index % images.length]}
+                    src={images[index]}
                     alt={`post-${index + 1}`}
                     fluid
                     style={{
@@ -148,28 +160,28 @@ const HomePage = () => {
                       cursor: "pointer",
                       float: "right",
                     }}
-                    onClick={() => handleImageClick(images[index % images.length])}
+                    onClick={() => handleImageClick(images[index])}
                   />
                 </Col>
               </Row>
 
               <div className="d-flex align-items-center">
                 <Button
-                  variant={post.upVoted ? "success" : "light"}
-                  onClick={() => handleReaction(index, "upVote")}
+                  variant={post.liked ? "success" : "light"}
+                  onClick={() => handleReaction(index, "like")}
                 >
                   <FaArrowUp />
                 </Button>
-                <span className="mx-2">{post.upVotes}</span>
+                <span className="mx-2">{post.likes}</span>
                 <Button
-                  variant={post.downVoted ? "danger" : "light"}
-                  onClick={() => handleReaction(index, "downVote")}
+                  variant={post.disliked ? "danger" : "light"}
+                  onClick={() => handleReaction(index, "dislike")}
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{post.downVotes}</span>
+                <span className="mx-2">{post.dislikes}</span>
                 <Button variant="light">
-                  <FaComment /> {post.commentsCount || 0}
+                  <FaComment /> {post.comments}
                 </Button>
                 <Button variant="light">
                   <FaShare /> Share
@@ -178,7 +190,6 @@ const HomePage = () => {
             </Card>
           ))}
 
-{/*************************************************** */}
           <Row>
             <Col className="text-center">
               <h3>
@@ -205,4 +216,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default HomeLogin;

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Subscription = require('./subscriptionModel');
+
 const User = require('./userModel');
 const communitySchema = new mongoose.Schema(
   {
@@ -55,6 +55,7 @@ communitySchema.post('save', async function (doc, next) {
     await User.findByIdAndUpdate(doc.createdBy, {
       $push: { moderatorCommunities: doc._id },
     });
+    const Subscription = require('./subscriptionModel');
     await Subscription.create({
       userId: doc.createdBy,
       communityId: doc._id,

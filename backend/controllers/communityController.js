@@ -4,6 +4,7 @@ const Subscription = require('../models/subscriptionModel');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const subscriptionController = require('./subscriptionController');
 const {
   factoryDeleteOne,
   factoryUpdateOne,
@@ -43,3 +44,4 @@ exports.deleteCommunity = catchAsync(async (req, res, next) => {
   }
 });
 // Custom methods
+exports.addUserById = subscriptionController.createNewSubscription;

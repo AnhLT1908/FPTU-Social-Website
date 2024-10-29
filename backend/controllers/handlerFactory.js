@@ -51,10 +51,15 @@ exports.factoryGetAll = (Model, filter) =>
     // For nested route
     if (req.params.communityId) filter.communityId = req.params.communityId;
     if (req.params.postId) filter.postId = req.params.postId;
-    const features = new APIFeatures(Model.find(filter), req.query)
+
+    const features = new APIFeatures(
+      Model.find(filter).populate('communityId').populate('userId'), // Add populate for Community and User
+      req.query
+    )
       .filter()
       .sort()
       .limitFields();
+
     const doc = await features.query;
     res.status(200).json(doc);
   });

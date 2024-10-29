@@ -40,8 +40,8 @@ const CommunityType = ({
                     </>
                   }
                   name="communityType"
-                  value="Public"
-                  checked={communityType === "Public"}
+                  value="public"
+                  checked={communityType === "public"}
                   onChange={handleCommunityTypeChange}
                   id="public"
                 />
@@ -61,8 +61,8 @@ const CommunityType = ({
                     </>
                   }
                   name="communityType"
-                  value="Restricted"
-                  checked={communityType === "Restricted"}
+                  value="restricted"
+                  checked={communityType === "restricted"}
                   onChange={handleCommunityTypeChange}
                   id="restricted"
                 />
@@ -80,29 +80,10 @@ const CommunityType = ({
                     </>
                   }
                   name="communityType"
-                  value="Private"
-                  checked={communityType === "Private"}
+                  value="private"
+                  checked={communityType === "private"}
                   onChange={handleCommunityTypeChange}
                   id="private"
-                />
-              </Form.Group>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <Form.Group className="form-switch">
-                <Form.Check
-                  type="checkbox"
-                  label={
-                    <>
-                      <strong>Mature (18+)</strong>
-                      <br />
-                      <small>
-                        Users must be over 18 to view and contribute.
-                      </small>
-                    </>
-                  }
-                  id="matureToggle"
-                  checked={isMature}
-                  onChange={handleMatureToggle}
                 />
               </Form.Group>
             </ListGroup.Item>

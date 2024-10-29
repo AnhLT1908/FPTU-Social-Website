@@ -1,5 +1,6 @@
 const express = require('express');
 const userController = require('../controllers/userController');
+const {register} = require('../controllers/userController');
 const {
   signup,
   login,
@@ -10,10 +11,12 @@ const {
   restrictTo,
   isLoggedIn,
   logout,
-  getAllUsersPaginate
+  getAllUsersPaginate,
+  checkUsername
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
+router.post('/check-username', checkUsername);
 router.post('/login', login);
 router.get('/logout', logout);
 router.post('/is-logged-in', isLoggedIn);

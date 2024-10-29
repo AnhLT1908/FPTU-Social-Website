@@ -1,13 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Form, Button, Dropdown, Tabs, Tab } from "react-bootstrap";
+import {
+  Container,
+  Form,
+  Button,
+  Tabs,
+  Tab,
+  FormSelect,
+  FormControl,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 const CreatePost = () => {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedTab, setSelectedTab] = useState("text");
   const [mediaFiles, setMediaFiles] = useState([]);
+  const [selectedCommunity, setSelectedCommunity] = useState("");
+  const [community, setCommunity] = useState([]);
+  const [user, setUser] = useState("");
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData) {
+      setUser(userData);
+      console.log("User data:", userData);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:9999/api/v1/communities/"
+        );
+        setCommunity(response.data);
+        console.log("Community:", response.data);
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+
+    fetchCommunities();
+  }, []);
+
+  const handleCommunityChange = (e) => {
+    setSelectedCommunity(e.target.value);
+  };
 
   const handleTabSelect = (key) => {
     setSelectedTab(key);
@@ -15,6 +57,39 @@ const CreatePost = () => {
 
   const handleMediaChange = (e) => {
     setMediaFiles([...e.target.files]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Create the post data object
+    const data = {
+      title: title,
+      content: body,
+      communityId: selectedCommunity,
+      userId: user.id,
+      media: mediaFiles, // Assuming you want to send file names or additional info
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:9999/api/v1/posts/",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include the token in headers
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        navigate(`/community/${selectedCommunity}`); // Redirect on success
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("Failed to create post. Please try again.");
+    }
   };
 
   return (
@@ -31,32 +106,40 @@ const CreatePost = () => {
         <h2>Create post</h2>
       </div>
 
-      <Dropdown className="mb-3">
-        <Dropdown.Toggle variant="light" id="dropdown-basic">
-          Select a community
-        </Dropdown.Toggle>
+      <Form onSubmit={handleSubmit}>
+        <FormSelect
+          className="mb-3"
+          style={{ width: "30%" }}
+          value={selectedCommunity}
+          onChange={handleCommunityChange}
+          name="community"
+          required
+        >
+          <option value="">Select a community</option>
+          {community?.map((c) => (
+            <option key={c.id} value={c.id}>{`f/ ${c.name}`}</option>
+          ))}
+        </FormSelect>
 
-        <Dropdown.Menu>
-          <Dropdown.Item href="#/action-1">Community 1</Dropdown.Item>
-          <Dropdown.Item href="#/action-2">Community 2</Dropdown.Item>
-          <Dropdown.Item href="#/action-3">Community 3</Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
+        <Tabs
+          activeKey={selectedTab}
+          onSelect={handleTabSelect}
+          className="mb-3"
+        >
+          <Tab eventKey="text" title="Text" />
+          <Tab eventKey="images" title="Images & Video" />
+        </Tabs>
 
-      <Tabs activeKey={selectedTab} onSelect={handleTabSelect} className="mb-3">
-        <Tab eventKey="text" title="Text" />
-        <Tab eventKey="images" title="Images & Video" />
-      </Tabs>
-
-      <Form>
         <Form.Group controlId="postTitle" className="mb-3">
-          <Form.Label>Title </Form.Label>
+          <Form.Label>Title</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={300}
+            name="title"
+            required
           />
           <Form.Text className="text-muted">{title.length}/300</Form.Text>
         </Form.Group>
@@ -70,6 +153,8 @@ const CreatePost = () => {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Body"
+              name="content"
+              required
             />
           </Form.Group>
         )}
@@ -101,8 +186,10 @@ const CreatePost = () => {
         )}
 
         <div className="d-flex justify-content-between">
-          <Button variant="secondary">Cancel</Button>
-          <Button variant="primary" onClick={() => navigate("/community/1")}>
+          <Button variant="secondary" onClick={() => navigate("/community")}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit">
             Post
           </Button>
         </div>

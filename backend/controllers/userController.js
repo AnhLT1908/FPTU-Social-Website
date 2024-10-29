@@ -10,6 +10,7 @@ const {
   factoryGetOne,
   factoryGetAll,
 } = require('./handlerFactory');
+
 // const multerStorage = multer.diskStorage({
 //   destination: (req, file, cb) => {
 //     cb(null, 'public/img/users');
@@ -19,6 +20,7 @@ const {
 //     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
 //   },
 // });
+
 const filterObj = (obj, ...excluded) => {
   const newObj = {};
   Object.keys(obj).forEach((el) => {
@@ -51,7 +53,9 @@ exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();
 };
-
+exports.register = (req, res, next) => {
+  res.status(200).json({message: 'Hello'});
+}
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
     return next(new AppError('This route is not for password update!', 400));
