@@ -22,7 +22,7 @@ import CommunityPage from "./components/CommunityWall";
 import CreateCommunity from "./components/CreateCommunity";
 import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
-import HomeLogin from "./components/HomeLogin";
+import ReportList from "./components/ReportList";
 
 function App() {
   return (
@@ -53,6 +53,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/report/:id" element={<DetailReport />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path ="/test" element ={<ReportList/>} />
         </Routes>
       </BrowserRouter>
     </div>

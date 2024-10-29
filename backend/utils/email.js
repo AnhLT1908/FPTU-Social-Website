@@ -7,6 +7,7 @@ module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
     this.firstName = user.username.split(' ')[0];
+
     this.url = url;
     this.from = `ThaoTTP ${process.env.EMAIL_FROM}`;
   }
