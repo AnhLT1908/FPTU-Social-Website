@@ -25,81 +25,61 @@ import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserPostProfile = () => {
   const [activeTab, setActiveTab] = useState("posts");
-  const [postDetail, setPostDetail] = useState({
-    id: "",
-    title: "",
-    body: "",
-    reactions: {
-      likes: 0,
-      dislikes: 0,
-    },
-    comments: 0,
-    timeCreate: "",
-    userName: "",
-    communityName: "",
-    liked: false,
-    disliked: false,
-  });
+  const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const [user, setUser] = useState("");
   const navigate = useNavigate();
 
-  const { id } = useParams();
-
   useEffect(() => {
-    fetch(`http://localhost:9999/post/${id}`)
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData) {
+      setUser(userData);
+    }
+    const userId = userData?._id;
+    const userName = userData?.username;
+
+    fetch(`http://localhost:9999/api/v1/posts/user/${userId}`)
       .then((res) => res.json())
       .then((data) => {
-        setPostDetail({
-          ...data,
-          liked: false,
-          disliked: false,
-        });
+        console.log("Post data:", data);
+        const postsWithReactions = data
+          .map((item) => ({
+            ...item,
+            upVotes: item.upVotes || 0,
+            downVotes: item.downVotes || 0,
+            upVoted: false,
+            downVoted: false,
+          }))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setPosts(postsWithReactions);
       })
-      .catch((error) => console.log(error));
-  }, [id]);
+      .catch((error) => console.error("Error fetching posts:", error));
+  }, []);
 
-  const handleLike = () => {
-    setPostDetail((prevPost) => {
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes + 1;
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes;
+  const handleReaction = (postIndex, type) => {
+    setPosts((prevPosts) => {
+      const updatedPosts = [...prevPosts];
+      const post = updatedPosts[postIndex];
 
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          likes: newLikes,
-          dislikes: newDislikes,
-        },
-        liked: !prevPost.liked,
-        disliked: prevPost.disliked ? false : prevPost.disliked,
-      };
-    });
-  };
+      if (type === "upVote") {
+        post.upVoted ? post.upVotes-- : post.upVotes++;
+        if (post.downVoted) {
+          post.downVotes--;
+          post.downVoted = false;
+        }
+        post.upVoted = !post.upVoted;
+      } else {
+        post.downVoted ? post.downVotes-- : post.downVotes++;
+        if (post.upVoted) {
+          post.upVotes--;
+          post.upVoted = false;
+        }
+        post.downVoted = !post.downVoted;
+      }
 
-  const handleDislike = () => {
-    setPostDetail((prevPost) => {
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes + 1;
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes;
-
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          dislikes: newDislikes,
-          likes: newLikes,
-        },
-        disliked: !prevPost.disliked,
-        liked: prevPost.liked ? false : prevPost.liked,
-      };
+      return updatedPosts;
     });
   };
 
@@ -163,7 +143,7 @@ const UserPostProfile = () => {
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                  <Link to={`/profile/${postDetail.id}`}>
+                  <Link to={`/profile/${user._id}`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -193,7 +173,7 @@ const UserPostProfile = () => {
                       <h6 style={{ marginTop: "5px" }}>Posts</h6>
                     </Button>
                   </Link>
-                  <Link to={`/profile/${postDetail.id}/saved`}>
+                  <Link to={`/profile/${user._id}/saved`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -230,77 +210,85 @@ const UserPostProfile = () => {
             </CardBody>
           </Card>
 
-          <Card key={postDetail.id} className="mt-3 p-3">
-            <Row>
-              <Col>
-                <Link to={"/community/2"}>
-                  <p>
-                    <strong>{postDetail.communityName}</strong> •{" "}
-                    {postDetail.timeCreate}
+          {posts.map((post, index) => (
+            <Card key={post.id} className="mt-3 p-3">
+              <Row>
+                <Col>
+                  <Link to={`/community/${post.communityId}`}>
+                    <p>
+                      <strong>
+                        {"f/" + post.communityId?.name || "Community Name"}
+                      </strong>{" "}
+                      • {new Date(post.createdAt).toLocaleString()}
+                    </p>
+                  </Link>
+                  <p className="mt-n2">
+                    {"u/" + post.userId?.username || "Username"}
                   </p>
-                </Link>
-                <p className="mt-n2">{postDetail.userName}</p>
-              </Col>
-              <Col className="d-flex justify-content-end">
-                <Dropdown>
-                  <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item>Save</Dropdown.Item>
-                    <Dropdown.Item>Report</Dropdown.Item>
-                    <Dropdown.Item>Hide</Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
-                      Edit
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </Col>
-            </Row>
+                </Col>
+                <Col className="d-flex justify-content-end">
+                  <Dropdown>
+                    <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item>Save</Dropdown.Item>
+                      <Dropdown.Item>Report</Dropdown.Item>
+                      <Dropdown.Item>Hide</Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => navigate(`/edit-post/${post.id}`)}
+                      >
+                        Edit
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Col>
+              </Row>
 
-            <Row>
-              <Col md={8}>
-                <Link to={`/post/${postDetail.id}`}>
-                  <h2>{postDetail.title}</h2>
-                </Link>
-              </Col>
-              <Col md={4}>
-                <Image
-                  src={image1}
-                  alt=""
-                  fluid
-                  style={{
-                    width: "75%",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    float: "right",
-                  }}
-                  onClick={() => handleImageClick(image1)}
-                />
-              </Col>
-            </Row>
+              <Row>
+                <Col md={8}>
+                  <Link to={`/post/${post.id}`}>
+                    <h2>{post.title}</h2>
+                  </Link>
+                </Col>
+                <Col md={4}>
+                  <Image
+                    src={image1}
+                    alt=""
+                    fluid
+                    style={{
+                      width: "75%",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      float: "right",
+                    }}
+                    onClick={() => handleImageClick(image1)}
+                  />
+                </Col>
+              </Row>
 
-            <div className="d-flex align-items-center">
-              <Button
-                variant={postDetail.liked ? "success" : "light"}
-                onClick={() => handleLike(postDetail.id)}
-              >
-                <FaArrowUp />
-              </Button>
-              <span className="mx-2">{postDetail.reactions.likes}</span>
-              <Button
-                variant={postDetail.disliked ? "danger" : "light"}
-                onClick={() => handleDislike(postDetail.id)}
-              >
-                <FaArrowDown />
-              </Button>
-              <span className="mx-2">{postDetail.reactions.dislikes}</span>
-              <Button variant="light">
-                <FaComment /> {postDetail.comments}
-              </Button>
-              <Button variant="light">
-                <FaShare /> Share
-              </Button>
-            </div>
-          </Card>
+              <div className="d-flex align-items-center">
+                <Button
+                  variant={post.upVoted ? "success" : "light"}
+                  onClick={() => handleReaction(index, "upVote")}
+                >
+                  <FaArrowUp />
+                </Button>
+                <span className="mx-2">{post.upVotes}</span>
+                <Button
+                  variant={post.downVoted ? "danger" : "light"}
+                  onClick={() => handleReaction(index, "downVote")}
+                >
+                  <FaArrowDown />
+                </Button>
+                <span className="mx-2">{post.downVotes}</span>
+                <Button variant="light">
+                  <FaComment /> {post.comments || 0}
+                </Button>
+                <Button variant="light">
+                  <FaShare /> Share
+                </Button>
+              </div>
+            </Card>
+          ))}
         </Col>
 
         <Col md={4}>

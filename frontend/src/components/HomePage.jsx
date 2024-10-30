@@ -27,24 +27,32 @@ const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState("");
   const token = localStorage.getItem("token");
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
-    fetch("http://localhost:9999/api/v1/posts/")
+    if (userData) {
+      setUser(userData);
+      console.log("User data:", userData);
+    }
+    const userId = userData?._id;
+    console.log("User id", userId);
+    fetch(`http://localhost:9999/api/v1/posts/user/${userId}`)
       .then((res) => res.json())
       .then((data) => {
-        const postsWithReactions = data.map((item) => ({
-          ...item,
-          upVotes: item.upVotes || 0,
-          downVotes: item.downVotes || 0,
-          upVoted: false,
-          downVoted: false,
-        }));
+        console.log("Post:", data);
+        const postsWithReactions = data
+          .map((item) => ({
+            ...item,
+            upVotes: item.upVotes || 0,
+            downVotes: item.downVotes || 0,
+            upVoted: false,
+            downVoted: false,
+          }))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setPosts(postsWithReactions);
       })
       .catch((error) => console.error("Error fetching posts:", error));
@@ -75,8 +83,7 @@ const HomePage = () => {
     });
   };
 
-  console.log(token)
-
+  console.log(token);
 
   const handleImageClick = (image) => {
     setModalImage(image);
@@ -111,12 +118,16 @@ const HomePage = () => {
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
                     <p>
-                      <strong>{"f/" + post.communityId.name || "Community Name"}</strong> •{" "}
-                      {new Date(post.createdAt).toLocaleString()}
+                      <strong>
+                        {"f/" + post.communityId?.name || "Community Name"}
+                      </strong>{" "}
+                      • {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
-                  <Link to={`/profile/${post.userId}`}>
-                    <p className="mt-n2">{"u/" + post.userId.username || "Username"}</p>
+                  <Link to={`/profile/${post.userId._id}`}>
+                    <p className="mt-n2">
+                      {"u/" + post.userId?.username || "Username"}
+                    </p>
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
@@ -126,7 +137,9 @@ const HomePage = () => {
                       <Dropdown.Item>Save</Dropdown.Item>
                       <Dropdown.Item>Report</Dropdown.Item>
                       <Dropdown.Item>Hide</Dropdown.Item>
-                      <Dropdown.Item onClick={() => navigate(`/edit-post/${post._id}`)}>
+                      <Dropdown.Item
+                        onClick={() => navigate(`/edit-post/${post._id}`)}
+                      >
                         Edit
                       </Dropdown.Item>
                     </Dropdown.Menu>
@@ -151,7 +164,9 @@ const HomePage = () => {
                       cursor: "pointer",
                       float: "right",
                     }}
-                    onClick={() => handleImageClick(images[index % images.length])}
+                    onClick={() =>
+                      handleImageClick(images[index % images.length])
+                    }
                   />
                 </Col>
               </Row>
@@ -181,7 +196,7 @@ const HomePage = () => {
             </Card>
           ))}
 
-{/*************************************************** */}
+          {/*************************************************** */}
           <Row>
             <Col className="text-center">
               <h3>

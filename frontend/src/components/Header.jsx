@@ -10,7 +10,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 function Header() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState("");
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -195,7 +195,7 @@ function Header() {
                             color: "var(--color-secondary-weak)",
                           }}
                         >
-                          @username
+                          {"u/" + user?.username}
                         </span>
                       </span>
                     </a>

@@ -14,4 +14,6 @@ router
   .patch(protect, postController.updatePost)
   .delete(protect, postController.deletePost);
 
+router.route('/user/:userId').get(postController.getPostByUserId);
+
 module.exports = router;

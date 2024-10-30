@@ -164,7 +164,7 @@ function Sidebar() {
                   </li>
                   <li>
                     {community?.map((c) => (
-                      <Link to={"/community/2"}>
+                      <Link key={c.id} to={"/community/2"}>
                         <span className="icon">
                           <img src="/images/logo.jpg" width={32} height={32} />
                         </span>
