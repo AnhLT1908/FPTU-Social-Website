@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const AppError = require('../utils/appError');
 const Post = require('./postModel');
 const Comment = require('./commentModel');
+const Community = require('./communityModel');
 const voteSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.ObjectId, ref: 'User' },

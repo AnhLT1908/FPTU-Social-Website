@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
 process.on('uncaughtException', (err) => {
   console.log(err.name, err.message);
   console.log('UNCAUGHT EXCEPTION! 🔴 Shutting Down...');
@@ -12,6 +13,7 @@ const DB = process.env.LOCAL_DATABASE;
 //   '<password>',
 //   process.env.DATABASE_PASSWORD
 // );
+
 mongoose
   .connect(DB, {
     useNewUrlParser: true,
@@ -24,7 +26,10 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-const port = process.env.PORT || 3000;
-const server = app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
+const port = process.env.PORT || 9999;
+const host = process.env.HOST || 'localhost';
+
+app.listen(port, () => {
+  console.log(`App running on http://${host}:${port}`);
 });
+

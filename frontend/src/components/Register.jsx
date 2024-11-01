@@ -2,34 +2,48 @@ import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const RegisterForm = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
-  const [validated, setValidated] = useState(false);
+  const [loading, setLoading] = useState(false);
   
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle successful form submission
-      console.log({ email, password });
-      // Redirect to /create-username-password
-      navigate("/create-username-password");
-    } else {
-      setValidated(true); // Show validation errors
+      setLoading(true); // Set loading to true
+      try {
+        const response = await fetch("http://localhost:9999/api/v1/users/check-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        if (response.ok) {
+          navigate("/create-username-password", { state: { email } });
+        } else {
+          const errorData = await response.json();
+          setErrors({ form: errorData.message || "Registration failed. Please try again." });
+        }
+      } catch (error) {
+        console.error("Error during registration:", error);
+        setErrors({ form: "An error occurred. Please try again later." });
+      } finally {
+        setLoading(false); // Reset loading state
+      }
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Email validation (basic regex for email format)
     if (!email) {
       newErrors.email = "Email is required.";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -37,15 +51,12 @@ const RegisterForm = () => {
     }
 
     setErrors(newErrors);
-
-    // If no errors, return true
     return Object.keys(newErrors).length === 0;
   };
 
   const handleGoogleSuccess = (credentialResponse) => {
     const details = jwtDecode(credentialResponse.credential);
     console.log("Logged in user:", details);
-    // Redirect after Google login success
     navigate("/create-username-password");
   };
 
@@ -85,22 +96,16 @@ const RegisterForm = () => {
                 </div>
 
                 <div className="d-flex align-items-center my-2">
-                  <div
-                    className="flex-grow-1 bg-secondary"
-                    style={{ height: "1px" }}
-                  ></div>
+                  <div className="flex-grow-1 bg-secondary" style={{ height: "1px" }}></div>
                   <span className="mx-4 text-muted">OR</span>
-                  <div
-                    className="flex-grow-1 bg-secondary"
-                    style={{ height: "1px" }}
-                  ></div>
+                  <div className="flex-grow-1 bg-secondary" style={{ height: "1px" }}></div>
                 </div>
 
-                <Form noValidate validated={validated} onSubmit={handleLogin}>
+                <Form noValidate onSubmit={handleRegister}>
                   <Form.Group className="mb-3" controlId="formEmail">
                     <Form.Control
                       type="email"
-                      placeholder="Email or username *"
+                      placeholder="Email *"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -126,13 +131,14 @@ const RegisterForm = () => {
                   <Button
                     type="submit"
                     className="mt-4 w-100"
+                    disabled={loading} // Disable button while loading
                     style={{
                       borderRadius: "20px",
                       height: "45px",
                       backgroundColor: "#ff5e00",
                     }}
                   >
-                    Continue
+                    {loading ? "Loading..." : "Continue"}
                   </Button>
                 </Form>
               </Card.Body>

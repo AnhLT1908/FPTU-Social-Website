@@ -6,7 +6,7 @@ const path = require('path');
 module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
-    this.firstName = user.name.split(' ')[0];
+    this.firstName = user.username.split(' ')[0];
     this.url = url;
     this.from = `ThaoTTP ${process.env.EMAIL_FROM}`;
   }
@@ -52,7 +52,7 @@ module.exports = class Email {
       firstName: this.name,
       url: this.url,
       subject,
-      ...options
+      ...options,
     });
     const mailOptions = {
       from: this.from,
@@ -69,7 +69,10 @@ module.exports = class Email {
     }
   }
   async sendWelcome() {
-    await this.send('emailTemplate', 'Welcome to the FPT University Social Website');
+    await this.send(
+      'emailTemplate',
+      'Welcome to the FPT University Social Website'
+    );
   }
   async sendResetPassword() {
     await this.send(
