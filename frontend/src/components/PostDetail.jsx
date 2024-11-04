@@ -27,29 +27,35 @@ const PostDetail = () => {
   const [postDetail, setPostDetail] = useState({
     id: "",
     title: "",
-    body: "",
+    content: "",
     reactions: {
-      likes: 0,
-      dislikes: 0,
+      upVotes: 0,
+      downVotes: 0,
     },
     comments: 0,
-    timeCreate: "",
-    userName: "",
-    communityName: "",
-    liked: false,
-    disliked: false,
+    createdAt: "",
+    userId: "",
+    communityId: "",
+    upVoted: false,
+    downVoted: false,
+    isActive: true,
   });
+  
+
+  console.log("Post detail:", postDetail)
+
 
   const { id } = useParams();
 
   useEffect(() => {
-    fetch(`http://localhost:9999/post/${id}`)
+    fetch(`http://localhost:9999/api/v1/posts/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setPostDetail({
           ...data,
-          liked: false,
-          disliked: false,
+          reactions: data.reactions || { upVotes: 0, downVotes: 0 },
+          upVoted: false,
+          downVoted: false,
         });
       })
       .catch((error) => console.log(error));
@@ -57,44 +63,44 @@ const PostDetail = () => {
 
   const handleLike = () => {
     setPostDetail((prevPost) => {
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes + 1;
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes;
+      const newupVotes = prevPost.upVoted
+        ? prevPost.reactions?.upVotes - 1
+        : prevPost.reactions?.upVotes + 1;
+      const newdownVotes = prevPost.downVoted
+        ? prevPost.reactions?.downVotes - 1
+        : prevPost.reactions?.downVotes;
 
       return {
         ...prevPost,
         reactions: {
           ...prevPost.reactions,
-          likes: newLikes,
-          dislikes: newDislikes,
+          upVotes: newupVotes,
+          downVotes: newdownVotes,
         },
-        liked: !prevPost.liked,
-        disliked: prevPost.disliked ? false : prevPost.disliked,
+        upVoted: !prevPost.upVoted,
+        downVoted: prevPost.downVoted ? false : prevPost.downVoted,
       };
     });
   };
 
   const handleDislike = () => {
     setPostDetail((prevPost) => {
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes + 1;
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes;
+      const newdownVotes = prevPost.downVoted
+        ? prevPost.reactions?.downVotes - 1
+        : prevPost.reactions?.downVotes + 1;
+      const newupVotes = prevPost.upVoted
+        ? prevPost.reactions?.upVotes - 1
+        : prevPost.reactions?.upVotes;
 
       return {
         ...prevPost,
         reactions: {
           ...prevPost.reactions,
-          dislikes: newDislikes,
-          likes: newLikes,
+          downVotes: newdownVotes,
+          upVotes: newupVotes,
         },
-        disliked: !prevPost.disliked,
-        liked: prevPost.liked ? false : prevPost.liked,
+        downVoted: !prevPost.downVoted,
+        upVoted: prevPost.upVoted ? false : prevPost.upVoted,
       };
     });
   };
@@ -124,13 +130,13 @@ const PostDetail = () => {
                   <Col>
                     <Link to={"/community/2"}>
                       <p>
-                        <strong>{postDetail.communityName}</strong> •{" "}
-                        {postDetail.timeCreate}
+                        <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
+                        {new Date(postDetail.createdAt).toLocaleString()}
                       </p>
                     </Link>
                     <p style={{ marginTop: "-20px" }}>
                       <Link to={`/profile/${postDetail.id}`}>
-                        {postDetail.userName}
+                        {"u/" + postDetail.userId.username}
                       </Link>
                     </p>
                   </Col>
@@ -160,13 +166,13 @@ const PostDetail = () => {
             </Row>
             <Row>
               <Col md={12}>
-                <p>{postDetail.body}</p>
+                <p>{postDetail.content}</p>
               </Col>
             </Row>
             <Row>
               <Col md={12}>
                 <Image
-                  src={images[imageIndex]}
+                  src={images[0]}
                   fluid
                   style={{ width: "100%", borderRadius: "10px" }}
                 />
@@ -175,19 +181,19 @@ const PostDetail = () => {
             <Row className="mt-4">
               <Col md={12}>
                 <Button
-                  variant={postDetail.liked ? "success" : "light"}
+                  variant={postDetail.upVoted ? "success" : "light"}
                   onClick={handleLike}
                 >
                   <FaArrowUp />
                 </Button>
-                <span className="mx-2">{postDetail.reactions.likes}</span>
+                <span className="mx-2">{postDetail.reactions?.upVotes}</span>
                 <Button
-                  variant={postDetail.disliked ? "danger" : "light"}
+                  variant={postDetail.downVoted ? "danger" : "light"}
                   onClick={handleDislike}
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{postDetail.reactions.dislikes}</span>
+                <span className="mx-2">{postDetail.reactions?.downVotes}</span>
                 <Button variant="light" className="mr-2">
                   <FaComment /> {postDetail.comments}
                 </Button>
@@ -213,7 +219,7 @@ const PostDetail = () => {
             className="mb-4 p-3"
             style={{ height: "85vh", overflowY: "auto" }}
           >
-            <h4>{postDetail.communityName}</h4>
+            <h4>{"f/" + postDetail.communityId.name}</h4>
             <p>
               This subreddit serves as a general hub to discuss most things
               Japanese and exchange information, as well as to guide users to

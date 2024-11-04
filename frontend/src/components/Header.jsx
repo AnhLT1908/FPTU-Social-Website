@@ -10,6 +10,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { searchCommunities, searchUsers } from '../services/SearchService';
 function Header() {
   const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [query, setQuery] = useState("");
   const [searchType, setSearchType] = useState("user"); // Mặc định là tìm kiếm User
@@ -17,6 +18,7 @@ function Header() {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [noResultsMessage, setNoResultsMessage] = useState(""); // Khai báo state mới
+
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -321,7 +323,7 @@ function Header() {
                             color: "var(--color-secondary-weak)",
                           }}
                         >
-                          @username
+                          {"u/" + user?.username}
                         </span>
                       </span>
                     </a>
