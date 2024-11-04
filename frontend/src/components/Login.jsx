@@ -51,30 +51,61 @@ const LoginForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Email validation
+  
+    // Email or username validation
     if (!email) {
-      newErrors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Invalid email format.";
+      newErrors.email = "Email or username is required.";
+    } else if (
+      !/\S+@\S+\.\S+/.test(email) && // Email format check
+      !/^[a-zA-Z0-9_]+$/.test(email)  // Username format check (letters, numbers, underscores)
+    ) {
+      newErrors.email = "Invalid email or username format.";
     }
-
+  
     // Password validation
     if (!password) {
       newErrors.password = "Password is required.";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters.";
     }
-
+  
     setErrors(newErrors);
-
+  
     return Object.keys(newErrors).length === 0;
   };
+  
 
   const handleGoogleSuccess = (credentialResponse) => {
     const details = jwtDecode(credentialResponse.credential);
-    console.log("Logged in user:", details);
+    
+    if (details.email.endsWith('.edu')) {
+      // Gửi token JWT đến backend để xác thực hoặc tạo tài khoản nếu chưa tồn tại
+      fetch("http://localhost:9999/api/v1/users/google-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "success") {
+            console.log("Google login successful", data.user);
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            navigate("/");
+          } else {
+            console.error("Google login failed", data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error during Google login", error);
+        });
+    } else {
+      console.error("Only .edu emails are allowed");
+    }
   };
+  
 
   const handleGoogleError = () => {
     console.log("Google Sign-In was unsuccessful");

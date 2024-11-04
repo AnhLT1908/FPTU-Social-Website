@@ -86,10 +86,11 @@ userSchema.pre(/^find/, function (next) {
   this.find({ isActive: { $ne: false } });
   next();
 });
-userSchema.methods.correctPassword = async function (userPassword) {
-  const correct = await bcrypt.compare(userPassword, this.password);
-  return correct;
+
+userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
+  return await bcrypt.compare(candidatePassword, userPassword);
 };
+
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changeTimeStamp = parseInt(

@@ -42,7 +42,7 @@ const CreateUPForm = () => {
 
         if (!responseStuCode.ok) {
           const errorData = await response.json();
-          setErrors({ username: errorData.message || "Student Code already taken." });
+          setErrors({ studentCode: errorData.message || "Student Code already taken." });
           return;
         }
 
@@ -82,12 +82,15 @@ const CreateUPForm = () => {
       newErrors.password = "Password must be at least 6 characters.";
     }
     if (!studentCode) {
-      newErrors.username = "Student Code is required.";
+      newErrors.studentCode = "Student Code is required.";
+    } else if (!/^(HE|HA|HS)/.test(studentCode)) {
+      newErrors.studentCode = "Student Code must start with HE, HA, or HS.";
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  
 
   const handleBack = () => {
     navigate("/signup");

@@ -5,6 +5,9 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Email = require('../utils/email');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -87,19 +90,30 @@ exports.checkUsername = catchAsync(async (req, res, next) => {
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+
+  // Kiểm tra nếu yêu cầu không có đủ thông tin
   if (!email || !password) {
-    return next(new AppError('Please provide email and password!', 400));
+    return next(new AppError('Vui lòng cung cấp tên người dùng/email và mật khẩu!', 400));
   }
-  const user = await User.findOne({ email: email }).select('+password');
-  console.log(user);
-  if (!user) {
-    return next(new AppError('Incorrect email or password', 401));
+
+  // Tìm người dùng bằng email hoặc tên người dùng
+  const user = await User.findOne({
+    $or: [{ email: email }, { username: email }] // `email` có thể là email hoặc tên người dùng
+  }).select('+password');
+
+  // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không đúng
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Tên người dùng/email hoặc mật khẩu không đúng', 401));
   }
+
+  // Nếu tìm thấy người dùng và mật khẩu đúng, tạo và gửi token
   createSendToken(user, 200, res);
 });
+
 exports.logout = (req, res) => {
   res.status(200).json({ status: 'success' });
 };
+
 exports.isLoggedIn = catchAsync(async (req, res, next) => {
   console.log('here');
 
@@ -145,6 +159,42 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
     message: "User haven't logged in!",
   });
 });
+
+//Login with google
+exports.googleLogin = catchAsync(async (req, res, next) => {
+  const { token } = req.body;
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  
+  const payload = ticket.getPayload();
+  
+  // Kiểm tra xem email có đuôi .edu hay không
+  if (!payload.email.endsWith('@fpt.edu.vn')) {
+    return next(new AppError('Only @fpt.edu.vn email addresses are allowed', 403));
+  }
+
+  // Tìm người dùng trong cơ sở dữ liệu
+  let user = await User.findOne({ email: payload.email });
+
+  // Tạo tài khoản mới nếu người dùng chưa tồn tại
+  if (!user) {
+    user = await User.create({
+      email: payload.email,
+      username: payload.name, // Hoặc bạn có thể xử lý để tạo username từ tên đầy đủ
+      password: crypto.randomBytes(16).toString('hex'), // Mật khẩu ngẫu nhiên, vì người dùng sẽ đăng nhập bằng Google
+      studentCode: 'auto-generated-or-placeholder', // Có thể tạo mã sinh viên tự động nếu cần
+      
+    });
+  }
+
+  // Tạo và gửi token đến client
+  createSendToken(user, 200, res);
+});
+
+
+
 // Authentication
 exports.protect = catchAsync(async (req, res, next) => {
   let token;

@@ -46,10 +46,10 @@ const RegisterForm = () => {
     const newErrors = {};
     if (!email) {
       newErrors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Invalid email format.";
+    } else if (!/^[\w.%+-]+@fpt\.edu\.vn$/.test(email)) {
+      newErrors.email = "Email must be in the format *@fpt.edu.vn.";
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
