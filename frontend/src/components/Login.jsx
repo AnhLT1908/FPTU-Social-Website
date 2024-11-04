@@ -16,21 +16,23 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-
       try {
-        const response = await fetch("http://localhost:9999/api/v1/users/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
+        const response = await fetch(
+          "http://localhost:9999/api/v1/users/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          }
+        );
 
         const data = await response.json();
 
         if (response.ok && data.status === "success") {
           console.log("Login successful", data.user);
-          
+
           // Save token and user data
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
@@ -39,12 +41,16 @@ const LoginForm = () => {
           navigate("/");
         } else {
           console.error("Login failed", data.message);
-          setErrors({ form: data.message || "Login failed. Please check your credentials." });
+          setErrors({
+            form:
+              data.message || "Login failed. Please check your credentials.",
+          });
         }
       } catch (error) {
         console.error("Error logging in", error);
-        setErrors({ form: "An error occurred while logging in. Please try again." });
-        
+        setErrors({
+          form: "An error occurred while logging in. Please try again.",
+        });
       }
     } else {
       setValidated(true);
@@ -84,7 +90,7 @@ const LoginForm = () => {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Container 
+      <Container
         fluid
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "100vh" }}
@@ -92,7 +98,12 @@ const LoginForm = () => {
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+              <img
+                src="../images/logo.jpg"
+                alt="Logo"
+                className="mb-3"
+                style={{ width: "100px" }}
+              />
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
@@ -169,14 +180,20 @@ const LoginForm = () => {
                   )}
 
                   <div className="mt-3">
-                    <a href="/forgot-password" style={{ textDecoration: "none", color: "#0086c9" }}>
+                    <a
+                      href="/forgot-password"
+                      style={{ textDecoration: "none", color: "#0086c9" }}
+                    >
                       Forgot Password?
                     </a>
                   </div>
 
                   <div className="mt-3">
                     New to our community?{" "}
-                    <a href="/signup" style={{ textDecoration: "none", color: "#0086c9" }}>
+                    <a
+                      href="/signup"
+                      style={{ textDecoration: "none", color: "#0086c9" }}
+                    >
                       Sign up
                     </a>
                   </div>

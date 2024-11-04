@@ -75,8 +75,7 @@ const HomePage = () => {
     });
   };
 
-  console.log(token)
-
+  console.log(token);
 
   const handleImageClick = (image) => {
     setModalImage(image);
@@ -109,14 +108,18 @@ const HomePage = () => {
             <Card key={post._id} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <Link to={`/community/${post.communityId}`}>
+                  <Link to={`/community/${post.communityId.id}`}>
                     <p>
-                      <strong>{"f/" + post.communityId.name || "Community Name"}</strong> •{" "}
-                      {new Date(post.createdAt).toLocaleString()}
+                      <strong>
+                        {"f/" + post.communityId.name || "Community Name"}
+                      </strong>{" "}
+                      • {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
-                  <Link to={`/profile/${post.userId}`}>
-                    <p className="mt-n2">{"u/" + post.userId.username || "Username"}</p>
+                  <Link to={`/profile/${post.userId.id}`}>
+                    <p className="mt-n2">
+                      {"u/" + post.userId.username || "Username"}
+                    </p>
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
@@ -126,7 +129,9 @@ const HomePage = () => {
                       <Dropdown.Item>Save</Dropdown.Item>
                       <Dropdown.Item>Report</Dropdown.Item>
                       <Dropdown.Item>Hide</Dropdown.Item>
-                      <Dropdown.Item onClick={() => navigate(`/edit-post/${post._id}`)}>
+                      <Dropdown.Item
+                        onClick={() => navigate(`/edit-post/${post._id}`)}
+                      >
                         Edit
                       </Dropdown.Item>
                     </Dropdown.Menu>
@@ -151,7 +156,9 @@ const HomePage = () => {
                       cursor: "pointer",
                       float: "right",
                     }}
-                    onClick={() => handleImageClick(images[index % images.length])}
+                    onClick={() =>
+                      handleImageClick(images[index % images.length])
+                    }
                   />
                 </Col>
               </Row>
@@ -181,7 +188,7 @@ const HomePage = () => {
             </Card>
           ))}
 
-{/*************************************************** */}
+          {/*************************************************** */}
           <Row>
             <Col className="text-center">
               <h3>

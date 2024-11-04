@@ -98,18 +98,11 @@ const CreateCommunity = () => {
       setDescription={setDescription}
       rule={rule}
       setRule={setRule}
-    />,
-    <CommunityStyle
+    />, <CommunityStyle
       banner={banner}
       setBanner={setBanner}
       icon={icon}
       setIcon={setIcon}
-      handleImageUpload={handleImageUpload}
-    />,
-    <CommunityTopics
-      selectedTopics={selectedTopics}
-      setSelectedTopics={setSelectedTopics}
-      topicsList={topicsList}
     />,
     <CommunityType
       communityType={communityType}
