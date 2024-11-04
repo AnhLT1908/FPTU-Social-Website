@@ -6,6 +6,7 @@ router
   .route('/')
   .get(communityController.getAllCommunities)
   .post(protect, communityController.createNewCommunity);
+  router.get('/search', communityController.searchCommunities);  
 router
   .route('/:id')
   .get(communityController.getCommunityById)

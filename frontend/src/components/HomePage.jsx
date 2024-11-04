@@ -34,6 +34,8 @@ const HomePage = () => {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData) setUser(userData);
+    fetch("http://localhost:9999/api/v1/posts")
     if (userData) {
       setUser(userData);
       console.log("User data:", userData);
@@ -118,6 +120,8 @@ const HomePage = () => {
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
                     <p>
+
+
                       <strong>
                         {"f/" + post.communityId?.name || "Community Name"}
                       </strong>{" "}
@@ -128,6 +132,7 @@ const HomePage = () => {
                     <p className="mt-n2">
                       {"u/" + post.userId?.username || "Username"}
                     </p>
+
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">

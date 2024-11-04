@@ -1,7 +1,7 @@
 import { message } from "antd";
 
 import axios from 'axios';
-const token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MTcxMjM1ZjAwYTVlMTBjNDllZGZjYyIsImlhdCI6MTczMDAxNTU1OSwiZXhwIjoxNzM3NzkxNTU5fQ.3hBWs3Trkp7OlWbRIyVrhFz7wBkwSksIrNJLEiumk3c'
+const token = localStorage.getItem('token');
 const HEADERS_NOT_AUTHORIZATION = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
