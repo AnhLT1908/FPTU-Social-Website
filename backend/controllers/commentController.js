@@ -1,4 +1,6 @@
 const Comment = require('../models/commentModel');
+const Post = require('../models/postModel');
+const catchAsync = require('../utils/catchAsync');
 const {
   factoryDeleteOne,
   factoryUpdateOne,
@@ -26,40 +28,48 @@ exports.getCommentById = async (req, res, next) => {
 };
 exports.createNewComment = async (req, res, next) => {
   try {
+    req.body.userId = req.user.id;
     const doc = await Comment.create(req.body);
-
+    if (doc.parentId) {
+      await Comment.findByIdAndUpdate(doc.parentId, {
+        $addToSet: { childrens: doc._id },
+      });
+    }
+    await Post.findByIdAndUpdate(doc.postId, {
+      $inc: { commentCount: 1 },
+    });
     res.status(201).json(doc);
   } catch (error) {
     next(error);
   }
 };
-exports.getAllComments = async (req, res, next) => {
-  try {
-    const comments = await Comment.find({})
-      .populate('userId')
-      .populate('postId')
-      .populate('parentId')
-      .populate('childrens');
-    res.status(200).json({
-      status: 'success',
-      results: comments.length,
-      data: {
-        comments: comments.map((comment) => ({
-          user: comment.userId,
-          post: comment.postId,
-          parent: comment.parentId,
-          content: comment.content,
-          isEdited: comment.isEdited,
-          childrens: comment.childrens,
-          upVotes: comment.upVotes,
-          downVotes: comment.downVotes,
-        })),
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+// exports.getAllComments = async (req, res, next) => {
+//   try {
+//     const comments = await Comment.find({})
+//       .populate('userId')
+//       .populate('postId')
+//       .populate('parentId')
+//       .populate('childrens');
+//     res.status(200).json({
+//       status: 'success',
+//       results: comments.length,
+//       data: {
+//         comments: comments.map((comment) => ({
+//           user: comment.userId,
+//           post: comment.postId,
+//           parent: comment.parentId,
+//           content: comment.content,
+//           isEdited: comment.isEdited,
+//           childrens: comment.childrens,
+//           upVotes: comment.upVotes,
+//           downVotes: comment.downVotes,
+//         })),
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 exports.updateComment = async (req, res, next) => {
   const doc = await Comment.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -72,23 +82,21 @@ exports.updateComment = async (req, res, next) => {
   }
   res.status(200).json(doc);
 };
-exports.deleteComment = factoryDeleteOne(Comment);
-exports.createChildrenComments = async (req, res, next) => {
-  try {
-    const parentComment = await Comment.findById(req.params.id);
-    if (!parentComment) {
-      return res.status(404).json({ message: 'Comment not found' });
-    }
-    const newComment = new Comment(req.body);
-    const newdoc = await newComment.save(); // Use await here
-    parentComment.childrens.push(newdoc._id);
-    await parentComment.save().then((result) => {
-      res.status(201).json(result);
+exports.deleteComment = catchAsync(async (req, res, next) => {
+  const doc = await Comment.findById(req.params.id);
+  let deleteCount = 1;
+  if (doc.hasParent) {
+    await Comment.findByIdAndUpdate(doc.parentId, {
+      $pull: { childrens: doc._id },
     });
-  } catch (error) {
-    next(error);
+  } else {
+    deleteCount = (await Comment.deleteMany({ parentId: doc._id })) + 1;
   }
-};
+  await Post.findByIdAndUpdate(doc.postId, {
+    $inc: { commentCount: -deleteCount },
+  });
+  res.status(204).json({ status: success, count: deleteCount });
+});
 exports.getCommentByPostId = async (req, res, next) => {
   try {
     const postId = req.params.id;
@@ -106,3 +114,65 @@ exports.getCommentByPostId = async (req, res, next) => {
     next(error);
   }
 };
+exports.getAllComments = catchAsync(async (req, res, next) => {
+  console.log('Inside getAll Comments');
+  const { postId } = req.params;
+  const { limit = 1, startAfter } = req.query;
+  const limitNumber = parseInt(limit, 10);
+  const query = { postId };
+  query.hasParent = false;
+  if (startAfter) {
+    query._id = { $gt: startAfter }; // Fetch comments with ID greater than startAfter
+  }
+  const comments = await Comment.find(query)
+    .limit(limitNumber)
+    .populate('userId')
+    .populate({ path: 'childrens', populate: { path: 'userId' } })
+    .lean()
+    .sort({ createdAt: 1 })
+    .exec();
+  const response = {
+    data: comments,
+  };
+  if (comments.length > 0) {
+    response.startAfter = comments[comments.length - 1]._id; // Set newStartAfter to the last comment's ID
+  }
+  res.status(200).json(response);
+});
+exports.getChildrenComments = catchAsync(async (req, res, next) => {
+  const { parentId } = req.params;
+  const { limit = 1, startAfter } = req.query;
+  const limitNumber = parseInt(limit, 10);
+  const query = { parentId };
+  if (startAfter) {
+    query._id = { $gt: startAfter }; // Fetch comments with ID greater than startAfter
+  }
+  const comments = await Comment.find(query)
+    .limit(limitNumber)
+    .lean()
+    .sort({ createdAt: 1 })
+    .exec();
+  const response = {
+    data: comments,
+  };
+  if (comments) {
+    response.startAfter = comments[comments.length - 1]._id; // Set newStartAfter to the last comment's ID
+  }
+  res.status(200).json(response);
+});
+exports.voteComment = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const comment = Comment.findById(id).lean();
+  if (!comment.votes) comment.votes = new Map();
+  if (req.body.vote == 'none') {
+    comment.votes.delete(req.user.id);
+  } else {
+    comment.votes.set(req.user.id, req.body.vote);
+  }
+  const updatedComment = await Comment.findByIdAndUpdate(
+    id,
+    { votes: comment.votes },
+    { new: true }
+  ).lean();
+  res.status(200).json(updatedComment);
+});

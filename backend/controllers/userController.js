@@ -157,7 +157,29 @@ exports.toggleUserActiveStatus = catchAsync(async (req, res, next) => {
     },
   });
 });
+exports.searchUsers = catchAsync(async (req, res, next) => {
+  const { query } = req.query;
 
+  if (!query) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Query parameter is required for searching',
+    });
+  }
+
+  // Tìm kiếm theo displayName
+  const searchFilter = { username: new RegExp(query, 'i') };
+
+  const users = await User.find(searchFilter)
+    .select('username displayName email avatar') // Chỉ lấy các trường cần thiết
+   .limit(10);
+
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: users,
+  });
+});
 
 
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import "../styles/header.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -7,24 +6,100 @@ import {
   faMessage,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link } from "react-router-dom";
-
-function Header() {
+import { searchCommunities, searchUsers } from "../services/SearchService";
+import { listNotifications } from "../services/NotificationService";
+function Header({ socket }) {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
 
+  const [user, setUser] = useState(null);
+  const [query, setQuery] = useState("");
+  const [searchType, setSearchType] = useState("user");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [noResultsMessage, setNoResultsMessage] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const fetchNotifications = async () => {
+    const data = await listNotifications();
+    setNotifications(data);
+  };
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
       setUser(userData);
-      console.log("User: ", userData)
+      console.log("User: ", userData);
     }
   }, []);
 
+  useEffect(() => {
+    socket.on("getNotification", (data) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+  }, [socket]);
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
     navigate("/login");
+  };
+
+  const handleSearch = (e) => {
+    const searchQuery = e.target.value;
+    setQuery(searchQuery);
+
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    const newTimeout = setTimeout(async () => {
+      if (searchQuery.length > 2) {
+        try {
+          let results;
+          let message = "";
+
+          if (searchType === "user") {
+            const response = await searchUsers(searchQuery);
+            results = response.data;
+
+            if (response.results === 0) {
+              // Thay đổi thông báo cho user
+            }
+          } else {
+            const response = await searchCommunities(searchQuery);
+            results = response.data;
+
+            if (response.results === 0) {
+            }
+          }
+
+          setSearchResults(results);
+          setIsDropdownVisible(true);
+          setNoResultsMessage(message);
+        } catch (error) {
+          console.error("Error fetching search results:", error);
+        }
+      } else {
+        setSearchResults([]);
+        setIsDropdownVisible(false);
+        setNoResultsMessage("");
+      }
+    }, 2000);
+
+    setSearchTimeout(newTimeout);
+  };
+
+  const handleResultClick = (result) => {
+    console.log("Selected result:", result);
+    setQuery(result.name || result.username);
+    setIsDropdownVisible(false);
+
+    if (searchType === "user") {
+      navigate(`/profile/${result._id}`);
+    } else if (searchType === "community") {
+      navigate(`/community/${result._id}`);
+    }
   };
 
   return (
@@ -34,7 +109,7 @@ function Header() {
       </Link>
       <div className="search-bar-section d-flex flex-grow-1 justify-content-stretch py-2">
         <div className="d-flex justify-content-stretch mx-xl-auto d-xl-block">
-          <div className="search-bar-wrapper">
+          <div className="search-bar-wrapper position-relative">
             <div className="search-icon">
               <svg
                 aria-hidden="true"
@@ -47,14 +122,83 @@ function Header() {
                 <path d="M19.5 18.616 14.985 14.1a8.528 8.528 0 1 0-.884.884l4.515 4.515.884-.884ZM1.301 8.553a7.253 7.253 0 1 1 7.252 7.253 7.261 7.261 0 0 1-7.252-7.253Z"></path>
               </svg>
             </div>
-            <form className="search-form">
+            <form
+              className="search-form d-flex align-items-center"
+              onSubmit={(e) => e.preventDefault()}
+            >
               <input
                 type="text"
                 placeholder="Search"
                 id="search"
                 autoComplete="off"
+                value={query}
+                onChange={handleSearch}
+                onFocus={() => setIsDropdownVisible(searchResults.length > 0)}
+                className="flex-grow-1"
               />
+              <select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+                className="search-type-dropdown"
+              >
+                <option value="user">User</option>
+                <option value="community">Community</option>
+              </select>
             </form>
+            {isDropdownVisible && (
+              <ul className="search-results-dropdown">
+                {searchResults.length > 0 ? (
+                  searchResults.map((result) => (
+                    <li
+                      key={result._id || result.id}
+                      className="search-result-item"
+                      onClick={() => handleResultClick(result)}
+                    >
+                      {result.message ? ( // Kiểm tra xem có thông báo không
+                        <span className="no-results-message">
+                          {result.message}
+                        </span>
+                      ) : (
+                        <>
+                          {searchType === "user" ? (
+                            <>
+                              <img
+                                src={result.avatar || "default.jpg"}
+                                alt="Avatar"
+                                className="result-avatar"
+                                width="20"
+                                height="20"
+                              />
+                              <span>{result.username}</span> -{" "}
+                              <span>{result.email}</span>
+                            </>
+                          ) : (
+                            <>
+                              <img
+                                src={result.logo || "default.jpg"}
+                                alt="Logo"
+                                className="result-logo"
+                                width="20"
+                                height="20"
+                              />
+                              <span>{result.name}</span> -{" "}
+                              <span>{result.description}</span>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <li className="no-results-message">Không có kết quả nào</li> // Hiển thị thông báo không có kết quả
+                )}
+              </ul>
+            )}
+
+            {/* Hiển thị thông báo không có kết quả */}
+            {noResultsMessage && (
+              <div className="no-results-message">{noResultsMessage}</div>
+            )}
           </div>
         </div>
       </div>
@@ -116,7 +260,7 @@ function Header() {
                   </div>
                   <div className="notification-content">
                     {/* Repeat Notification Items Here */}
-                    {[...Array(3)].map((_, index) => (
+                    {notifications.map((_, index) => (
                       <li className="d-flex" key={index}>
                         <a className="dropdown-item-notification" href="#">
                           <span className="dropdown-item-icon">
@@ -186,18 +330,20 @@ function Header() {
                           alt="User Avatar for u/sjdkdk48"
                         />
                       </span>
-                      <span className="dropdown-item-name d-flex flex-column">
-                        <span>View Profile</span>
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            lineHeight: "1rem",
-                            color: "var(--color-secondary-weak)",
-                          }}
-                        >
-                          @username
+                      <Link to={`/profile/${user.id}`}>
+                        <span className="dropdown-item-name d-flex flex-column">
+                          <span>View Profile</span>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              lineHeight: "1rem",
+                              color: "var(--color-secondary-weak)",
+                            }}
+                          >
+                            {"u/" + user?.username}
+                          </span>
                         </span>
-                      </span>
+                      </Link>
                     </a>
                   </li>
                   <li>
