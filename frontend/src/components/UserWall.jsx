@@ -23,7 +23,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
 import image1 from "../images/postImage/images_postId1.jpg";
 
-const UserProfile = () => {
+const UserWall = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
@@ -244,7 +244,7 @@ const UserProfile = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`/post/${post._id}`}>
+                  <Link to={`/post/${post.id}`}>
                     <h2>{post.title}</h2>
                   </Link>
                 </Col>
@@ -388,4 +388,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default UserWall;

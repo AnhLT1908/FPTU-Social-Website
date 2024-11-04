@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Button,
   Col,
@@ -9,19 +9,20 @@ import {
   Row,
   Dropdown,
   Card,
-} from "react-bootstrap";
-import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
+} from 'react-bootstrap';
+import { FaArrowUp, FaArrowDown, FaComment, FaShare } from 'react-icons/fa';
 
-import img1 from "../images/postImage/images_postId1.jpg";
-import img2 from "../images/postImage/images_postId2.jpg";
-import img3 from "../images/postImage/images_postId3.jpg";
-import img4 from "../images/postImage/images_postId4.jpg";
-import img5 from "../images/postImage/images_postId5.jpg";
-import img6 from "../images/postImage/images_postId6.jpg";
-import img7 from "../images/postImage/images_postId7.jpg";
-import img8 from "../images/postImage/images_postId8.jpg";
-import img9 from "../images/postImage/images_postId9.jpg";
-import img10 from "../images/postImage/images_postId10.jpg";
+import img1 from '../images/postImage/images_postId1.jpg';
+import img2 from '../images/postImage/images_postId2.jpg';
+import img3 from '../images/postImage/images_postId3.jpg';
+import img4 from '../images/postImage/images_postId4.jpg';
+import img5 from '../images/postImage/images_postId5.jpg';
+import img6 from '../images/postImage/images_postId6.jpg';
+import img7 from '../images/postImage/images_postId7.jpg';
+import img8 from '../images/postImage/images_postId8.jpg';
+import img9 from '../images/postImage/images_postId9.jpg';
+import img10 from '../images/postImage/images_postId10.jpg';
+import CommentList from './Comment/CommentList';
 
 const PostDetail = () => {
   const [postDetail, setPostDetail] = useState({
@@ -43,10 +44,7 @@ const PostDetail = () => {
   
 
   console.log("Post detail:", postDetail)
-
-
   const { id } = useParams();
-
   useEffect(() => {
     fetch(`http://localhost:9999/api/v1/posts/${id}`)
       .then((res) => res.json())
@@ -116,7 +114,7 @@ const PostDetail = () => {
           <Link to="/">
             <Button
               className="btn btn-secondary mt-2"
-              style={{ borderRadius: "10px", float: "right" }}
+              style={{ borderRadius: '10px', float: 'right' }}
             >
               Back
             </Button>
@@ -128,13 +126,14 @@ const PostDetail = () => {
               <Col md={12}>
                 <Row className="mb-2">
                   <Col>
-                    <Link to={"/community/2"}>
+                    <Link to={'/community/2'}>
                       <p>
                         <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
                         {new Date(postDetail.createdAt).toLocaleString()}
+
                       </p>
                     </Link>
-                    <p style={{ marginTop: "-20px" }}>
+                    <p style={{ marginTop: '-20px' }}>
                       <Link to={`/profile/${postDetail.id}`}>
                         {"u/" + postDetail.userId.username}
                       </Link>
@@ -142,14 +141,17 @@ const PostDetail = () => {
                   </Col>
                   <Col className="d-flex justify-content-end align-items-center">
                     <Dropdown>
-                      <Dropdown.Toggle variant="light" id="dropdown-basic">
+                      <Dropdown.Toggle
+                        variant="light"
+                        id="dropdown-basic"
+                      >
                         Settings
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
                         <Dropdown.Item>Save</Dropdown.Item>
                         <Dropdown.Item>Report</Dropdown.Item>
                         <Dropdown.Item>Hide</Dropdown.Item>
-                        <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
+                        <Dropdown.Item onClick={() => navigate('/edit-post/2')}>
                           Edit
                         </Dropdown.Item>
                       </Dropdown.Menu>
@@ -174,7 +176,7 @@ const PostDetail = () => {
                 <Image
                   src={images[0]}
                   fluid
-                  style={{ width: "100%", borderRadius: "10px" }}
+                  style={{ width: '100%', borderRadius: '10px' }}
                 />
               </Col>
             </Row>
@@ -189,6 +191,7 @@ const PostDetail = () => {
                 <span className="mx-2">{postDetail.reactions?.upVotes}</span>
                 <Button
                   variant={postDetail.downVoted ? "danger" : "light"}
+
                   onClick={handleDislike}
                 >
                   <FaArrowDown />
@@ -204,11 +207,7 @@ const PostDetail = () => {
             </Row>
             <Row className="mt-4">
               <Col md={12}>
-                <FormControl
-                  style={{ borderRadius: "15px" }}
-                  type="text"
-                  placeholder="Add a comment"
-                />
+                <CommentList postId={postDetail.id} />
               </Col>
             </Row>
           </Card>
@@ -217,7 +216,7 @@ const PostDetail = () => {
         <Col md={4}>
           <Card
             className="mb-4 p-3"
-            style={{ height: "85vh", overflowY: "auto" }}
+            style={{ height: '85vh', overflowY: 'auto' }}
           >
             <h4>{"f/" + postDetail.communityId.name}</h4>
             <p>

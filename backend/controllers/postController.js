@@ -13,14 +13,34 @@ const {
   factoryCreateOne,
 } = require('./handlerFactory');
 
-// CRUD factory methods
+// // Get feed for guest users
+const Comment = require('../models/commentModel');
+// CRUD
 exports.getPostById = factoryGetOne(Post, 'communityId userId');
 exports.createNewPost = factoryCreateOne(Post);
 exports.getAllPosts = factoryGetAll(Post);
 exports.updatePost = factoryUpdateOne(Post);
-exports.deletePost = factoryDeleteOne(Post);
-
-// Get feed for guest users
+exports.deletePost = catchAsync(async (req, res, next) => {
+  const doc = await Model.findByIdAndDelete(req.params.id);
+  if (!doc) {
+    return next(
+      new AppError(`No document found with ID ${req.params.id}`, 404)
+    );
+  }
+  // Check if a document was found and deleted
+  await Community.findByIdAndUpdate(doc.communityId, {
+    $inc: { postCount: -1 },
+  });
+  await Comment.deleteMany({ postId: doc._id });
+  // await Vote.deleteMany({
+  //   entityType: 'Post',
+  //   voteEntityId: doc._id,
+  // });
+  res.status(204).json({
+    message: 'success',
+    data: null,
+  });
+});
 exports.getGuestFeed = catchAsync(async (req, res, next) => {
   const limit = Number(req.query.limit ?? 5);
   const communityIds = await Community.find({
@@ -120,7 +140,6 @@ exports.getMyFeed = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ feed, next: nextCursor, hasMore });
 });
-
 exports.getPostByUserId = catchAsync(async (req, res, next) => {
   const userId = req.params.userId;
 
@@ -140,6 +159,21 @@ exports.getPostByUserId = catchAsync(async (req, res, next) => {
   res.status(200).json(listPost);
 });
 
+exports.votePost = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const post = Post.findById(id).lean();
+  if (req.body.vote == 'none') {
+    post.votes.delete(req.user.id);
+  } else {
+    post.votes.set([req.user.id, req.body.vote]);
+  }
+  const updatedPost = await Post.findByIdAndUpdate(
+    id,
+    { votes: post.votes },
+    { new: true }
+  );
+  res.status(200).json(updatedPost);
+});
 // Exporting the postController object
 const postController = {
   getPostById: exports.getPostById,
@@ -150,6 +184,7 @@ const postController = {
   getGuestFeed: exports.getGuestFeed,
   getMyFeed: exports.getMyFeed,
   getPostByUserId: exports.getPostByUserId,
+  votePost: exports.votePost,
 };
 
 module.exports = postController;

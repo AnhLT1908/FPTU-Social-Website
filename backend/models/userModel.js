@@ -54,16 +54,6 @@ const userSchema = new mongoose.Schema(
     moderatorCommunities: [
       { type: mongoose.Schema.ObjectId, ref: 'Community' },
     ],
-    notifications: [
-      {
-        resourceId: String,
-        notifType: { String, enum: ['NewPost', 'NewComment', 'NewFollower'] },
-        title: String,
-        description: String,
-        seen: Boolean,
-        createdAt: Date,
-      },
-    ],
   },
   {
     timestamps: true,

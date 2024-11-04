@@ -22,6 +22,7 @@ import CreateCommunity from "./components/CreateCommunity";
 import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
 import ReportList from "./components/ReportList";
+import UserWall from "./components/UserWall";
 function App() {
   return (
     <div className="App">
@@ -37,6 +38,7 @@ function App() {
             <Route path="/post/:id" element={<PostDetail />} />
           
             <Route path="/profile/:id" element={<UserProfile />} />
+            <Route path="/profile-user/:id" element={<UserWall />} />
             <Route path="/profile/:id/saved" element={<UserSavedPost />} />
 
             <Route path="/setting" element={<SettingProfile />} />

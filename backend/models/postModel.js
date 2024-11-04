@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 const Community = require('./communityModel');
-const Comment = require('./commentModel');
-const Vote = require('./voteModel');
 const postSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.ObjectId, ref: 'User' },
@@ -9,9 +7,8 @@ const postSchema = new mongoose.Schema(
     title: String,
     content: String,
     media: [],
-    upVotes: { type: Number, default: 0 },
-    downVotes: { type: Number, default: 0 },
-    commentsCount: { type: Number, default: 0 }, 
+    commentCount: { type: Number, default: 0 },
+    votes: { type: Map, of: Boolean },
     isEdited: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
@@ -36,25 +33,6 @@ postSchema.post('save', async function (doc, next) {
     next(); // Call next middleware
   } catch (err) {
     next(err); // Handle any errors
-  }
-});
-// After delete a post
-postSchema.post('findOneAndDelete', async function (doc, next) {
-  try {
-    if (doc) {
-      // Check if a document was found and deleted
-      await Community.findByIdAndUpdate(doc.communityId, {
-        $inc: { postCount: -1 },
-      });
-      await Comment.deleteMany({ postId: doc._id });
-      await Vote.deleteMany({
-        entityType: 'Post',
-        voteEntityId: doc._id,
-      });
-    }
-    next();
-  } catch (err) {
-    next(err);
   }
 });
 const Post = mongoose.model('Post', postSchema);

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import "../styles/header.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,7 +7,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link } from "react-router-dom";
 import { searchCommunities, searchUsers } from "../services/SearchService";
-function Header() {
+import { listNotifications } from "../services/NotificationService";
+function Header({ socket }) {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
@@ -18,7 +18,11 @@ function Header() {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [noResultsMessage, setNoResultsMessage] = useState("");
-
+  const [notifications, setNotifications] = useState([]);
+  const fetchNotifications = async () => {
+    const data = await listNotifications();
+    setNotifications(data);
+  };
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
@@ -27,10 +31,17 @@ function Header() {
     }
   }, []);
 
+  useEffect(() => {
+    socket.on("getNotification", (data) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+  }, [socket]);
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
     navigate("/login");
   };
 
@@ -249,7 +260,7 @@ function Header() {
                   </div>
                   <div className="notification-content">
                     {/* Repeat Notification Items Here */}
-                    {[...Array(3)].map((_, index) => (
+                    {notifications.map((_, index) => (
                       <li className="d-flex" key={index}>
                         <a className="dropdown-item-notification" href="#">
                           <span className="dropdown-item-icon">
