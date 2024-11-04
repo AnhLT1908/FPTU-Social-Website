@@ -34,8 +34,7 @@ exports.deleteCommunity = catchAsync(async (req, res, next) => {
     return next(
       new AppError(`No document found with ID ${req.params.id}`, 404)
     );
-  }
-  if (community.memberCount === 1) {
+  } else {
     await Community.findByIdAndDelete(req.params.id);
     await Post.deleteMany({ communityId: req.params.id });
     res.status(204).json({

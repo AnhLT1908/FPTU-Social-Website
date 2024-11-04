@@ -9,6 +9,7 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
   const [type, setType] = useState("");
   const [joinRequests, setJoinRequests] = useState([]);
   const token = localStorage.getItem("token");
+  const [show, setShow] = useState(false);
   // Sử dụng useEffect để cập nhật state khi có thông tin community mới
   useEffect(() => {
     if (community) {
@@ -43,6 +44,28 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
       .catch((error) => {
         console.log(error);
       });
+  };
+  const handleAgree = () => {
+    let config = {
+      method: "delete",
+      maxBodyLength: Infinity,
+      url: `http://localhost:9999/api/v1/communities/${community.id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        window.location.href = "/";
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    setShow(false);
   };
   const handleCloseModal = () => setShowModal(false);
   const handleUpdate = () => {
@@ -237,7 +260,24 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
         <Button variant="secondary" onClick={handleCloseModal}>
           Close
         </Button>
+        <Button variant="primary" onClick={() => setShow(true)}>
+          Delete
+        </Button>
       </Modal.Footer>
+      <Modal show={show} onHide={() => setShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete this community?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShow(false)}>
+            No
+          </Button>
+          <Button variant="primary" onClick={handleAgree}>
+            Yes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Modal>
   );
 };
