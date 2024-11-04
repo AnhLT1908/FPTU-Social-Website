@@ -74,7 +74,9 @@ const RegisterForm = () => {
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }} />
+              <a href="/">
+                <img src="../images/logo.jpg" href="/" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+              </a>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>

@@ -8,7 +8,7 @@ module.exports = class Email {
     this.to = user.email;
     this.firstName = user.username.split(' ')[0];
     this.url = url;
-    this.from = `ThaoTTP ${process.env.EMAIL_FROM}`;
+    this.from = `FPT University Social Website ${process.env.EMAIL_FROM}`;
   }
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
@@ -71,12 +71,18 @@ module.exports = class Email {
   async sendWelcome() {
     await this.send('emailTemplate', 'Welcome to the FPT University Social Website');
   }
-  async sendResetPassword() {
-    await this.send(
-      'passwordResetTemplate',
-      'Your password reset token (valid for only 10 minutes)'
-    );
+
+  async sendResetPassword(newPassword) {
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject: "Your new password",
+      text: `Your new password is: ${newPassword}\nPlease log in and change it as soon as possible.`,
+    };
+
+    await this.newTransport().sendMail(mailOptions);
   }
+
   async sendPassword(password) {
     await this.send('newUserTemplate', 'Your Account Password', { password });
   }

@@ -56,7 +56,7 @@ const LoginForm = () => {
     if (!email) {
       newErrors.email = "Email or username is required.";
     } else if (
-      !/\S+@\S+\.\S+/.test(email) && // Email format check
+      !/^[\w.%+-]+@fpt\.edu\.vn$/.test(email) && // Email format check
       !/^[a-zA-Z0-9_]+$/.test(email)  // Username format check (letters, numbers, underscores)
     ) {
       newErrors.email = "Invalid email or username format.";
@@ -121,7 +121,9 @@ const LoginForm = () => {
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+              <a href="/">
+                <img src="../images/logo.jpg" href="/" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+              </a>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
