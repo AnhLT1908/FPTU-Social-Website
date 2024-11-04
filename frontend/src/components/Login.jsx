@@ -17,19 +17,22 @@ const LoginForm = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:9999/api/v1/users/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
+        const response = await fetch(
+          "http://localhost:9999/api/v1/users/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          }
+        );
 
         const data = await response.json();
 
         if (response.ok && data.status === "success") {
           console.log("Login successful", data.user);
-          
+
           // Save token and user data
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
@@ -38,11 +41,16 @@ const LoginForm = () => {
           navigate("/");
         } else {
           console.error("Login failed", data.message);
-          setErrors({ form: data.message || "Login failed. Please check your credentials." });
+          setErrors({
+            form:
+              data.message || "Login failed. Please check your credentials.",
+          });
         }
       } catch (error) {
         console.error("Error logging in", error);
-        setErrors({ form: "An error occurred while logging in. Please try again." });
+        setErrors({
+          form: "An error occurred while logging in. Please try again.",
+        });
       }
     } else {
       setValidated(true);
@@ -51,34 +59,33 @@ const LoginForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-  
+
     // Email or username validation
     if (!email) {
       newErrors.email = "Email or username is required.";
     } else if (
       !/^[\w.%+-]+@fpt\.edu\.vn$/.test(email) && // Email format check
-      !/^[a-zA-Z0-9_]+$/.test(email)  // Username format check (letters, numbers, underscores)
+      !/^[a-zA-Z0-9_]+$/.test(email) // Username format check (letters, numbers, underscores)
     ) {
       newErrors.email = "Invalid email or username format.";
     }
-  
+
     // Password validation
     if (!password) {
       newErrors.password = "Password is required.";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters.";
     }
-  
+
     setErrors(newErrors);
-  
+
     return Object.keys(newErrors).length === 0;
   };
-  
 
   const handleGoogleSuccess = (credentialResponse) => {
     const details = jwtDecode(credentialResponse.credential);
-    
-    if (details.email.endsWith('.edu')) {
+
+    if (details.email.endsWith("@fpt.edu.vn")) {
       // Gửi token JWT đến backend để xác thực hoặc tạo tài khoản nếu chưa tồn tại
       fetch("http://localhost:9999/api/v1/users/google-login", {
         method: "POST",
@@ -96,16 +103,25 @@ const LoginForm = () => {
             navigate("/");
           } else {
             console.error("Google login failed", data.message);
+            setErrors({
+              form: data.message || "Login failed. Please try again.",
+            });
           }
         })
         .catch((error) => {
           console.error("Error during Google login", error);
+          setErrors({
+            form: "An error occurred during Google Sign-In. Please try again.",
+          });
         });
     } else {
-      console.error("Only .edu emails are allowed");
+      // Thêm thông báo khi email không hợp lệ
+      console.error("Only @fpt.edu.vn emails are allowed");
+      setErrors({
+        form: "Only fpt emails are allowed.",
+      });
     }
   };
-  
 
   const handleGoogleError = () => {
     console.log("Google Sign-In was unsuccessful");
@@ -113,7 +129,7 @@ const LoginForm = () => {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Container 
+      <Container
         fluid
         className="d-flex justify-content-center align-items-center"
         style={{ minHeight: "100vh" }}
@@ -122,7 +138,13 @@ const LoginForm = () => {
           <Col>
             <div className="text-center mb-4">
               <a href="/">
-                <img src="../images/logo.jpg" href="/" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+                <img
+                  src="../images/logo.jpg"
+                  href="/"
+                  alt="Logo"
+                  className="mb-3"
+                  style={{ width: "100px" }}
+                />
               </a>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
@@ -200,14 +222,20 @@ const LoginForm = () => {
                   )}
 
                   <div className="mt-3">
-                    <a href="/forgot-password" style={{ textDecoration: "none", color: "#0086c9" }}>
+                    <a
+                      href="/forgot-password"
+                      style={{ textDecoration: "none", color: "#0086c9" }}
+                    >
                       Forgot Password?
                     </a>
                   </div>
 
                   <div className="mt-3">
                     New to our community?{" "}
-                    <a href="/signup" style={{ textDecoration: "none", color: "#0086c9" }}>
+                    <a
+                      href="/signup"
+                      style={{ textDecoration: "none", color: "#0086c9" }}
+                    >
                       Sign up
                     </a>
                   </div>

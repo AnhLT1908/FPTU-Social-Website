@@ -193,6 +193,35 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.checkEmailForGoogleLogin = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Kiểm tra xem email có được gửi lên không
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    // Kiểm tra định dạng email
+    if (!/^[\w.%+-]+@fpt\.edu\.vn$/.test(email)) {
+      return res.status(400).json({ message: "Only emails with the domain @fpt.edu.vn are allowed." });
+    }
+
+    // Tìm người dùng theo email
+    const user = await User.findOne({ email });
+
+    if (user) {
+      // Email đã tồn tại, trả về phản hồi thành công
+      return res.status(200).json({ exists: true, message: "Email found. Proceed to login." });
+    } else {
+      // Email chưa tồn tại, trả về phản hồi không tìm thấy
+      return res.status(200).json({ exists: false, message: "Email not found. Proceed to sign up." });
+    }
+  } catch (error) {
+    console.error("Error checking email for Google login:", error);
+    res.status(500).json({ message: "An error occurred while checking the email." });
+  }
+};
 
 
 // Authentication
@@ -238,7 +267,7 @@ exports.restrictTo = (...roles) => {
 
 const generateRandomPassword = (min = 6, max = 8) => {
   const length = Math.floor(Math.random() * (max - min + 1)) + min;
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let password = '';
   for (let i = 0; i < length; i++) {
     password += characters.charAt(Math.floor(Math.random() * characters.length));
