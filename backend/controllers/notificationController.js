@@ -15,6 +15,10 @@ exports.getMyNotifications = catchAsync(async (req, res, next) => {
     .lean();
   res.status(200).json(notifications);
 });
-exports.createNewNotification = factoryCreateOne(Notification);
+exports.createNewNotification = catchAsync(async (req, res, next) => {
+  const notification = await Notification.create(req.body);
+  const io = req.app.socketio;
+  io.room(req.params.roomId).emit(notification);
+});
 exports.updateNotification = factoryUpdateOne(Notification);
 exports.deleteNotification = factoryDeleteOne(Notification);

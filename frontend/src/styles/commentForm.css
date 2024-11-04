@@ -1,0 +1,28 @@
+/* Styling for the contenteditable div */
+.comment-input {
+  display: block;
+  border: 1px solid #ced4da;
+  border-radius: 15px;
+  padding: 8px 12px;
+  min-height: 38px; /* Ensures it looks like an input box */
+  outline: none;
+  white-space: pre-wrap;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Placeholder styling for contenteditable div */
+.comment-input:empty:before {
+  content: attr(placeholder);
+  color: #aaa;
+  font-style: italic;
+  pointer-events: none; /* Prevents selection of placeholder text */
+  display: block; /* Ensures placeholder is on a new line */
+}
+
+/* Styling for tagged text (e.g., @username) */
+.tagged {
+  color: #0056b3;
+  background-color: #e6f2ff;
+  padding: 2px 4px;
+}

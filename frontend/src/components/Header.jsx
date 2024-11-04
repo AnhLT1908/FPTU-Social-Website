@@ -1,36 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import "../styles/header.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useState } from 'react';
+import '../styles/header.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEllipsisVertical,
   faMessage,
-} from "@fortawesome/free-solid-svg-icons";
-import { useNavigate, Link } from "react-router-dom";
-
-function Header() {
+} from '@fortawesome/free-solid-svg-icons';
+import { useNavigate, Link } from 'react-router-dom';
+import { listNotifications } from '../services/NotificationService';
+function Header({ socket }) {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-
+  const [notifications, setNotifications] = useState([]);
+  const fetchNotifications = async () => {
+    const data = await listNotifications();
+    setNotifications(data);
+  };
+  const user = JSON.parse(localStorage.getItem('user'));
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) {
-      setUser(userData);
-      console.log("User: ", userData)
-    }
+    socket.on('getNotification', (data) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+  }, [socket]);
+  useEffect(() => {
+    fetchNotifications();
   }, []);
-
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
     <nav className="d-flex px-md-2 align-items-center header-navbar">
-      <Link to="/" className="nav-logo m-0">
-        <img src="/images/logo.jpg" width={50} alt="Logo" />
+      <Link
+        to="/"
+        className="nav-logo m-0"
+      >
+        <img
+          src="/images/logo.jpg"
+          width={50}
+          alt="Logo"
+        />
       </Link>
       <div className="search-bar-section d-flex flex-grow-1 justify-content-stretch py-2">
         <div className="d-flex justify-content-stretch mx-xl-auto d-xl-block">
@@ -61,7 +70,10 @@ function Header() {
       <div className="header-right-section">
         {/* As Guest */}
         {!user ? (
-          <Link to="/login" className="login-button">
+          <Link
+            to="/login"
+            className="login-button"
+          >
             Log In
           </Link>
         ) : (
@@ -69,7 +81,7 @@ function Header() {
             <div className="tools-wrapper">
               <button
                 className="create-button"
-                onClick={() => navigate("/create-post")}
+                onClick={() => navigate('/create-post')}
               >
                 <span className="d-flex align-items-center justify-content-center">
                   <span className="d-flex me-2">
@@ -116,9 +128,15 @@ function Header() {
                   </div>
                   <div className="notification-content">
                     {/* Repeat Notification Items Here */}
-                    {[...Array(3)].map((_, index) => (
-                      <li className="d-flex" key={index}>
-                        <a className="dropdown-item-notification" href="#">
+                    {notifications.map((_, index) => (
+                      <li
+                        className="d-flex"
+                        key={index}
+                      >
+                        <a
+                          className="dropdown-item-notification"
+                          href="#"
+                        >
                           <span className="dropdown-item-icon">
                             <FontAwesomeIcon icon={faMessage} />
                           </span>
@@ -169,7 +187,7 @@ function Header() {
                       src="/images/logo.jpg"
                       width={32}
                       height={32}
-                      style={{ borderRadius: "50%" }}
+                      style={{ borderRadius: '50%' }}
                       alt="User Avatar"
                     />
                   </span>
@@ -179,7 +197,10 @@ function Header() {
                   aria-labelledby="dropdownMenuButton1"
                 >
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <a
+                      className="dropdown-item"
+                      href="#"
+                    >
                       <span className="dropdown-item-icon">
                         <img
                           src="/images/logo.jpg"
@@ -190,9 +211,9 @@ function Header() {
                         <span>View Profile</span>
                         <span
                           style={{
-                            fontSize: "0.75rem",
-                            lineHeight: "1rem",
-                            color: "var(--color-secondary-weak)",
+                            fontSize: '0.75rem',
+                            lineHeight: '1rem',
+                            color: 'var(--color-secondary-weak)',
                           }}
                         >
                           @username

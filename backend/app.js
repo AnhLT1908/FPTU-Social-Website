@@ -10,8 +10,8 @@ const userRouter = require('./routes/userRoutes');
 const communityRouter = require('./routes/communityRoutes');
 const postRouter = require('./routes/postRoutes');
 const commentRouter = require('./routes/commentRoutes');
-const voteRouter = require('./routes/voteRoutes');
 const reportRouter = require('./routes/reportRoutes');
+const notificationRouter = require('./routes/notificationRoutes');
 const path = require('path');
 // 1) MIDDLEWARES
 // app.set('trust proxy', 3);
@@ -49,8 +49,8 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/communities', communityRouter);
 app.use('/api/v1/posts', postRouter);
 app.use('/api/v1/comments', commentRouter);
-app.use('/api/v1/votes', voteRouter);
 app.use('/api/v1/reports', reportRouter);
+app.use('/api/v1/notifications', notificationRouter);
 
 // 3) ERROR HANDLING
 // Bắt lỗi các route API không hợp lệ
