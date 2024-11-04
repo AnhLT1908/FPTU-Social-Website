@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { message } from 'antd';
 import { api } from './api';
-
+const token = localStorage.getItem('token');
 // Hàm lấy token từ localStorage và trả về header xác thực
 const getAuthHeader = () => ({
     'Content-Type': 'application/json',

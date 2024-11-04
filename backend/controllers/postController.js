@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 const Community = require('../models/communityModel');
 const Post = require('../models/postModel');
+const Subscription = require('../models/subscriptionModel');
 const catchAsync = require('../utils/catchAsync');
 const {
   factoryDeleteOne,
@@ -39,30 +40,20 @@ exports.getGuestFeed = catchAsync(async (req, res, next) => {
   res.status(200).json({ feed, next: nextCursor, hasMore });
 });
 exports.getMyFeed = catchAsync(async (req, res, next) => {
-  let subscribedCommunityIds = await Subscription.find({
-    userId: req.user.id,
-  }).distinct('communityId');
-  const communityIds = await Community.find({
-    privacyType: { $in: ['public', 'restricted'] },
-  }).distinct('_id');
-  const mergedCommunityIds = [
-    ...new Set([...subscribedCommunityIds, ...communityIds]),
-  ];
-  let filter = {};
-  filter.communityId = { $in: mergedCommunityIds };
-  let sortBy = '-_id';
-  if (req.query.sort) {
-    sortBy += ` ${req.query.sort.split(',').join(' ')}`;
-  }
-  if (req.query.next) {
-    if (!mongoose.Types.ObjectId.isValid(req.query.next)) {
-      return next(new AppError('Invalid ID format', 400));
-    }
-    const nextId = mongoose.Types.ObjectId(req.query.next);
-    filter._id = { $lt: nextId };
-  }
-  const feed = Post.find(filter).sort(sortBy).limit(limit).lean();
+  const limit = Number(req.query.limit) || 5;
+  const subscribedCommunityIds = await Subscription.find({ userId: req.user.id }).distinct('communityId');
+  const communityIds = await Community.find({ privacyType: { $in: ['public', 'restricted'] } }).distinct('_id');
+
+  const mergedCommunityIds = [...new Set([...subscribedCommunityIds, ...communityIds])];
+
+  const filter = { communityId: { $in: mergedCommunityIds }, isActive: true };
+  const sortBy = req.query.sort === 'new' ? '-createdAt' : req.query.sort === 'hot' ? '-hotnessScore' : '-_id';
+
+  const feed = await Post.find(filter).sort(sortBy).limit(limit).lean();
+
   const nextCursor = feed.length > 0 ? feed[feed.length - 1]._id : null;
   const hasMore = feed.length === limit;
+
   res.status(200).json({ feed, next: nextCursor, hasMore });
 });
+

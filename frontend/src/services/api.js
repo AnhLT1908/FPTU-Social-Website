@@ -1,7 +1,7 @@
 import { message } from "antd";
 
 import axios from 'axios';
-const token = JSON.parse(localStorage.getItem('token'));
+const token = localStorage.getItem('token');
 const HEADERS_NOT_AUTHORIZATION = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

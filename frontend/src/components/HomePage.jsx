@@ -35,7 +35,7 @@ const HomePage = () => {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
-    fetch("http://localhost:9999/api/v1/posts/")
+    fetch("http://localhost:9999/api/v1/posts/my-feed")
       .then((res) => res.json())
       .then((data) => {
         const postsWithReactions = data.map((item) => ({
