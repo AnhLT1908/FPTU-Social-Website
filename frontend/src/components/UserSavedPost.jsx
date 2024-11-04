@@ -107,19 +107,6 @@ const UserSavedPost = () => {
                       </h6>
                     </Button>
                   </Link>
-                  <Link to={`/profile/${user._id}/posts`}>
-                    <Button
-                      variant="light"
-                      className="btn"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("posts")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Posts</h6>
-                    </Button>
-                  </Link>
                   <Link>
                     <Button
                       className="btn"
@@ -150,7 +137,6 @@ const UserSavedPost = () => {
                       <Dropdown.Menu>
                         <Dropdown.Item>Hot</Dropdown.Item>
                         <Dropdown.Item>New</Dropdown.Item>
-                        <Dropdown.Item>Top</Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>
@@ -190,16 +176,6 @@ const UserSavedPost = () => {
                   <Row>
                     <Col md={12}>
                       <h5>AnhLTHE172031</h5>
-                      <Button
-                        variant="light"
-                        style={{
-                          backgroundColor: "#c9d7de",
-                          borderRadius: "30px",
-                          marginTop: "5px",
-                        }}
-                      >
-                        <FaShare /> Share
-                      </Button>
                     </Col>
                   </Row>
                   <hr />

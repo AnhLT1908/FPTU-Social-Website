@@ -28,6 +28,8 @@ const UserProfile = () => {
   const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState("new");
+  const token = localStorage.getItem("token");
 
   const [user, setUser] = useState("");
   const navigate = useNavigate();
@@ -35,29 +37,31 @@ const UserProfile = () => {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) {
-      setUser(userData);
-    }
-    const userId = userData?._id;
-    const userName = userData?.username;
+    if (userData) setUser(userData);
 
-    fetch(`http://localhost:9999/api/v1/posts/user/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Post data:", data);
-        const postsWithReactions = data
-          .map((item) => ({
+    const fetchPosts = () => {
+      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Post:", data);
+          const postsWithReactions = data.feed.map((item) => ({
             ...item,
             upVotes: item.upVotes || 0,
             downVotes: item.downVotes || 0,
             upVoted: false,
             downVoted: false,
-          }))
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setPosts(postsWithReactions);
-      })
-      .catch((error) => console.error("Error fetching posts:", error));
-  }, []);
+          }));
+          setPosts(postsWithReactions);
+        })
+        .catch((error) => console.error("Error fetching posts:", error));
+    };
+
+    fetchPosts();
+  }, [filter, token]);
 
   const handleReaction = (postIndex, type) => {
     setPosts((prevPosts) => {
@@ -92,6 +96,10 @@ const UserProfile = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setModalImage(null);
+  };
+
+  const handleFilterChange = (selectedFilter) => {
+    setFilter(selectedFilter);
   };
 
   return (
@@ -157,19 +165,6 @@ const UserProfile = () => {
                   >
                     <h6 style={{ marginTop: "5px" }}>Overview</h6>
                   </Button>
-                  <Link to={`/profile/${user._id}/posts`}>
-                    <Button
-                      variant="light"
-                      className="btn"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("posts")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Posts</h6>
-                    </Button>
-                  </Link>
                   <Link to={`/profile/${user._id}/saved`}>
                     <Button
                       className="btn"
@@ -196,9 +191,16 @@ const UserProfile = () => {
                         New
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
-                        <Dropdown.Item>Hot</Dropdown.Item>
-                        <Dropdown.Item>New</Dropdown.Item>
-                        <Dropdown.Item>Top</Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleFilterChange("new")}
+                        >
+                          New
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleFilterChange("hot")}
+                        >
+                          Hot
+                        </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>
@@ -208,7 +210,7 @@ const UserProfile = () => {
           </Card>
 
           {posts.map((post, index) => (
-            <Card key={post.id} className="mt-3 p-3">
+            <Card key={index} className="mt-3 p-3">
               <Row>
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
@@ -280,9 +282,6 @@ const UserProfile = () => {
                 <Button variant="light">
                   <FaComment /> {post.comments || 0}
                 </Button>
-                <Button variant="light">
-                  <FaShare /> Share
-                </Button>
               </div>
             </Card>
           ))}
@@ -317,22 +316,12 @@ const UserProfile = () => {
                   <Row>
                     <Col md={12}>
                       <h5>{user?.username || "Username"}</h5>
-                      <Button
-                        variant="light"
-                        style={{
-                          backgroundColor: "#c9d7de",
-                          borderRadius: "30px",
-                          marginTop: "5px",
-                        }}
-                      >
-                        <FaShare /> Share
-                      </Button>
                     </Col>
                   </Row>
                   <hr />
                   <Row>
                     <Col md={12}>
-                      <h5>Settings</h5>
+                      <h5>Setting</h5>
                     </Col>
                   </Row>
                   <Row className="mt-2">

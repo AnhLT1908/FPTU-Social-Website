@@ -49,29 +49,77 @@ exports.getGuestFeed = catchAsync(async (req, res, next) => {
   res.status(200).json({ feed, next: nextCursor, hasMore });
 });
 
-// Get personalized feed for authenticated users
 exports.getMyFeed = catchAsync(async (req, res, next) => {
-
   const limit = Number(req.query.limit) || 5;
-  const subscribedCommunityIds = await Subscription.find({ userId: req.user.id }).distinct('communityId');
-  const communityIds = await Community.find({ privacyType: { $in: ['public', 'restricted'] } }).distinct('_id');
 
-  const mergedCommunityIds = [...new Set([...subscribedCommunityIds, ...communityIds])];
+  const subscribedCommunityIds = await Subscription.find({
+    userId: req.user.id,
+  }).distinct('communityId');
+  const communityIds = await Community.find({
+    privacyType: { $in: ['public', 'restricted'] },
+  }).distinct('_id');
+  const mergedCommunityIds = [
+    ...new Set([...subscribedCommunityIds, ...communityIds]),
+  ];
 
-  const filter = { communityId: { $in: mergedCommunityIds }, isActive: true };
-  const sortBy = req.query.sort === 'new' ? '-createdAt' : req.query.sort === 'hot' ? '-hotnessScore' : '-_id';
-
-  const feed = await Post.find(filter).sort(sortBy).limit(limit).lean();
-
+  const feed = await Post.aggregate([
+    { $match: { communityId: { $in: mergedCommunityIds }, isActive: true } },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments',
+      },
+    },
+    {
+      $lookup: {
+        from: 'communities',
+        localField: 'communityId',
+        foreignField: '_id',
+        as: 'communityId',
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userId',
+      },
+    },
+    {
+      $unwind: { path: '$communityId', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $unwind: { path: '$userId', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $project: {
+        communityId: 1,
+        userId: 1,
+        title: 1,
+        createdAt: 1,
+        upVotes: 1,
+        downVotes: 1,
+        commentsCount: { $size: '$comments' },
+        hotnessScore: {
+          $add: ['$upVotes', '$downVotes', { $size: '$comments' }],
+        },
+      },
+    },
+    {
+      $sort:
+        req.query.sort === 'hot' ? { hotnessScore: -1 } : { createdAt: -1 },
+    },
+    { $limit: limit },
+  ]);
 
   const nextCursor = feed.length > 0 ? feed[feed.length - 1]._id : null;
   const hasMore = feed.length === limit;
 
   res.status(200).json({ feed, next: nextCursor, hasMore });
 });
-
-
-
 
 exports.getPostByUserId = catchAsync(async (req, res, next) => {
   const userId = req.params.userId;
@@ -105,4 +153,3 @@ const postController = {
 };
 
 module.exports = postController;
-

@@ -11,6 +11,7 @@ const postSchema = new mongoose.Schema(
     media: [],
     upVotes: { type: Number, default: 0 },
     downVotes: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 }, 
     isEdited: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
@@ -20,9 +21,6 @@ const postSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
-postSchema.virtual('hotnessScore').get(function () {
-  return this.upVotes + this.downVotes + this.commentCount;
-});
 // MIDDLEWARES
 postSchema.pre(/^find/, function (next) {
   this.find({ isActive: { $ne: false } });

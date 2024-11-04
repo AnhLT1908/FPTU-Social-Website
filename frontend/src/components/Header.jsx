@@ -7,24 +7,23 @@ import {
   faMessage,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link } from "react-router-dom";
-import { searchCommunities, searchUsers } from '../services/SearchService';
+import { searchCommunities, searchUsers } from "../services/SearchService";
 function Header() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
   const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState("user"); // Mặc định là tìm kiếm User
+  const [searchType, setSearchType] = useState("user");
   const [searchResults, setSearchResults] = useState([]);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
-  const [noResultsMessage, setNoResultsMessage] = useState(""); // Khai báo state mới
-
+  const [noResultsMessage, setNoResultsMessage] = useState("");
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
       setUser(userData);
-      console.log("User: ", userData)
+      console.log("User: ", userData);
     }
   }, []);
 
@@ -34,71 +33,63 @@ function Header() {
     setUser(null);
     navigate("/login");
   };
-  // Hàm tìm kiếm
+
   const handleSearch = (e) => {
     const searchQuery = e.target.value;
     setQuery(searchQuery);
-  
+
     if (searchTimeout) {
-      clearTimeout(searchTimeout); // Xóa timeout trước đó nếu người dùng nhập tiếp
+      clearTimeout(searchTimeout);
     }
-  
-    // Đặt lại timeout mới sau khi dừng nhập 2 giây
+
     const newTimeout = setTimeout(async () => {
       if (searchQuery.length > 2) {
         try {
           let results;
-          let message = ""; // Thêm biến để lưu thông báo không có kết quả
-  
+          let message = "";
+
           if (searchType === "user") {
             const response = await searchUsers(searchQuery);
             results = response.data;
-  
+
             if (response.results === 0) {
               // Thay đổi thông báo cho user
             }
           } else {
             const response = await searchCommunities(searchQuery);
             results = response.data;
-  
+
             if (response.results === 0) {
-           
             }
           }
-  
+
           setSearchResults(results);
           setIsDropdownVisible(true);
-          setNoResultsMessage(message); // Cập nhật thông báo không có kết quả
+          setNoResultsMessage(message);
         } catch (error) {
           console.error("Error fetching search results:", error);
         }
       } else {
         setSearchResults([]);
         setIsDropdownVisible(false);
-        setNoResultsMessage(""); // Đặt lại thông báo khi không có kết quả
+        setNoResultsMessage("");
       }
-    }, 2000); // Chờ 2 giây trước khi gọi API
-  
-    setSearchTimeout(newTimeout); // Lưu timeout mới
-  };
-  
-  
+    }, 2000);
 
-  // Hàm xử lý khi chọn kết quả tìm kiếm
+    setSearchTimeout(newTimeout);
+  };
+
   const handleResultClick = (result) => {
     console.log("Selected result:", result);
-    setQuery(result.name || result.username); // Đặt tên vào ô search
-    setIsDropdownVisible(false); // Ẩn dropdown
-    
-    // Điều hướng tới trang chi tiết của kết quả nếu cần
+    setQuery(result.name || result.username);
+    setIsDropdownVisible(false);
+
     if (searchType === "user") {
-      navigate(`/profile/${result._id}`); // Điều hướng đến trang profile của user
+      navigate(`/profile/${result._id}`);
     } else if (searchType === "community") {
-      navigate(`/community/${result._id}`); // Điều hướng đến trang community
+      navigate(`/community/${result._id}`);
     }
   };
-  
-
 
   return (
     <nav className="d-flex px-md-2 align-items-center header-navbar">
@@ -120,7 +111,10 @@ function Header() {
                 <path d="M19.5 18.616 14.985 14.1a8.528 8.528 0 1 0-.884.884l4.515 4.515.884-.884ZM1.301 8.553a7.253 7.253 0 1 1 7.252 7.253 7.261 7.261 0 0 1-7.252-7.253Z"></path>
               </svg>
             </div>
-            <form className="search-form d-flex align-items-center" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="search-form d-flex align-items-center"
+              onSubmit={(e) => e.preventDefault()}
+            >
               <input
                 type="text"
                 placeholder="Search"
@@ -141,48 +135,59 @@ function Header() {
               </select>
             </form>
             {isDropdownVisible && (
-  <ul className="search-results-dropdown">
-    {searchResults.length > 0 ? (
-      searchResults.map((result) => (
-        <li
-          key={result._id || result.id}
-          className="search-result-item"
-          onClick={() => handleResultClick(result)}
-        >
-          {result.message ? ( // Kiểm tra xem có thông báo không
-            <span className="no-results-message">{result.message}</span>
-          ) : (
-            <>
-              {searchType === "user" ? (
-                <>
-                  <img src={result.avatar || "default.jpg"} alt="Avatar" className="result-avatar" width="20" height="20" />
-                  <span>{result.username}</span> - <span>{result.email}</span>
-                </>
-              ) : (
-                <>
-                  <img src={result.logo || "default.jpg"} alt="Logo" className="result-logo" width="20" height="20" />
-                  <span>{result.name}</span> - <span>{result.description}</span>
-                </>
-              )}
-            </>
-          )}
-        </li>
-      ))
-    ) : (
-      <li className="no-results-message">Không có kết quả nào</li> // Hiển thị thông báo không có kết quả
-    )}
-  </ul>
-)}
+              <ul className="search-results-dropdown">
+                {searchResults.length > 0 ? (
+                  searchResults.map((result) => (
+                    <li
+                      key={result._id || result.id}
+                      className="search-result-item"
+                      onClick={() => handleResultClick(result)}
+                    >
+                      {result.message ? ( // Kiểm tra xem có thông báo không
+                        <span className="no-results-message">
+                          {result.message}
+                        </span>
+                      ) : (
+                        <>
+                          {searchType === "user" ? (
+                            <>
+                              <img
+                                src={result.avatar || "default.jpg"}
+                                alt="Avatar"
+                                className="result-avatar"
+                                width="20"
+                                height="20"
+                              />
+                              <span>{result.username}</span> -{" "}
+                              <span>{result.email}</span>
+                            </>
+                          ) : (
+                            <>
+                              <img
+                                src={result.logo || "default.jpg"}
+                                alt="Logo"
+                                className="result-logo"
+                                width="20"
+                                height="20"
+                              />
+                              <span>{result.name}</span> -{" "}
+                              <span>{result.description}</span>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <li className="no-results-message">Không có kết quả nào</li> // Hiển thị thông báo không có kết quả
+                )}
+              </ul>
+            )}
 
-
-{/* Hiển thị thông báo không có kết quả */}
-{noResultsMessage && (
-  <div className="no-results-message">
-    {noResultsMessage}
-  </div>
-)}
-
-
+            {/* Hiển thị thông báo không có kết quả */}
+            {noResultsMessage && (
+              <div className="no-results-message">{noResultsMessage}</div>
+            )}
           </div>
         </div>
       </div>
@@ -314,18 +319,20 @@ function Header() {
                           alt="User Avatar for u/sjdkdk48"
                         />
                       </span>
-                      <span className="dropdown-item-name d-flex flex-column">
-                        <span>View Profile</span>
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            lineHeight: "1rem",
-                            color: "var(--color-secondary-weak)",
-                          }}
-                        >
-                          {"u/" + user?.username}
+                      <Link to={`/profile/${user.id}`}>
+                        <span className="dropdown-item-name d-flex flex-column">
+                          <span>View Profile</span>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              lineHeight: "1rem",
+                              color: "var(--color-secondary-weak)",
+                            }}
+                          >
+                            {"u/" + user?.username}
+                          </span>
                         </span>
-                      </span>
+                      </Link>
                     </a>
                   </li>
                   <li>

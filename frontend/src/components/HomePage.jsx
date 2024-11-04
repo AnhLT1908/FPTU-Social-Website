@@ -28,6 +28,7 @@ const HomePage = () => {
   const [modalImage, setModalImage] = useState(null);
   const navigate = useNavigate();
   const [user, setUser] = useState("");
+  const [filter, setFilter] = useState("new");
   const token = localStorage.getItem("token");
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
@@ -35,30 +36,30 @@ const HomePage = () => {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
-    fetch("http://localhost:9999/api/v1/posts")
-    if (userData) {
-      setUser(userData);
-      console.log("User data:", userData);
-    }
-    const userId = userData?._id;
-    console.log("User id", userId);
-    fetch(`http://localhost:9999/api/v1/posts/user/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Post:", data);
-        const postsWithReactions = data
-          .map((item) => ({
+
+    const fetchPosts = () => {
+      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Post:", data);
+          const postsWithReactions = data.feed.map((item) => ({
             ...item,
             upVotes: item.upVotes || 0,
             downVotes: item.downVotes || 0,
             upVoted: false,
             downVoted: false,
-          }))
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setPosts(postsWithReactions);
-      })
-      .catch((error) => console.error("Error fetching posts:", error));
-  }, []);
+          }));
+          setPosts(postsWithReactions);
+        })
+        .catch((error) => console.error("Error fetching posts:", error));
+    };
+
+    fetchPosts();
+  }, [filter, token]);
 
   const handleReaction = (index, type) => {
     setPosts((prevPosts) => {
@@ -85,8 +86,6 @@ const HomePage = () => {
     });
   };
 
-  console.log(token);
-
   const handleImageClick = (image) => {
     setModalImage(image);
     setShowModal(true);
@@ -97,6 +96,10 @@ const HomePage = () => {
     setModalImage(null);
   };
 
+  const handleFilterChange = (selectedFilter) => {
+    setFilter(selectedFilter);
+  };
+
   return (
     <Container>
       <Row className="mt-2 mb-2">
@@ -104,11 +107,16 @@ const HomePage = () => {
           <Row className="mb-2">
             <Col>
               <Dropdown>
-                <Dropdown.Toggle variant="light">New</Dropdown.Toggle>
+                <Dropdown.Toggle variant="light">
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item>Hot</Dropdown.Item>
-                  <Dropdown.Item>Top</Dropdown.Item>
-                  <Dropdown.Item>Rising</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleFilterChange("new")}>
+                    New
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleFilterChange("hot")}>
+                    Hot
+                  </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
@@ -120,8 +128,6 @@ const HomePage = () => {
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
                     <p>
-
-
                       <strong>
                         {"f/" + post.communityId?.name || "Community Name"}
                       </strong>{" "}
@@ -132,7 +138,6 @@ const HomePage = () => {
                     <p className="mt-n2">
                       {"u/" + post.userId?.username || "Username"}
                     </p>
-
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
@@ -194,14 +199,10 @@ const HomePage = () => {
                 <Button variant="light">
                   <FaComment /> {post.commentsCount || 0}
                 </Button>
-                <Button variant="light">
-                  <FaShare /> Share
-                </Button>
               </div>
             </Card>
           ))}
 
-          {/*************************************************** */}
           <Row>
             <Col className="text-center">
               <h3>
