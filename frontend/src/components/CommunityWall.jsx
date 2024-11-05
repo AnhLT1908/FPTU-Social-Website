@@ -177,6 +177,7 @@ const CommunityPage = () => {
       reportEntityId: pid,
       entityType: "Post",
       description: reportDes,
+      status: "Waiting",
     });
 
     let config = {
@@ -279,16 +280,6 @@ const CommunityPage = () => {
               <h1 className="ml-3">f/{communityName}</h1>
             </div>
             <div className="d-flex justify-content-between align-items-center">
-              <Dropdown>
-                <Dropdown.Toggle variant="light" id="dropdown-basic">
-                  Hot
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item>New</Dropdown.Item>
-                  <Dropdown.Item>Top</Dropdown.Item>
-                  <Dropdown.Item>Rising</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
               {user?.moderatorCommunities?.includes(id) ? (
                 <Button variant="light" onClick={() => setShowModal(true)}>
                   Manage Comunity
@@ -301,7 +292,7 @@ const CommunityPage = () => {
                   >
                     Create Post
                   </Button>
-                  {!users?.includes(user.id) ? (
+                  {!users?.includes(user?.id) ? (
                     <Button variant="light" onClick={() => setShowModal2(true)}>
                       Join
                     </Button>
@@ -387,14 +378,14 @@ const CommunityPage = () => {
                   <Link to={`/community/${post.communityId.id}`}>
                     <p>
                       <strong>
-                        {"f/" + (post.communityId?.name || "Community Name")}
+                        {"f/" + (post?.communityId?.name || "Community Name")}
                       </strong>{" "}
                       • {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
-                  <Link to={`/profile/${post.userId.id}`}>
+                  <Link to={`/profile/${post?.userId?.id}`}>
                     <p className="mt-n2">
-                      {"u/" + (post.userId?.username || "Username")}
+                      {"u/" + (post?.userId?.username || "Username")}
                     </p>
                   </Link>
                 </Col>
@@ -402,18 +393,19 @@ const CommunityPage = () => {
                   <Dropdown>
                     <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item onClick={() => handleSave(post._id)}>
+                      <Dropdown.Item onClick={() => handleSave(post?._id)}>
                         Save
                       </Dropdown.Item>
-                      <Dropdown.Item onClick={() => openReportModal(post._id)}>
+                      <Dropdown.Item onClick={() => openReportModal(post?._id)}>
                         Report
                       </Dropdown.Item>
-
-                      <Dropdown.Item
-                        onClick={() => navigate(`/edit-post/${post._id}`)}
-                      >
-                        Edit
-                      </Dropdown.Item>
+                      {post?.userId?.id === user?.id && (
+                        <Dropdown.Item
+                          onClick={() => navigate(`/edit-post/${post?._id}`)}
+                        >
+                          Edit
+                        </Dropdown.Item>
+                      )}
                     </Dropdown.Menu>
                   </Dropdown>
                 </Col>
@@ -421,8 +413,8 @@ const CommunityPage = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`/post/${post._id}`}>
-                    <h2>{post.title}</h2>
+                  <Link to={`/post/${post?._id}`}>
+                    <h2>{post?.title}</h2>
                   </Link>
                 </Col>
                 <Col md={4}>
@@ -457,10 +449,10 @@ const CommunityPage = () => {
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{post.downVotes}</span>
+                <span className="mx-2">{post?.downVotes}</span>
                 <Button
                   variant="light"
-                  onClick={() => navigate(`/post/${post._id}`)}
+                  onClick={() => navigate(`/post/${post?._id}`)}
                 >
                   <FaComment /> {post.commentsCount || 0}
                 </Button>
