@@ -120,11 +120,30 @@ exports.getMyFeed = catchAsync(async (req, res, next) => {
         userId: 1,
         title: 1,
         createdAt: 1,
-        upVotes: 1,
-        downVotes: 1,
+        votes: 1,
         commentsCount: { $size: '$comments' },
         hotnessScore: {
-          $add: ['$upVotes', '$downVotes', { $size: '$comments' }],
+          $add: [
+            {
+              $size: {
+                $filter: {
+                  input: { $objectToArray: '$votes' },
+                  as: 'vote',
+                  cond: { $eq: ['$$vote.v', true] },
+                },
+              },
+            }, // Count upvotes
+            {
+              $size: {
+                $filter: {
+                  input: { $objectToArray: '$votes' },
+                  as: 'vote',
+                  cond: { $eq: ['$$vote.v', false] },
+                },
+              },
+            }, // Count downvotes
+            { $size: '$comments' },
+          ],
         },
       },
     },
