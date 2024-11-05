@@ -29,6 +29,7 @@ const communitySchema = new mongoose.Schema(
       {
         userId: { type: mongoose.Schema.ObjectId, ref: 'User' },
         reason: { type: String },
+        access: { type: Boolean, default: false },
       },
     ],
     communityRule: String,

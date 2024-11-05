@@ -1,33 +1,73 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Form, Button, Dropdown, Tabs, Tab } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-const EditPost = ({ initialData }) => {
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+const EditPost = () => {
   const navigate = useNavigate();
   // Sử dụng state để quản lý dữ liệu bài đăng
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [post, setPost] = useState();
   const [selectedTab, setSelectedTab] = useState("text");
   const [mediaFiles, setMediaFiles] = useState([]);
-
+  const { id } = useParams();
+  const token = localStorage.getItem("token");
   // Sử dụng useEffect để load dữ liệu bài đăng ban đầu khi component được mount
   useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title);
-      setBody(initialData.body);
-      setSelectedTab(
-        initialData.mediaFiles && initialData.mediaFiles.length > 0
-          ? "images"
-          : "text"
-      );
-      setMediaFiles(initialData.mediaFiles || []);
-    }
-  }, [initialData]);
+    fetchPost();
+  }, []);
+  const fetchPost = () => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://localhost:9999/api/v1/posts/${id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
+    axios
+      .request(config)
+      .then((response) => {
+        setPost(response.data);
+        setTitle(response?.data?.title);
+        setBody(response?.data?.content);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   const handleTabSelect = (key) => {
     setSelectedTab(key);
   };
+  const handleChangePost = () => {
+    let data = JSON.stringify({
+      title: title,
+      content: body,
+    });
 
+    let config = {
+      method: "patch",
+      maxBodyLength: Infinity,
+      url: `http://localhost:9999/api/v1/posts/${id}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        alert("Update success!!");
+        window.location.href = `/post/${id}`;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   const handleMediaChange = (e) => {
     setMediaFiles([...e.target.files]);
   };
@@ -45,18 +85,6 @@ const EditPost = ({ initialData }) => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Edit Post</h2>
       </div>
-
-      <Dropdown className="mb-3">
-        <Dropdown.Toggle variant="light" id="dropdown-basic">
-          Select a community
-        </Dropdown.Toggle>
-
-        <Dropdown.Menu>
-          <Dropdown.Item href="#/action-1">Community 1</Dropdown.Item>
-          <Dropdown.Item href="#/action-2">Community 2</Dropdown.Item>
-          <Dropdown.Item href="#/action-3">Community 3</Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
 
       <Tabs activeKey={selectedTab} onSelect={handleTabSelect} className="mb-3">
         <Tab eventKey="text" title="Text" />
@@ -117,7 +145,7 @@ const EditPost = ({ initialData }) => {
 
         <div className="d-flex justify-content-between">
           <Button variant="secondary">Cancel</Button>
-          <Button variant="primary" onClick={() => navigate("/community/2")}>
+          <Button variant="primary" onClick={() => handleChangePost()}>
             Save Changes
           </Button>
         </div>
