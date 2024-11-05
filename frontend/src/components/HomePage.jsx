@@ -39,7 +39,7 @@ const HomePage = () => {
     if (userData) setUser(userData);
 
     const fetchPosts = () => {
-      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
+      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -47,10 +47,7 @@ const HomePage = () => {
         .then((res) => res.json())
         .then((data) => {
           console.log('Post:', data);
-          const postsWithReactions = data.feed.map((item) => ({
-            ...item,
-          }));
-          setPosts(postsWithReactions);
+          setPosts(data.feed);
         })
         .catch((error) => console.error('Error fetching posts:', error));
     };
