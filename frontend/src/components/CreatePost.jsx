@@ -4,13 +4,14 @@ import {
   Container,
   Form,
   Button,
-  Dropdown,
   Tabs,
   Tab,
   FormSelect,
   FormControl,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 const CreatePost = () => {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -18,13 +19,32 @@ const CreatePost = () => {
   const [selectedTab, setSelectedTab] = useState("text");
   const [mediaFiles, setMediaFiles] = useState([]);
   const [selectedCommunity, setSelectedCommunity] = useState("");
-  const [user, setUser] = useState(null);
+  const [community, setCommunity] = useState([]);
+  const [user, setUser] = useState("");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
       setUser(userData);
+      console.log("User data:", userData);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:9999/api/v1/communities/"
+        );
+        setCommunity(response.data);
+        console.log("Community:", response.data);
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+
+    fetchCommunities();
   }, []);
 
   const handleCommunityChange = (e) => {
@@ -37,6 +57,39 @@ const CreatePost = () => {
 
   const handleMediaChange = (e) => {
     setMediaFiles([...e.target.files]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Create the post data object
+    const data = {
+      title: title,
+      content: body,
+      communityId: selectedCommunity,
+      userId: user.id,
+      media: mediaFiles, // Assuming you want to send file names or additional info
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:9999/api/v1/posts/",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include the token in headers
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        navigate(`/community/${selectedCommunity}`); // Redirect on success
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("Failed to create post. Please try again.");
+    }
   };
 
   return (
@@ -53,22 +106,19 @@ const CreatePost = () => {
         <h2>Create post</h2>
       </div>
 
-      <Form>
-        {/* <FormControl value={user.id} name="userId" hidden/> */}
-
+      <Form onSubmit={handleSubmit}>
         <FormSelect
           className="mb-3"
           style={{ width: "30%" }}
           value={selectedCommunity}
           onChange={handleCommunityChange}
           name="community"
+          required
         >
-          <option id="dropdown-basic" value="">
-            Select a community
-          </option>
-          <option value="f/FPTU">f/FPTU</option>
-          <option>Community 2</option>
-          <option>Community 3</option>
+          <option value="">Select a community</option>
+          {community?.map((c) => (
+            <option key={c.id} value={c.id}>{`f/ ${c.name}`}</option>
+          ))}
         </FormSelect>
 
         <Tabs
@@ -81,7 +131,7 @@ const CreatePost = () => {
         </Tabs>
 
         <Form.Group controlId="postTitle" className="mb-3">
-          <Form.Label>Title </Form.Label>
+          <Form.Label>Title</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter title"
@@ -89,6 +139,7 @@ const CreatePost = () => {
             onChange={(e) => setTitle(e.target.value)}
             maxLength={300}
             name="title"
+            required
           />
           <Form.Text className="text-muted">{title.length}/300</Form.Text>
         </Form.Group>
@@ -103,6 +154,7 @@ const CreatePost = () => {
               onChange={(e) => setBody(e.target.value)}
               placeholder="Body"
               name="content"
+              required
             />
           </Form.Group>
         )}
@@ -134,8 +186,10 @@ const CreatePost = () => {
         )}
 
         <div className="d-flex justify-content-between">
-          <Button variant="secondary">Cancel</Button>
-          <Button variant="primary" onClick={() => navigate("/community/1")}>
+          <Button variant="secondary" onClick={() => navigate("/community")}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit">
             Post
           </Button>
         </div>

@@ -54,16 +54,6 @@ const userSchema = new mongoose.Schema(
     moderatorCommunities: [
       { type: mongoose.Schema.ObjectId, ref: 'Community' },
     ],
-    notifications: [
-      {
-        resourceId: String,
-        notifType: { String, enum: ['NewPost', 'NewComment', 'NewFollower'] },
-        title: String,
-        description: String,
-        seen: Boolean,
-        createdAt: Date,
-      },
-    ],
   },
   {
     timestamps: true,
@@ -83,7 +73,10 @@ userSchema.pre('save', function (next) {
   next();
 });
 userSchema.pre(/^find/, function (next) {
-  this.find({ isActive: { $ne: false } });
+  // Apply filtering only if noIsActiveFilter is not set to true
+  if (!this.getOptions().noIsActiveFilter) {
+    this.find({ isActive: { $ne: false } });
+  }
   next();
 });
 

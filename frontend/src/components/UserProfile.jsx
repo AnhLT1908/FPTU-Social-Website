@@ -21,85 +21,101 @@ import {
 } from "react-icons/fa";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
+import axios from "axios";
 import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [postDetail, setPostDetail] = useState({
-    id: "",
-    title: "",
-    body: "",
-    reactions: {
-      likes: 0,
-      dislikes: 0,
-    },
-    comments: 0,
-    timeCreate: "",
-    userName: "",
-    communityName: "",
-    liked: false,
-    disliked: false,
-  });
+  const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState("new");
+  const token = localStorage.getItem("token");
+
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    console.log("storedUserData", storedUserData);
+    if (storedUserData) setUser(storedUserData);
+  }, []);
+
+  const userId = user?.id;
+  console.log("UserId", userId)
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user || !user._id) return; 
+      try {
+        const response = await axios.get(
+          `http://localhost:9999/api/v1/users/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUserData(response.data);
+        console.log("User data", response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    if (token && user) {
+      fetchUserData();
+    }
+  }, [token]);
 
   useEffect(() => {
-    fetch(`http://localhost:9999/post/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPostDetail({
-          ...data,
-          liked: false,
-          disliked: false,
-        });
+    const fetchPosts = () => {
+      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .catch((error) => console.log(error));
-  }, [id]);
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Post:", data);
+          const postsWithReactions = data.feed.map((item) => ({
+            ...item,
+            upVotes: item.upVotes || 0,
+            downVotes: item.downVotes || 0,
+            upVoted: false,
+            downVoted: false,
+          }));
+          setPosts(postsWithReactions);
+        })
+        .catch((error) => console.error("Error fetching posts:", error));
+    };
 
-  const handleLike = () => {
-    setPostDetail((prevPost) => {
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes + 1;
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes;
+    fetchPosts();
+  }, [filter, token]);
 
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          likes: newLikes,
-          dislikes: newDislikes,
-        },
-        liked: !prevPost.liked,
-        disliked: prevPost.disliked ? false : prevPost.disliked,
-      };
-    });
-  };
+  const handleReaction = (postIndex, type) => {
+    setPosts((prevPosts) => {
+      const updatedPosts = [...prevPosts];
+      const post = updatedPosts[postIndex];
 
-  const handleDislike = () => {
-    setPostDetail((prevPost) => {
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes + 1;
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes;
+      if (type === "upVote") {
+        post.upVoted ? post.upVotes-- : post.upVotes++;
+        if (post.downVoted) {
+          post.downVotes--;
+          post.downVoted = false;
+        }
+        post.upVoted = !post.upVoted;
+      } else {
+        post.downVoted ? post.downVotes-- : post.downVotes++;
+        if (post.upVoted) {
+          post.upVotes--;
+          post.upVoted = false;
+        }
+        post.downVoted = !post.downVoted;
+      }
 
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          dislikes: newDislikes,
-          likes: newLikes,
-        },
-        disliked: !prevPost.disliked,
-        liked: prevPost.liked ? false : prevPost.liked,
-      };
+      return updatedPosts;
     });
   };
 
@@ -113,6 +129,10 @@ const UserProfile = () => {
     setModalImage(null);
   };
 
+  const handleFilterChange = (selectedFilter) => {
+    setFilter(selectedFilter);
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -122,6 +142,7 @@ const UserProfile = () => {
               <Row>
                 <Col md={12} className="d-flex align-items-center">
                   <div style={{ marginRight: "30px" }}>
+                    <Image src={user?.avatar} />
                     <FaUser
                       style={{
                         borderRadius: "100px",
@@ -154,44 +175,29 @@ const UserProfile = () => {
                     </Button>
                   </div>
                   <div>
-                    <h4>AnhLTHE172031</h4>
+                    <h4>{user?.username || "Username"}</h4>
                     <p style={{ fontWeight: "bold", color: "#666666" }}>
-                      u/AnhLTHE172031
+                      u/{user?.username || "Username"}
                     </p>
                   </div>
                 </Col>
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                  <Link>
-                    <Button
-                      className="btn"
-                      variant="light"
-                      style={{
-                        backgroundColor:
-                          activeTab === "overview" ? "#c9d7de" : "#ffffff",
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("overview")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Overview</h6>
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${postDetail.id}/posts`}>
-                    <Button
-                      className="btn"
-                      variant="light"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("posts")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Posts</h6>
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${postDetail.id}/saved`}>
+                  <Button
+                    className="btn"
+                    variant="light"
+                    style={{
+                      backgroundColor:
+                        activeTab === "overview" ? "#c9d7de" : "#ffffff",
+                      border: "none",
+                      borderRadius: "30px",
+                    }}
+                    onClick={() => setActiveTab("overview")}
+                  >
+                    <h6 style={{ marginTop: "5px" }}>Overview</h6>
+                  </Button>
+                  <Link to={`/profile/${user?._id}/saved`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -208,19 +214,6 @@ const UserProfile = () => {
               </Row>
               <Row className="mt-2">
                 <Col md={12} className="d-flex">
-                  <Button
-                    className="btn"
-                    variant="light"
-                    style={{
-                      borderRadius: "18px",
-                      border: "1px solid black",
-                      fontWeight: "bold",
-                      marginRight: "5px",
-                    }}
-                    onClick={() => navigate("/create-post")}
-                  >
-                    Create Post
-                  </Button>
                   <div>
                     <Dropdown>
                       <Dropdown.Toggle
@@ -230,9 +223,16 @@ const UserProfile = () => {
                         New
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
-                        <Dropdown.Item>Hot</Dropdown.Item>
-                        <Dropdown.Item>New</Dropdown.Item>
-                        <Dropdown.Item>Top</Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleFilterChange("new")}
+                        >
+                          New
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleFilterChange("hot")}
+                        >
+                          Hot
+                        </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>
@@ -241,77 +241,82 @@ const UserProfile = () => {
             </CardBody>
           </Card>
 
-          <Card key={postDetail.id} className="mt-3 p-3">
-            <Row>
-              <Col>
-                <Link to={"/community/2"}>
-                  <p>
-                    <strong>{postDetail.communityName}</strong> •{" "}
-                    {postDetail.timeCreate}
+          {posts.map((post, index) => (
+            <Card key={index} className="mt-3 p-3">
+              <Row>
+                <Col>
+                  <Link to={`/community/${post.communityId}`}>
+                    <p>
+                      <strong>
+                        {"f/" + post.communityId?.name || "Community Name"}
+                      </strong>{" "}
+                      • {new Date(post.createdAt).toLocaleString()}
+                    </p>
+                  </Link>
+                  <p className="mt-n2">
+                    {"u/" + post.userId?.username || "Username"}
                   </p>
-                </Link>
-                <p className="mt-n2">{postDetail.userName}</p>
-              </Col>
-              <Col className="d-flex justify-content-end">
-                <Dropdown>
-                  <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item>Save</Dropdown.Item>
-                    <Dropdown.Item>Report</Dropdown.Item>
-                    <Dropdown.Item>Hide</Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
-                      Edit
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </Col>
-            </Row>
+                </Col>
+                <Col className="d-flex justify-content-end">
+                  <Dropdown>
+                    <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item>Save</Dropdown.Item>
+                      <Dropdown.Item>Report</Dropdown.Item>
+                      <Dropdown.Item>Hide</Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => navigate(`/edit-post/${post.id}`)}
+                      >
+                        Edit
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Col>
+              </Row>
 
-            <Row>
-              <Col md={8}>
-                <Link to={`/post/${postDetail.id}`}>
-                  <h2>{postDetail.title}</h2>
-                </Link>
-              </Col>
-              <Col md={4}>
-                <Image
-                  src={image1}
-                  alt=""
-                  fluid
-                  style={{
-                    width: "75%",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    float: "right",
-                  }}
-                  onClick={() => handleImageClick(image1)}
-                />
-              </Col>
-            </Row>
+              <Row>
+                <Col md={8}>
+                  <Link to={`/post/${post._id}`}>
+                    <h2>{post.title}</h2>
+                  </Link>
+                </Col>
+                <Col md={4}>
+                  <Image
+                    src={image1}
+                    alt=""
+                    fluid
+                    style={{
+                      width: "75%",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      float: "right",
+                    }}
+                    onClick={() => handleImageClick(image1)}
+                  />
+                </Col>
+              </Row>
 
-            <div className="d-flex align-items-center">
-              <Button
-                variant={postDetail.liked ? "success" : "light"}
-                onClick={() => handleLike(postDetail.id)}
-              >
-                <FaArrowUp />
-              </Button>
-              <span className="mx-2">{postDetail.reactions.likes}</span>
-              <Button
-                variant={postDetail.disliked ? "danger" : "light"}
-                onClick={() => handleDislike(postDetail.id)}
-              >
-                <FaArrowDown />
-              </Button>
-              <span className="mx-2">{postDetail.reactions.dislikes}</span>
-              <Button variant="light">
-                <FaComment /> {postDetail.comments}
-              </Button>
-              <Button variant="light">
-                <FaShare /> Share
-              </Button>
-            </div>
-          </Card>
+              <div className="d-flex align-items-center">
+                <Button
+                  variant={post.upVoted ? "success" : "light"}
+                  onClick={() => handleReaction(index, "upVote")}
+                >
+                  <FaArrowUp />
+                </Button>
+                <span className="mx-2">{post.upVotes}</span>
+                <Button
+                  variant={post.downVoted ? "danger" : "light"}
+                  onClick={() => handleReaction(index, "downVote")}
+                >
+                  <FaArrowDown />
+                </Button>
+                <span className="mx-2">{post.downVotes}</span>
+                <Button variant="light">
+                  <FaComment /> {post.comments || 0}
+                </Button>
+              </div>
+            </Card>
+          ))}
         </Col>
 
         <Col md={4}>
@@ -342,17 +347,7 @@ const UserProfile = () => {
                   </Button>
                   <Row>
                     <Col md={12}>
-                      <h5>AnhLTHE172031</h5>
-                      <Button
-                        variant="light"
-                        style={{
-                          backgroundColor: "#c9d7de",
-                          borderRadius: "30px",
-                          marginTop: "5px",
-                        }}
-                      >
-                        <FaShare /> Share
-                      </Button>
+                      <h5>{user?.username || "Username"}</h5>
                     </Col>
                   </Row>
                   <hr />

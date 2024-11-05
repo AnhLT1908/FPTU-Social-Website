@@ -1,9 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/sidebar.css";
 import { Link, useLocation } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
 const sidebarPath = ["/", "/popular", "explore"];
+
 function Sidebar() {
   const { pathname } = useLocation();
+  const [community, setCommunity] = useState([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchCommunities = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:9999/api/v1/communities/",
+          {
+            signal: controller.signal,
+          }
+        );
+        const data = await response.json();
+        setCommunity(data);
+        console.log("Community:", data);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Fetch error:", error);
+        }
+      }
+    };
+    fetchCommunities();
+    return () => controller.abort();
+  }, []);
 
   return (
     <nav className="pt-3">
@@ -73,41 +99,6 @@ function Sidebar() {
         </li>
       </sidebar-top-section>
       <hr />
-      <sidebar-recent-section>
-        <div className="accordion accordion-flush">
-          <div className="accordion-item">
-            <div class="accordion-header" id="flush-headingOne">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#flush-collapseOne"
-                aria-expanded="false"
-                aria-controls="flush-collapseOne"
-              >
-                RECENT
-              </button>
-            </div>
-            <div
-              id="flush-collapseOne"
-              class="accordion-collapse collapse"
-              aria-labelledby="flush-headingOne"
-            >
-              <div class="accordion-body">
-                <li>
-                  <Link to={"/community/2"}>
-                    <span className="icon">
-                      <img src="/images/logo.jpg" width={32} height={32} />
-                    </span>
-                    <span className="name">f/FPTU</span>
-                  </Link>
-                </li>
-              </div>
-            </div>
-          </div>
-        </div>
-      </sidebar-recent-section>
-      <hr />
       <sidebar-community-section>
         <div className="accordion accordion-flush">
           <div className="accordion-item">
@@ -130,12 +121,24 @@ function Sidebar() {
             >
               <div class="accordion-body">
                 <li>
-                  <Link to={"/community/2"}>
+                  <Link to={"/create-community"}>
                     <span className="icon">
-                      <img src="/images/logo.jpg" width={32} height={32} />
+                      <FaPlus
+                        style={{ marginLeft: "10px", marginRight: "5px" }}
+                      />
                     </span>
-                    <span className="name">f/FPTU</span>
+                    <span className="name">Create a new community</span>
                   </Link>
+                </li>
+                <li>
+                  {community?.map((c) => (
+                    <Link to={`/community/${c.id}`}>
+                      <span className="icon">
+                        <img src="/images/logo.jpg" width={32} height={32} />
+                      </span>
+                      <span className="name">{`f/  ${c.name}`}</span>
+                    </Link>
+                  ))}
                 </li>
               </div>
             </div>

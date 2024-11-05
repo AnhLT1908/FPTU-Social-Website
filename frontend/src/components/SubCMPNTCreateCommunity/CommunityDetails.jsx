@@ -6,6 +6,8 @@ const CommunityDetails = ({
   setCommunityName,
   description,
   setDescription,
+  rule,
+  setRule,
 }) => {
   return (
     <Container className="p-3 mb-4">
@@ -18,11 +20,14 @@ const CommunityDetails = ({
       <Form>
         {/* Block for Community Name */}
         <Form.Group controlId="communityName" className="mb-3">
-          <Form.Label>Community name *</Form.Label>
+          <Form.Label>
+            Community name <span style={{ color: "red" }}>*</span>
+          </Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter community name"
             value={communityName}
+            required
             onChange={(e) => setCommunityName(e.target.value)}
           />
         </Form.Group>
@@ -31,13 +36,26 @@ const CommunityDetails = ({
 
         {/* Block for Description */}
         <Form.Group controlId="description" className="mb-3">
-          <Form.Label>Description *</Form.Label>
+          <Form.Label>
+            Description <span style={{ color: "red" }}>*</span>
+          </Form.Label>
           <Form.Control
             as="textarea"
             rows={4}
+            required
             placeholder="Enter description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group controlId="description" className="mb-3">
+          <Form.Label>Rule </Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={4}
+            placeholder="Enter Rule"
+            value={rule}
+            onChange={(e) => setRule(e.target.value)}
           />
         </Form.Group>
       </Form>

@@ -12,93 +12,53 @@ import {
 } from "react-bootstrap";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 
-import img1 from "../images/postImage/images_postId1.jpg";
-import img2 from "../images/postImage/images_postId2.jpg";
-import img3 from "../images/postImage/images_postId3.jpg";
-import img4 from "../images/postImage/images_postId4.jpg";
-import img5 from "../images/postImage/images_postId5.jpg";
-import img6 from "../images/postImage/images_postId6.jpg";
-import img7 from "../images/postImage/images_postId7.jpg";
-import img8 from "../images/postImage/images_postId8.jpg";
-import img9 from "../images/postImage/images_postId9.jpg";
-import img10 from "../images/postImage/images_postId10.jpg";
+import img1 from '../images/postImage/images_postId1.jpg';
+import img2 from '../images/postImage/images_postId2.jpg';
+import img3 from '../images/postImage/images_postId3.jpg';
+import img4 from '../images/postImage/images_postId4.jpg';
+import img5 from '../images/postImage/images_postId5.jpg';
+import img6 from '../images/postImage/images_postId6.jpg';
+import img7 from '../images/postImage/images_postId7.jpg';
+import img8 from '../images/postImage/images_postId8.jpg';
+import img9 from '../images/postImage/images_postId9.jpg';
+import img10 from '../images/postImage/images_postId10.jpg';
+import CommentList from './Comment/CommentList';
+import { doVotePost, getPostDetail } from '../services/PostService';
 
 const PostDetail = () => {
-  const [postDetail, setPostDetail] = useState({
-    id: "",
-    title: "",
-    body: "",
-    reactions: {
-      likes: 0,
-      dislikes: 0,
-    },
-    comments: 0,
-    timeCreate: "",
-    userName: "",
-    communityName: "",
-    liked: false,
-    disliked: false,
-  });
+  const [postDetail, setPostDetail] = useState({});
 
   const { id } = useParams();
-
+  console.log(id);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const fetchPostDetail = async () => {
+    const res = await getPostDetail(id);
+    setPostDetail(res);
+  };
   useEffect(() => {
-    fetch(`http://localhost:9999/post/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPostDetail({
-          ...data,
-          liked: false,
-          disliked: false,
-        });
-      })
-      .catch((error) => console.log(error));
+    fetchPostDetail();
   }, [id]);
 
-  const handleLike = () => {
+  const handleVote = async (postId, vote) => {
+    // Handle the vote up logic
+    const res = await doVotePost(postId, vote);
+    // Update the commentList state with the new vote information
     setPostDetail((prevPost) => {
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes + 1;
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes;
+      // Create a new votes object based on the current votes
+      const updatedVotes = { ...prevPost.votes };
 
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          likes: newLikes,
-          dislikes: newDislikes,
-        },
-        liked: !prevPost.liked,
-        disliked: prevPost.disliked ? false : prevPost.disliked,
-      };
+      // Update the votes based on the action
+      if (vote === true) {
+        updatedVotes[user.id] = true; // User voted up
+      } else if (vote === false) {
+        updatedVotes[user.id] = false; // User voted down
+      } else {
+        delete updatedVotes[user.id]; // User removed their vote
+      }
+      // Return the updated post object
+      return { ...prevPost, votes: updatedVotes };
     });
   };
-
-  const handleDislike = () => {
-    setPostDetail((prevPost) => {
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes + 1;
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes;
-
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          dislikes: newDislikes,
-          likes: newLikes,
-        },
-        disliked: !prevPost.disliked,
-        liked: prevPost.liked ? false : prevPost.liked,
-      };
-    });
-  };
-
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const navigate = useNavigate();
   const imageIndex = parseInt(id) - 1;
@@ -124,8 +84,9 @@ const PostDetail = () => {
                   <Col>
                     <Link to={"/community/2"}>
                       <p>
-                        <strong>{postDetail.communityName}</strong> •{" "}
-                        {postDetail.timeCreate}
+
+                        <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
+                        {new Date(postDetail.createdAt).toLocaleString()}
                       </p>
                     </Link>
                     <p style={{ marginTop: "-20px" }}>
@@ -134,21 +95,7 @@ const PostDetail = () => {
                       </Link>
                     </p>
                   </Col>
-                  <Col className="d-flex justify-content-end align-items-center">
-                    <Dropdown>
-                      <Dropdown.Toggle variant="light" id="dropdown-basic">
-                        Settings
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item>Save</Dropdown.Item>
-                        <Dropdown.Item>Report</Dropdown.Item>
-                        <Dropdown.Item>Hide</Dropdown.Item>
-                        <Dropdown.Item onClick={() => navigate("/edit-post/2")}>
-                          Edit
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Col>
+                  <Col className="d-flex justify-content-end align-items-center"></Col>
                 </Row>
               </Col>
             </Row>
@@ -175,34 +122,59 @@ const PostDetail = () => {
             <Row className="mt-4">
               <Col md={12}>
                 <Button
-                  variant={postDetail.liked ? "success" : "light"}
-                  onClick={handleLike}
+                  variant={
+                    postDetail.votes && postDetail.votes[user.id] === true
+                      ? 'success'
+                      : 'light'
+                  }
+                  onClick={() =>
+                    postDetail.votes && postDetail.votes[user.id] === true
+                      ? handleVote(postDetail.id, 'none')
+                      : handleVote(postDetail.id, true)
+                  }
+                  aria-label="Vote Up"
                 >
                   <FaArrowUp />
+                  {
+                    Object.values(postDetail.votes || {}).filter(
+                      (vote) => vote === true
+                    ).length
+                  }
                 </Button>
-                <span className="mx-2">{postDetail.reactions.likes}</span>
+                <span className="mx-2"></span>
                 <Button
-                  variant={postDetail.disliked ? "danger" : "light"}
-                  onClick={handleDislike}
+                  variant={
+                    postDetail.votes && postDetail.votes[user.id] === false
+                      ? 'danger'
+                      : 'light'
+                  }
+                  onClick={() =>
+                    postDetail.votes && postDetail.votes[user.id] === false
+                      ? handleVote(postDetail._id, 'none')
+                      : handleVote(postDetail._id, false)
+                  }
+                  aria-label="Vote Down"
+
                 >
                   <FaArrowDown />
+                  {
+                    Object.values(postDetail.votes || {}).filter(
+                      (vote) => vote === false
+                    ).length
+                  }
                 </Button>
-                <span className="mx-2">{postDetail.reactions.dislikes}</span>
-                <Button variant="light" className="mr-2">
+                <span className="mx-2"></span>
+                <Button
+                  variant="light"
+                  className="mr-2"
+                >
                   <FaComment /> {postDetail.comments}
-                </Button>
-                <Button variant="light">
-                  <FaShare /> Share
                 </Button>
               </Col>
             </Row>
             <Row className="mt-4">
               <Col md={12}>
-                <FormControl
-                  style={{ borderRadius: "15px" }}
-                  type="text"
-                  placeholder="Add a comment"
-                />
+                <CommentList postId={postDetail.id} />
               </Col>
             </Row>
           </Card>

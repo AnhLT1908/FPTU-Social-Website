@@ -146,6 +146,7 @@ const LoginForm = () => {
                   style={{ width: "100px" }}
                 />
               </a>
+
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>

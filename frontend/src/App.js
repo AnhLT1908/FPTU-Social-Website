@@ -16,14 +16,13 @@ import SettingProfile from "./components/SettingProfle";
 import Dashboard from "./components/Dashboard";
 import DetailReport from "./components/DetailReport";
 import UserManagement from "./components/ManageUser";
-import UserPostProfile from "./components/UserPostProfile";
 import UserSavedPost from "./components/UserSavedPost";
 import CommunityPage from "./components/CommunityWall";
 import CreateCommunity from "./components/CreateCommunity";
 import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
-import HomeLogin from "./components/HomeLogin";
-
+import ReportList from "./components/ReportList";
+import UserWall from "./components/UserWall";
 function App() {
   return (
     <div className="App">
@@ -39,7 +38,7 @@ function App() {
             <Route path="/post/:id" element={<PostDetail />} />
           
             <Route path="/profile/:id" element={<UserProfile />} />
-            <Route path="/profile/:id/posts" element={<UserPostProfile />} />
+            <Route path="/profile-user/:id" element={<UserWall />} />
             <Route path="/profile/:id/saved" element={<UserSavedPost />} />
 
             <Route path="/setting" element={<SettingProfile />} />
@@ -53,6 +52,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/report/:id" element={<DetailReport />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path ="/test" element ={<ReportList/>} />
         </Routes>
       </BrowserRouter>
     </div>
