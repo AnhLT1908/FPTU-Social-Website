@@ -85,7 +85,7 @@ const PostDetail = () => {
                     <Link to={"/community/2"}>
                       <p>
 
-                        <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
+                        <strong>{"f/" + postDetail.communityId?.name}</strong> •{" "}
                         {new Date(postDetail.createdAt).toLocaleString()}
                       </p>
                     </Link>
