@@ -195,3 +195,90 @@
     width: 560px;
   }
 }
+.search-bar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.search-form input {
+  border: 1px solid #ccc;
+  border-right: none;
+  padding: 8px;
+  flex-grow: 1;
+}
+
+.search-type-dropdown {
+  
+  border-left: none;
+  padding: 8px;
+
+  outline: none;
+  cursor: pointer;
+  border-radius: 30%;
+    background: #e5ebee;
+    border: none;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.search-result-item:hover {
+  background-color: #f0f0f0;
+}
+result-avatar,
+.result-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+}
+
+/* Style cho tên và mô tả */
+.search-result-item span {
+  color: #333;
+  font-size: 14px;
+}
+
+.search-result-item span:first-of-type {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.search-result-item span:last-of-type {
+  color: #777;
+}
+.no-results-message {
+  padding: 10px;
+  color: red; /* Màu đỏ cho thông báo không có kết quả */
+  text-align: center;
+  font-weight: bold; /* In đậm thông báo */
+  background-color: #f8d7da; /* Nền màu nhạt cho thông báo */
+}
+

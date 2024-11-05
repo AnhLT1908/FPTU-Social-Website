@@ -47,6 +47,7 @@ const CommunityPage = () => {
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const [postId, setPostId] = useState(null); // Tạo state để lưu post._id
   const [joinReason, setJoinReason] = useState();
+  const [bookmarks, setBookmarks] = useState();
   // Hàm mở modal và lưu postId
   const openReportModal = (id) => {
     setPostId(id); // Lưu post._id vào state
@@ -54,7 +55,10 @@ const CommunityPage = () => {
   };
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
+    if (userData) {
+      setUser(userData);
+      setBookmarks(userData.bookmarks);
+    }
 
     fetch(`http://localhost:9999/api/v1/communities/get-post/${id}`)
       .then((res) => res.json())
@@ -145,10 +149,16 @@ const CommunityPage = () => {
     setModalImage(image);
     setShowModal(true);
   };
-  const handleSave = (id) => {
+  const handleSave = (sid) => {
+    if (!user.bookmarks.includes(sid)) {
+      user.bookmarks.push(sid);
+    }
+    localStorage.setItem("user", JSON.stringify(user));
     const data = JSON.stringify({
-      bookmarks: [id],
+      bookmarks: user.bookmarks,
     });
+
+    console.log("data", data);
 
     const config = {
       method: "patch",
@@ -165,7 +175,7 @@ const CommunityPage = () => {
       .request(config)
       .then((response) => {
         alert("Save post success!");
-        console.log("Phản hồi từ server:", response.data);
+        window.location.href = `/community/${id}`;
       })
       .catch((error) => {
         console.error("Lỗi khi gửi yêu cầu:", error);
@@ -258,6 +268,7 @@ const CommunityPage = () => {
           console.log(error);
         });
     }
+    window.location.href = `/community/${id}`;
   };
 
   return (
@@ -286,20 +297,33 @@ const CommunityPage = () => {
                 </Button>
               ) : (
                 <ButtonGroup aria-label="Basic example">
-                  <Button
-                    variant="light"
-                    onClick={() => navigate("/create-post")}
-                  >
-                    Create Post
-                  </Button>
                   {!users?.includes(user?.id) ? (
-                    <Button variant="light" onClick={() => setShowModal2(true)}>
-                      Join
-                    </Button>
+                    community?.joinRequests?.some(
+                      (request) => request.userId === user.id
+                    ) ? (
+                      <Button variant="light" aria-readonly>
+                        Process
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="light"
+                        onClick={() => setShowModal2(true)}
+                      >
+                        Join
+                      </Button>
+                    )
                   ) : (
-                    <Button variant="success" aria-readonly>
-                      Joined
-                    </Button>
+                    <>
+                      <Button
+                        variant="light"
+                        onClick={() => navigate("/create-post")}
+                      >
+                        Create Post
+                      </Button>
+                      <Button variant="success" aria-readonly>
+                        Joined
+                      </Button>
+                    </>
                   )}
                 </ButtonGroup>
               )}
@@ -393,18 +417,23 @@ const CommunityPage = () => {
                   <Dropdown>
                     <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item onClick={() => handleSave(post?._id)}>
-                        Save
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={() => openReportModal(post?._id)}>
-                        Report
-                      </Dropdown.Item>
-                      {post?.userId?.id === user?.id && (
+                      {post?.userId?.id === user?.id ? (
                         <Dropdown.Item
                           onClick={() => navigate(`/edit-post/${post?._id}`)}
                         >
                           Edit
                         </Dropdown.Item>
+                      ) : (
+                        <>
+                          <Dropdown.Item onClick={() => handleSave(post?._id)}>
+                            Save
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() => openReportModal(post?._id)}
+                          >
+                            Report
+                          </Dropdown.Item>
+                        </>
                       )}
                     </Dropdown.Menu>
                   </Dropdown>
@@ -454,11 +483,20 @@ const CommunityPage = () => {
                   variant="light"
                   onClick={() => navigate(`/post/${post?._id}`)}
                 >
-                  <FaComment /> {post.commentsCount || 0}
+                  <FaComment /> {post.commentCount || 0}
                 </Button>
               </div>
             </Card>
           ))}
+          <Row>
+            <Col className="text-center">
+              <h3>
+                <a href="#" style={{ textDecoration: "none" }}>
+                  No more content
+                </a>
+              </h3>
+            </Col>
+          </Row>
         </Col>
 
         {/* Sidebar */}

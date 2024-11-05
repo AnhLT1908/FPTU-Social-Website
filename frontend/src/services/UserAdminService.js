@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { message } from 'antd';
 
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA0ZmY2ZWEzZTA4N2I3MDk2OGM1NSIsImlhdCI6MTczMDE3MDk0MiwiZXhwIjoxNzM3OTQ2OTQyfQ.t_KF9hficaDELynF5vfoI8YYfq3NeoyzGOKr7zaTodI';
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2NjcyZWM4NDk5NTZjODU2N2RlMyIsImlhdCI6MTczMDE3Njk2MiwiZXhwIjoxNzM3OTUyOTYyfQ.tJvV6vlj-tdOzWvoemJ8S8SUzuUU8ojRxNS-CSnRu4o';
 
 // Function to get the authorization header
 const getAuthHeader = () => ({

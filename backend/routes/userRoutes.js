@@ -37,6 +37,7 @@ router.patch(
   // userController.resizeUserPhoto,
   userController.updateMe
 );
+router.get('/search', userController.searchUsers);
 router.delete('/delete-me', userController.deleteMe);
 // Restrict To ADMIN Only
 router.get('/list',userController.getAllUsersPaginate)

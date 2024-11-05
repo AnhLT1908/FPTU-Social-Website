@@ -25,87 +25,17 @@ import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserSavedPost = () => {
   const [activeTab, setActiveTab] = useState("saved");
-  const [postDetail, setPostDetail] = useState({
-    id: "",
-    title: "",
-    body: "",
-    reactions: {
-      likes: 0,
-      dislikes: 0,
-    },
-    comments: 0,
-    timeCreate: "",
-    userName: "",
-    communityName: "",
-    liked: false,
-    disliked: false,
-  });
+  const [user, setUser] = useState("");
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const { id } = useParams();
-
   useEffect(() => {
-    fetch(`http://localhost:9999/post/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPostDetail({
-          ...data,
-          liked: false,
-          disliked: false,
-        });
-      })
-      .catch((error) => console.log(error));
-  }, [id]);
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData) {
+      setUser(userData);
+    }
+  }, []);
 
-  const handleLike = () => {
-    setPostDetail((prevPost) => {
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes + 1;
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes;
-
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          likes: newLikes,
-          dislikes: newDislikes,
-        },
-        liked: !prevPost.liked,
-        disliked: prevPost.disliked ? false : prevPost.disliked,
-      };
-    });
-  };
-
-  const handleDislike = () => {
-    setPostDetail((prevPost) => {
-      const newDislikes = prevPost.disliked
-        ? prevPost.reactions.dislikes - 1
-        : prevPost.reactions.dislikes + 1;
-      const newLikes = prevPost.liked
-        ? prevPost.reactions.likes - 1
-        : prevPost.reactions.likes;
-
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          dislikes: newDislikes,
-          likes: newLikes,
-        },
-        disliked: !prevPost.disliked,
-        liked: prevPost.liked ? false : prevPost.liked,
-      };
-    });
-  };
-
-  const handleImageClick = (image) => {
-    setModalImage(image);
-    setShowModal(true);
-  };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -162,7 +92,7 @@ const UserSavedPost = () => {
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                  <Link to={`/profile/${postDetail.id}`}>
+                <Link to={`/profile/${user._id}`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -175,19 +105,6 @@ const UserSavedPost = () => {
                       <h6 style={{ marginTop: "5px", color: "black" }}>
                         Overview
                       </h6>
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${postDetail.id}/posts`}>
-                    <Button
-                      variant="light"
-                      className="btn"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("posts")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Posts</h6>
                     </Button>
                   </Link>
                   <Link>
@@ -220,7 +137,6 @@ const UserSavedPost = () => {
                       <Dropdown.Menu>
                         <Dropdown.Item>Hot</Dropdown.Item>
                         <Dropdown.Item>New</Dropdown.Item>
-                        <Dropdown.Item>Top</Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>
@@ -260,16 +176,6 @@ const UserSavedPost = () => {
                   <Row>
                     <Col md={12}>
                       <h5>AnhLTHE172031</h5>
-                      <Button
-                        variant="light"
-                        style={{
-                          backgroundColor: "#c9d7de",
-                          borderRadius: "30px",
-                          marginTop: "5px",
-                        }}
-                      >
-                        <FaShare /> Share
-                      </Button>
                     </Col>
                   </Row>
                   <hr />
