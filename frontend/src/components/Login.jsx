@@ -16,7 +16,6 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-
       try {
         const response = await fetch(
           "http://localhost:9999/api/v1/users/login",
@@ -147,6 +146,7 @@ const LoginForm = () => {
                   style={{ width: "100px" }}
                 />
               </a>
+
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
