@@ -152,8 +152,13 @@ const CommentList = () => {
               aria-label="Vote Up"
             >
               <FaArrowUp />
+              {
+                Object.values(comment.votes || {}).filter(
+                  (vote) => vote === true
+                ).length
+              }
             </Button>
-            <span className="mx-2">{Object.values(comment.votes || {}).filter(vote => vote === true).length}</span>
+            <span className="mx-2"></span>
             <Button
               variant={
                 comment.votes && comment.votes[user.id] === false
@@ -168,8 +173,13 @@ const CommentList = () => {
               aria-label="Vote Down"
             >
               <FaArrowDown />
+              {
+                Object.values(comment.votes || {}).filter(
+                  (vote) => vote === false
+                ).length
+              }
             </Button>
-            <span className="mx-2">{Object.values(comment.votes || {}).filter(vote => vote === false).length}</span>
+            <span className="mx-2"></span>
             <Button
               variant="light"
               onClick={() => handleReplyClick(comment, 'none')}
@@ -221,6 +231,13 @@ const CommentList = () => {
                     <a
                       className="fw-bold"
                       href={`/profile/${childComment.tagInfo?.userId}`}
+                      style={{ textDecoration: 'none' }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.textDecoration = 'underline')
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.textDecoration = 'none')
+                      }
                     >
                       {childComment.tagInfo && childComment.tagInfo.tagName}
                     </a>
@@ -244,8 +261,13 @@ const CommentList = () => {
                       aria-label="Vote Up"
                     >
                       <FaArrowUp />
+                      {
+                        Object.values(childComment.votes || {}).filter(
+                          (vote) => vote === true
+                        ).length
+                      }
                     </Button>
-                    <span className="mx-2">{Object.values(childComment.votes || {}).filter(vote => vote === true).length}</span>
+                    <span className="mx-2"></span>
                     <Button
                       variant={
                         childComment.votes &&
@@ -262,8 +284,13 @@ const CommentList = () => {
                       aria-label="Vote Down"
                     >
                       <FaArrowDown />
+                      {
+                        Object.values(childComment.votes || {}).filter(
+                          (vote) => vote === false
+                        ).length
+                      }
                     </Button>
-                    <span className="mx-2">{Object.values(childComment.votes || {}).filter(vote => vote === false).length}</span>
+                    <span className="mx-2"></span>
                     <Button
                       variant="light"
                       onClick={() => handleReplyClick(childComment)}
@@ -283,10 +310,14 @@ const CommentList = () => {
             <CommentForm
               postId={id}
               parentId={comment._id} // Pass parentId for the reply
-              tagInfo={{
-                userId: replyTo.userId._id,
-                tagName: replyTo.userId.displayName,
-              }} // Set tag info if needed
+              tagInfo={
+                replyTo.parentId
+                  ? {
+                      userId: replyTo.userId._id,
+                      tagName: replyTo.userId.displayName,
+                    }
+                  : null
+              } // Set tag info if needed
               onCommentSubmit={handleFormSubmit}
             />
           )}

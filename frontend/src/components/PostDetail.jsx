@@ -150,14 +150,13 @@ const PostDetail = () => {
                   aria-label="Vote Up"
                 >
                   <FaArrowUp />
-                </Button>
-                <span className="mx-2">
                   {
                     Object.values(postDetail.votes || {}).filter(
                       (vote) => vote === true
                     ).length
                   }
-                </span>
+                </Button>
+                <span className="mx-2"></span>
                 <Button
                   variant={
                     postDetail.votes && postDetail.votes[user.id] === false
@@ -172,14 +171,13 @@ const PostDetail = () => {
                   aria-label="Vote Down"
                 >
                   <FaArrowDown />
-                </Button>
-                <span className="mx-2">
                   {
                     Object.values(postDetail.votes || {}).filter(
                       (vote) => vote === false
                     ).length
                   }
-                </span>
+                </Button>
+                <span className="mx-2"></span>
                 <Button
                   variant="light"
                   className="mr-2"
