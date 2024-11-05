@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Col,
   Container,
@@ -8,33 +8,34 @@ import {
   Button,
   Card,
   Dropdown,
-} from "react-bootstrap";
-import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import img1 from "../images/postImage/images_postId1.jpg";
-import img2 from "../images/postImage/images_postId2.jpg";
-import img3 from "../images/postImage/images_postId3.jpg";
-import img4 from "../images/postImage/images_postId4.jpg";
-import img5 from "../images/postImage/images_postId5.jpg";
-import img6 from "../images/postImage/images_postId6.jpg";
-import img7 from "../images/postImage/images_postId7.jpg";
-import img8 from "../images/postImage/images_postId8.jpg";
-import img9 from "../images/postImage/images_postId9.jpg";
-import img10 from "../images/postImage/images_postId10.jpg";
+} from 'react-bootstrap';
+import { FaArrowUp, FaArrowDown, FaComment, FaShare } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import img1 from '../images/postImage/images_postId1.jpg';
+import img2 from '../images/postImage/images_postId2.jpg';
+import img3 from '../images/postImage/images_postId3.jpg';
+import img4 from '../images/postImage/images_postId4.jpg';
+import img5 from '../images/postImage/images_postId5.jpg';
+import img6 from '../images/postImage/images_postId6.jpg';
+import img7 from '../images/postImage/images_postId7.jpg';
+import img8 from '../images/postImage/images_postId8.jpg';
+import img9 from '../images/postImage/images_postId9.jpg';
+import img10 from '../images/postImage/images_postId10.jpg';
+import { doVotePost } from '../services/PostService';
 
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
   const navigate = useNavigate();
-  const [user, setUser] = useState("");
-  const [filter, setFilter] = useState("new");
-  const token = localStorage.getItem("token");
+  const [user, setUser] = useState('');
+  const [filter, setFilter] = useState('new');
+  const token = localStorage.getItem('token');
 
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
+    const userData = JSON.parse(localStorage.getItem('user'));
     if (userData) setUser(userData);
 
     const fetchPosts = () => {
@@ -45,45 +46,43 @@ const HomePage = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("Post:", data);
+          console.log('Post:', data);
           const postsWithReactions = data.feed.map((item) => ({
             ...item,
-            upVotes: item.upVotes || 0,
-            downVotes: item.downVotes || 0,
-            upVoted: false,
-            downVoted: false,
           }));
           setPosts(postsWithReactions);
         })
-        .catch((error) => console.error("Error fetching posts:", error));
+        .catch((error) => console.error('Error fetching posts:', error));
     };
 
     fetchPosts();
   }, [filter, token]);
 
-  const handleReaction = (index, type) => {
-    setPosts((prevPosts) => {
-      const updatedPosts = [...prevPosts];
-      const post = updatedPosts[index];
+  const handleVote = async (postId, vote) => {
+    // Handle the vote up logic
+    const res = await doVotePost(postId, vote);
+    // Update the commentList state with the new vote information
+    setPosts((prevList) =>
+      prevList.map((post) => {
+        if (post._id === postId) {
+          // Create a new votes object based on the current votes
+          const updatedVotes = { ...post.votes };
 
-      if (type === "upVote") {
-        post.upVoted ? post.upVotes-- : post.upVotes++;
-        if (post.downVoted) {
-          post.downVotes--;
-          post.downVoted = false;
-        }
-        post.upVoted = !post.upVoted;
-      } else {
-        post.downVoted ? post.downVotes-- : post.downVotes++;
-        if (post.upVoted) {
-          post.upVotes--;
-          post.upVoted = false;
-        }
-        post.downVoted = !post.downVoted;
-      }
+          // Update the votes based on the action
+          if (vote === true) {
+            updatedVotes[user.id] = true; // User voted up
+          } else if (vote === false) {
+            updatedVotes[user.id] = false; // User voted down
+          } else {
+            delete updatedVotes[user.id]; // User removed their vote
+          }
 
-      return updatedPosts;
-    });
+          // Return the updated comment object
+          return { ...post, votes: updatedVotes };
+        }
+        return post; // Return the comment unchanged if it doesn't match
+      })
+    );
   };
 
   const handleImageClick = (image) => {
@@ -111,10 +110,10 @@ const HomePage = () => {
                   {filter.charAt(0).toUpperCase() + filter.slice(1)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => handleFilterChange("new")}>
+                  <Dropdown.Item onClick={() => handleFilterChange('new')}>
                     New
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleFilterChange("hot")}>
+                  <Dropdown.Item onClick={() => handleFilterChange('hot')}>
                     Hot
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -123,20 +122,23 @@ const HomePage = () => {
           </Row>
 
           {posts.map((post, index) => (
-            <Card key={post._id} className="mb-3 p-3">
+            <Card
+              key={post._id}
+              className="mb-3 p-3"
+            >
               <Row>
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
                     <p>
                       <strong>
-                        {"f/" + post.communityId?.name || "Community Name"}
-                      </strong>{" "}
+                        {'f/' + post.communityId?.name || 'Community Name'}
+                      </strong>{' '}
                       • {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
                   <Link to={`/profile/${post.userId._id}`}>
                     <p className="mt-n2">
-                      {"u/" + post.userId?.username || "Username"}
+                      {'u/' + post.userId?.username || 'Username'}
                     </p>
                   </Link>
                 </Col>
@@ -169,10 +171,10 @@ const HomePage = () => {
                     alt={`post-${index + 1}`}
                     fluid
                     style={{
-                      width: "50%",
-                      borderRadius: "10px",
-                      cursor: "pointer",
-                      float: "right",
+                      width: '50%',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      float: 'right',
                     }}
                     onClick={() =>
                       handleImageClick(images[index % images.length])
@@ -183,19 +185,47 @@ const HomePage = () => {
 
               <div className="d-flex align-items-center">
                 <Button
-                  variant={post.upVoted ? "success" : "light"}
-                  onClick={() => handleReaction(index, "upVote")}
+                  variant={
+                    post.votes && post.votes[user.id] === true
+                      ? 'success'
+                      : 'light'
+                  }
+                  onClick={() =>
+                    post.votes && post.votes[user.id] === true
+                      ? handleVote(post._id, 'none')
+                      : handleVote(post._id, true)
+                  }
+                  aria-label="Vote Up"
                 >
                   <FaArrowUp />
+                  {
+                    Object.values(post.votes || {}).filter(
+                      (vote) => vote === true
+                    ).length
+                  }
                 </Button>
-                <span className="mx-2">{post.upVotes}</span>
+                <span className="mx-2"></span>
                 <Button
-                  variant={post.downVoted ? "danger" : "light"}
-                  onClick={() => handleReaction(index, "downVote")}
+                  variant={
+                    post.votes && post.votes[user.id] === false
+                      ? 'danger'
+                      : 'light'
+                  }
+                  onClick={() =>
+                    post.votes && post.votes[user.id] === false
+                      ? handleVote(post._id, 'none')
+                      : handleVote(post._id, false)
+                  }
+                  aria-label="Vote Down"
                 >
                   <FaArrowDown />
+                  {
+                    Object.values(post.votes || {}).filter(
+                      (vote) => vote === false
+                    ).length
+                  }
                 </Button>
-                <span className="mx-2">{post.downVotes}</span>
+                <span className="mx-2"></span>
                 <Button variant="light">
                   <FaComment /> {post.commentsCount || 0}
                 </Button>
@@ -206,7 +236,10 @@ const HomePage = () => {
           <Row>
             <Col className="text-center">
               <h3>
-                <a href="#" style={{ textDecoration: "none" }}>
+                <a
+                  href="#"
+                  style={{ textDecoration: 'none' }}
+                >
                   No more content
                 </a>
               </h3>
@@ -215,12 +248,23 @@ const HomePage = () => {
         </Col>
       </Row>
 
-      <Modal show={showModal} onHide={handleCloseModal} centered>
+      <Modal
+        show={showModal}
+        onHide={handleCloseModal}
+        centered
+      >
         <Modal.Body>
-          <Image src={modalImage} style={{ width: "100%" }} fluid />
+          <Image
+            src={modalImage}
+            style={{ width: '100%' }}
+            fluid
+          />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          <Button
+            variant="secondary"
+            onClick={handleCloseModal}
+          >
             Close
           </Button>
         </Modal.Footer>

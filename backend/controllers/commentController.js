@@ -1,5 +1,7 @@
 const Comment = require('../models/commentModel');
+const Notification = require('../models/notificationModel');
 const Post = require('../models/postModel');
+const { getIo } = require('../socket');
 const catchAsync = require('../utils/catchAsync');
 const {
   factoryDeleteOne,
@@ -38,7 +40,19 @@ exports.createNewComment = async (req, res, next) => {
     await Post.findByIdAndUpdate(doc.postId, {
       $inc: { commentCount: 1 },
     });
-    res.status(201).json(doc);
+    const populatedDoc = await Comment.findById(doc._id).populate('userId');
+    if (populatedDoc.tagInfo) {
+      const io = getIo()
+      const notification = await Notification.create({
+        userId: doc.tagInfo.userId,
+        resourceId: `comments/${populatedDoc._id}`,
+        notifType: 'Tag',
+        title: 'Replied',
+        description: `User ${req.user.id} has just tag you in a comment.`,
+      });
+      io.emit('newNotification', notification);
+    }
+    res.status(201).json(populatedDoc);
   } catch (error) {
     next(error);
   }
@@ -162,7 +176,7 @@ exports.getChildrenComments = catchAsync(async (req, res, next) => {
 });
 exports.voteComment = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const comment = Comment.findById(id).lean();
+  const comment = await Comment.findById(id);
   if (!comment.votes) comment.votes = new Map();
   if (req.body.vote == 'none') {
     comment.votes.delete(req.user.id);
