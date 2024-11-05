@@ -37,8 +37,12 @@ const LoginForm = () => {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
 
-          // Redirect user after login
-          navigate("/");
+          // Redirect user based on role
+          if (data.user.role === 'student') {
+            navigate("/"); // Redirect to home for students
+          } else if (data.user.role === 'admin') {
+            navigate("/dashboard"); // Redirect to dashboard for admin
+          }
         } else {
           console.error("Login failed", data.message);
           setErrors({
@@ -86,7 +90,7 @@ const LoginForm = () => {
     const details = jwtDecode(credentialResponse.credential);
 
     if (details.email.endsWith("@fpt.edu.vn")) {
-      // Gửi token JWT đến backend để xác thực hoặc tạo tài khoản nếu chưa tồn tại
+      // Send JWT token to backend for verification or account creation if it doesn't exist
       fetch("http://localhost:9999/api/v1/users/google-login", {
         method: "POST",
         headers: {
@@ -94,37 +98,30 @@ const LoginForm = () => {
         },
         body: JSON.stringify({ token: credentialResponse.credential }),
       })
-        .then((res) => res.json())
+        .then((response) => response.json())
         .then((data) => {
           if (data.status === "success") {
-            console.log("Google login successful", data.user);
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
-            navigate("/");
+
+            // Redirect user based on role
+            if (data.user.role === 'student') {
+              navigate("/"); // Redirect to home for students
+            } else if (data.user.role === 'admin') {
+              navigate("/dashboard"); // Redirect to dashboard for admin
+            }
           } else {
             console.error("Google login failed", data.message);
-            setErrors({
-              form: data.message || "Login failed. Please try again.",
-            });
+            setErrors({ form: data.message });
           }
-        })
-        .catch((error) => {
-          console.error("Error during Google login", error);
-          setErrors({
-            form: "An error occurred during Google Sign-In. Please try again.",
-          });
         });
     } else {
-      // Thêm thông báo khi email không hợp lệ
-      console.error("Only @fpt.edu.vn emails are allowed");
-      setErrors({
-        form: "Only fpt emails are allowed.",
-      });
+      setErrors({ form: "Email must be a FPT email!" });
     }
   };
 
-  const handleGoogleError = () => {
-    console.log("Google Sign-In was unsuccessful");
+  const handleGoogleFailure = (error) => {
+    console.error("Google login failed", error);
   };
 
   return (
@@ -162,7 +159,7 @@ const LoginForm = () => {
                 <div className="mb-2">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
+                    onError={handleGoogleFailure}
                     useOneTap
                   />
                 </div>

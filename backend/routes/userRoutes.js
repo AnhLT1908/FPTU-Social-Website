@@ -18,9 +18,11 @@ const {
   checkStudentCode,
   googleLogin,
   checkEmailForGoogleLogin,
+  activateAccount
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
+router.get('/activate/:token', activateAccount);
 router.post('/check-email', checkEmail);
 router.post('/check-email-for-google-login', checkEmailForGoogleLogin);
 router.post('/check-student-code', checkStudentCode);
