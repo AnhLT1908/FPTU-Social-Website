@@ -14,7 +14,7 @@ const CreateCommunity = () => {
   const [banner, setBanner] = useState("");
   const [icon, setIcon] = useState("");
   const [selectedTopics, setSelectedTopics] = useState([]);
-  const [communityType, setCommunityType] = useState("Public");
+  const [communityType, setCommunityType] = useState("public");
   const [isMature, setIsMature] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -106,7 +106,6 @@ const CreateCommunity = () => {
       setIcon={setIcon}
       handleImageUpload={handleImageUpload}
     />,
-    
     <CommunityType
       communityType={communityType}
       setCommunityType={setCommunityType}
@@ -114,7 +113,10 @@ const CreateCommunity = () => {
       setIsMature={setIsMature}
     />,
   ];
-
+  const handleClose = () => {
+    setShowPreview(false);
+    window.location.href = "/";
+  };
   return (
     <Container
       className="mt-5 bg-white mb-5"
@@ -183,7 +185,7 @@ const CreateCommunity = () => {
           <p>{description || "Community description goes here..."}</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowPreview(false)}>
+          <Button variant="secondary" onClick={() => handleClose()}>
             Close
           </Button>
           <Button variant="primary" onClick={handleSubmit}>

@@ -46,19 +46,74 @@ const RegisterForm = () => {
     const newErrors = {};
     if (!email) {
       newErrors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Invalid email format.";
+    } else if (!/^[\w.%+-]+@fpt\.edu\.vn$/.test(email)) {
+      newErrors.email = "Email must be in the format *@fpt.edu.vn.";
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
-    const details = jwtDecode(credentialResponse.credential);
-    console.log("Logged in user:", details);
-    navigate("/create-username-password");
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const details = jwtDecode(credentialResponse.credential);
+      const email = details.email;
+  
+      // Kiểm tra nếu email không có đuôi @fpt.edu.vn thì không cho phép tiếp tục
+      if (!email.endsWith("@fpt.edu.vn")) {
+        setErrors({ form: "Only FPT emails are allowed." });
+        return;
+      }
+  
+      // Gửi yêu cầu kiểm tra email lên server
+      const response = await fetch("http://localhost:9999/api/v1/users/check-email-for-google-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        if (data.exists) {
+          // Nếu tài khoản đã tồn tại, thực hiện đăng nhập tự động
+          fetch("http://localhost:9999/api/v1/users/google-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: credentialResponse.credential }),
+          })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === "success") {
+              console.log("Google login successful", data.user);
+              localStorage.setItem("token", data.token);
+              localStorage.setItem("user", JSON.stringify(data.user));
+              navigate("/");
+            } else {
+              console.error("Google login failed", data.message);
+            }
+        })
+          .catch((error) => {
+            console.error("Error during Google login", error);
+          });
+        } else {
+          // Nếu chưa có tài khoản, chuyển hướng đến trang tạo username và password
+          navigate("/create-username-password", { state: { email } });
+        }
+      } else {
+        console.error("Error checking email:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error during Google Sign-In:", error);
+      setErrors({ form: "An error occurred during Google Sign-In. Please try again later." });
+    }
   };
+  
+  
+  
 
   const handleGoogleError = () => {
     console.log("Google Sign-In was unsuccessful");
@@ -74,7 +129,9 @@ const RegisterForm = () => {
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img src="../images/logo.jpg" alt="Logo" className="mb-3" style={{ width: "100px" }} />
+              <a href="/">
+                <img src="../images/logo.jpg" href="/" alt="Logo" className="mb-3" style={{ width: "100px" }}/>
+              </a>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
@@ -120,6 +177,10 @@ const RegisterForm = () => {
                       {errors.email}
                     </Form.Control.Feedback>
                   </Form.Group>
+
+                  {errors.form && (
+                    <div className="text-danger mt-3">{errors.form}</div>
+                  )}
 
                   <div className="mt-3">
                     Already a member?{" "}

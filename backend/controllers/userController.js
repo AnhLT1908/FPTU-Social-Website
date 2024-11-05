@@ -1,5 +1,7 @@
 const multer = require('multer');
 const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -28,6 +30,64 @@ const filterObj = (obj, ...excluded) => {
   });
   return newObj;
 };
+const multerStorage = multer.memoryStorage();
+
+// Bộ lọc chỉ cho phép upload ảnh
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload images only.', 400), false);
+  }
+};
+
+// Khởi tạo upload với cấu hình trên
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+// Middleware để upload ảnh
+exports.uploadUserPhoto = upload.single('image');
+
+// Hàm để resize ảnh và cập nhật trường avatar hoặc background
+exports.updateUserImage = catchAsync(async (req, res, next) => {
+  if (!req.file) {
+    return next(new AppError('Please upload an image file.', 400));
+  }
+
+  // Đặt tên file cho ảnh đã xử lý
+  const filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  // Đường dẫn lưu ảnh vào thư mục src/images/userImage
+  const outputPath = path.join(__dirname, '../../frontend/public/images/userImage', filename);
+  console.log("Path", outputPath)
+  // Kiểm tra nếu thư mục chưa tồn tại, tạo thư mục
+  const dirPath = path.dirname(outputPath);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
+  // Resize ảnh và lưu vào đường dẫn mới
+  await sharp(req.file.buffer)
+    .resize(500, 500) // Tùy chỉnh kích thước ảnh
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(outputPath);
+
+  // Cập nhật ảnh vào trường avatar hoặc background tùy theo yêu cầu từ client
+  const updateField = req.body.type === 'background' ? 'background' : 'avatar';
+  const updateData = { [updateField]: `/images/userImage/${filename}` };
+
+  // Cập nhật thông tin người dùng trong cơ sở dữ liệu
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: `${updateField} updated successfully!`,
+    user: updatedUser,
+  });
+});
 // const multerStorage = multer.memoryStorage();
 // const multerFilter = (req, file, cb) => {
 //   if (file.mimetype.startsWith('image')) {
@@ -54,8 +114,8 @@ exports.getMe = (req, res, next) => {
   next();
 };
 exports.register = (req, res, next) => {
-  res.status(200).json({message: 'Hello'});
-}
+  res.status(200).json({ message: 'Hello' });
+};
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
     return next(new AppError('This route is not for password update!', 400));
@@ -68,9 +128,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
   res.status(200).json({
     status: 'success',
-    data: {
-      user: updatedUser,
-    },
+    user: updatedUser,
   });
 });
 exports.deleteMe = catchAsync(async (req, res, next) => {
@@ -118,8 +176,14 @@ exports.getAllUsersPaginate = catchAsync(async (req, res, next) => {
   const totalUsers = await User.countDocuments(filter);
 
   // Get the count of active and inactive users
-  const activeUsersCount = await User.countDocuments({ ...filter, isActive: true });
-  const inactiveUsersCount = await User.countDocuments({ ...filter, isActive: false });
+  const activeUsersCount = await User.countDocuments({
+    ...filter,
+    isActive: true,
+  });
+  const inactiveUsersCount = await User.countDocuments({
+    ...filter,
+    isActive: false,
+  });
 
   // Send response
   res.status(200).json({
@@ -151,7 +215,9 @@ exports.toggleUserActiveStatus = catchAsync(async (req, res, next) => {
   // Response after successful update
   res.status(200).json({
     status: 'success',
-    message: `User status has been updated to ${user.isActive ? 'active' : 'inactive'}.`,
+    message: `User status has been updated to ${
+      user.isActive ? 'active' : 'inactive'
+    }.`,
     data: {
       user,
     },
@@ -172,7 +238,7 @@ exports.searchUsers = catchAsync(async (req, res, next) => {
 
   const users = await User.find(searchFilter)
     .select('username displayName email avatar') // Chỉ lấy các trường cần thiết
-   .limit(10);
+    .limit(10);
 
   res.status(200).json({
     status: 'success',
@@ -180,8 +246,3 @@ exports.searchUsers = catchAsync(async (req, res, next) => {
     data: users,
   });
 });
-
-
-
-
-

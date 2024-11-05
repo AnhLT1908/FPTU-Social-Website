@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Col,
@@ -9,8 +9,8 @@ import {
   Row,
   Dropdown,
   Card,
-} from 'react-bootstrap';
-import { FaArrowUp, FaArrowDown, FaComment, FaShare } from 'react-icons/fa';
+} from "react-bootstrap";
+import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 
 import img1 from '../images/postImage/images_postId1.jpg';
 import img2 from '../images/postImage/images_postId2.jpg';
@@ -27,6 +27,7 @@ import { doVotePost, getPostDetail } from '../services/PostService';
 
 const PostDetail = () => {
   const [postDetail, setPostDetail] = useState({});
+
   const { id } = useParams();
   console.log(id);
   const user = JSON.parse(localStorage.getItem('user'));
@@ -69,7 +70,7 @@ const PostDetail = () => {
           <Link to="/">
             <Button
               className="btn btn-secondary mt-2"
-              style={{ borderRadius: '10px', float: 'right' }}
+              style={{ borderRadius: "10px", float: "right" }}
             >
               Back
             </Button>
@@ -81,36 +82,20 @@ const PostDetail = () => {
               <Col md={12}>
                 <Row className="mb-2">
                   <Col>
-                    <Link to={'/community/2'}>
+                    <Link to={"/community/2"}>
                       <p>
-                        <strong>{postDetail.communityName}</strong> •{' '}
-                        {postDetail.timeCreate}
+
+                        <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
+                        {new Date(postDetail.createdAt).toLocaleString()}
                       </p>
                     </Link>
-                    <p style={{ marginTop: '-20px' }}>
+                    <p style={{ marginTop: "-20px" }}>
                       <Link to={`/profile/${postDetail.id}`}>
                         {postDetail.userName}
                       </Link>
                     </p>
                   </Col>
-                  <Col className="d-flex justify-content-end align-items-center">
-                    <Dropdown>
-                      <Dropdown.Toggle
-                        variant="light"
-                        id="dropdown-basic"
-                      >
-                        Settings
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item>Save</Dropdown.Item>
-                        <Dropdown.Item>Report</Dropdown.Item>
-                        <Dropdown.Item>Hide</Dropdown.Item>
-                        <Dropdown.Item onClick={() => navigate('/edit-post/2')}>
-                          Edit
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Col>
+                  <Col className="d-flex justify-content-end align-items-center"></Col>
                 </Row>
               </Col>
             </Row>
@@ -130,7 +115,7 @@ const PostDetail = () => {
                 <Image
                   src={images[imageIndex]}
                   fluid
-                  style={{ width: '100%', borderRadius: '10px' }}
+                  style={{ width: "100%", borderRadius: "10px" }}
                 />
               </Col>
             </Row>
@@ -169,6 +154,7 @@ const PostDetail = () => {
                       : handleVote(postDetail._id, false)
                   }
                   aria-label="Vote Down"
+
                 >
                   <FaArrowDown />
                   {
@@ -184,9 +170,6 @@ const PostDetail = () => {
                 >
                   <FaComment /> {postDetail.comments}
                 </Button>
-                <Button variant="light">
-                  <FaShare /> Share
-                </Button>
               </Col>
             </Row>
             <Row className="mt-4">
@@ -200,7 +183,7 @@ const PostDetail = () => {
         <Col md={4}>
           <Card
             className="mb-4 p-3"
-            style={{ height: '85vh', overflowY: 'auto' }}
+            style={{ height: "85vh", overflowY: "auto" }}
           >
             <h4>{postDetail.communityName}</h4>
             <p>
