@@ -52,28 +52,13 @@ exports.checkStudentCode = catchAsync(async (req, res, next) => {
 
 // Signup function
 exports.signup = catchAsync(async (req, res, next) => {
-  const { email, username, password, studentCode } = req.body;
-
-  // Generate a random password if not provided
-  const generatedPassword = password || (await promisify(crypto.randomBytes)(12)).toString('hex');
-
-  // Create new user
-  const newUser = await User.create({
-    email,
-    username,
-    password: generatedPassword,
-    studentCode
-  });
-
-  // Generate profile URL for the email
   const url = `${req.protocol}://${req.get('host')}/me`;
-
-  // Send email with generated password if a password was generated
-  if (!password) {
-    await new Email(newUser, url).sendPassword(generatedPassword);
-  }
-
-  // Send token response
+  // const randomBytes = await promisify(crypto.randomBytes)(12);
+  const newUser = await User.create({
+    ...req.body,
+    passwordConfirm: req.body.password,
+  });
+  await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, res);
 });
 

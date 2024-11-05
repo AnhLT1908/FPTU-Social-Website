@@ -23,86 +23,41 @@ import img8 from '../images/postImage/images_postId8.jpg';
 import img9 from '../images/postImage/images_postId9.jpg';
 import img10 from '../images/postImage/images_postId10.jpg';
 import CommentList from './Comment/CommentList';
+import { doVotePost, getPostDetail } from '../services/PostService';
 
 const PostDetail = () => {
-  const [postDetail, setPostDetail] = useState({
-    id: "",
-    title: "",
-    content: "",
-    reactions: {
-      upVotes: 0,
-      downVotes: 0,
-    },
-    comments: 0,
-    createdAt: "",
-    userId: "",
-    communityId: "",
-    upVoted: false,
-    downVoted: false,
-    isActive: true,
-  });
-  
-
-  console.log("Post detail:", postDetail)
+  const [postDetail, setPostDetail] = useState({});
   const { id } = useParams();
+  console.log(id);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const fetchPostDetail = async () => {
+    const res = await getPostDetail(id);
+    setPostDetail(res);
+  };
   useEffect(() => {
-    fetch(`http://localhost:9999/api/v1/posts/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPostDetail({
-          ...data,
-          reactions: data.reactions || { upVotes: 0, downVotes: 0 },
-          upVoted: false,
-          downVoted: false,
-        });
-      })
-      .catch((error) => console.log(error));
+    fetchPostDetail();
   }, [id]);
 
-  const handleLike = () => {
+  const handleVote = async (postId, vote) => {
+    // Handle the vote up logic
+    const res = await doVotePost(postId, vote);
+    // Update the commentList state with the new vote information
     setPostDetail((prevPost) => {
-      const newupVotes = prevPost.upVoted
-        ? prevPost.reactions?.upVotes - 1
-        : prevPost.reactions?.upVotes + 1;
-      const newdownVotes = prevPost.downVoted
-        ? prevPost.reactions?.downVotes - 1
-        : prevPost.reactions?.downVotes;
+      // Create a new votes object based on the current votes
+      const updatedVotes = { ...prevPost.votes };
 
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          upVotes: newupVotes,
-          downVotes: newdownVotes,
-        },
-        upVoted: !prevPost.upVoted,
-        downVoted: prevPost.downVoted ? false : prevPost.downVoted,
-      };
+      // Update the votes based on the action
+      if (vote === true) {
+        updatedVotes[user.id] = true; // User voted up
+      } else if (vote === false) {
+        updatedVotes[user.id] = false; // User voted down
+      } else {
+        delete updatedVotes[user.id]; // User removed their vote
+      }
+      // Return the updated post object
+      return { ...prevPost, votes: updatedVotes };
     });
   };
-
-  const handleDislike = () => {
-    setPostDetail((prevPost) => {
-      const newdownVotes = prevPost.downVoted
-        ? prevPost.reactions?.downVotes - 1
-        : prevPost.reactions?.downVotes + 1;
-      const newupVotes = prevPost.upVoted
-        ? prevPost.reactions?.upVotes - 1
-        : prevPost.reactions?.upVotes;
-
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          downVotes: newdownVotes,
-          upVotes: newupVotes,
-        },
-        downVoted: !prevPost.downVoted,
-        upVoted: prevPost.upVoted ? false : prevPost.upVoted,
-      };
-    });
-  };
-
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const navigate = useNavigate();
   const imageIndex = parseInt(id) - 1;
@@ -128,14 +83,13 @@ const PostDetail = () => {
                   <Col>
                     <Link to={'/community/2'}>
                       <p>
-                        <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
-                        {new Date(postDetail.createdAt).toLocaleString()}
-
+                        <strong>{postDetail.communityName}</strong> •{' '}
+                        {postDetail.timeCreate}
                       </p>
                     </Link>
                     <p style={{ marginTop: '-20px' }}>
                       <Link to={`/profile/${postDetail.id}`}>
-                        {"u/" + postDetail.userId.username}
+                        {postDetail.userName}
                       </Link>
                     </p>
                   </Col>
@@ -168,13 +122,13 @@ const PostDetail = () => {
             </Row>
             <Row>
               <Col md={12}>
-                <p>{postDetail.content}</p>
+                <p>{postDetail.body}</p>
               </Col>
             </Row>
             <Row>
               <Col md={12}>
                 <Image
-                  src={images[0]}
+                  src={images[imageIndex]}
                   fluid
                   style={{ width: '100%', borderRadius: '10px' }}
                 />
@@ -183,21 +137,53 @@ const PostDetail = () => {
             <Row className="mt-4">
               <Col md={12}>
                 <Button
-                  variant={postDetail.upVoted ? "success" : "light"}
-                  onClick={handleLike}
+                  variant={
+                    postDetail.votes && postDetail.votes[user.id] === true
+                      ? 'success'
+                      : 'light'
+                  }
+                  onClick={() =>
+                    postDetail.votes && postDetail.votes[user.id] === true
+                      ? handleVote(postDetail.id, 'none')
+                      : handleVote(postDetail.id, true)
+                  }
+                  aria-label="Vote Up"
                 >
                   <FaArrowUp />
                 </Button>
-                <span className="mx-2">{postDetail.reactions?.upVotes}</span>
+                <span className="mx-2">
+                  {
+                    Object.values(postDetail.votes || {}).filter(
+                      (vote) => vote === true
+                    ).length
+                  }
+                </span>
                 <Button
-                  variant={postDetail.downVoted ? "danger" : "light"}
-
-                  onClick={handleDislike}
+                  variant={
+                    postDetail.votes && postDetail.votes[user.id] === false
+                      ? 'danger'
+                      : 'light'
+                  }
+                  onClick={() =>
+                    postDetail.votes && postDetail.votes[user.id] === false
+                      ? handleVote(postDetail._id, 'none')
+                      : handleVote(postDetail._id, false)
+                  }
+                  aria-label="Vote Down"
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{postDetail.reactions?.downVotes}</span>
-                <Button variant="light" className="mr-2">
+                <span className="mx-2">
+                  {
+                    Object.values(postDetail.votes || {}).filter(
+                      (vote) => vote === false
+                    ).length
+                  }
+                </span>
+                <Button
+                  variant="light"
+                  className="mr-2"
+                >
                   <FaComment /> {postDetail.comments}
                 </Button>
                 <Button variant="light">
@@ -218,7 +204,7 @@ const PostDetail = () => {
             className="mb-4 p-3"
             style={{ height: '85vh', overflowY: 'auto' }}
           >
-            <h4>{"f/" + postDetail.communityId.name}</h4>
+            <h4>{postDetail.communityName}</h4>
             <p>
               This subreddit serves as a general hub to discuss most things
               Japanese and exchange information, as well as to guide users to

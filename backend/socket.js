@@ -1,53 +1,42 @@
+// socket.js
 const { Server } = require('socket.io');
 let io;
-const userRooms = {};
-module.exports.init = (httpServer) => {
-  io = new Server(httpServer, {
+const initSocket = (server) => {
+  io = new Server(server, {
     cors: {
       origin: [
-        '*',
-        'http://localhost:3000',
         'http://localhost:9999',
+        'http://localhost:3000',
         'http://127.0.0.1:9999',
         'http://127.0.0.1:3000',
       ],
       methods: ['GET', 'POST'],
       credentials: true,
     },
+    // transports: ['websocket'],
+    // pingInterval: 1000 * 60 * 5,
+    // pingTimeout: 1000 * 60 * 3,
   });
+
+  // Listen for incoming socket connections
   io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
-    socket.on('joinUserRoom', (userId) => {
-      console.log(`User join in room: ${userId}`);
-      socket.join(userId);
-      userRooms[socket.id] = userId;
+    console.log('A user connected: ' + socket.id);
+    socket.on('joinRoom', (userId) => {
+      console.log('User  join: ' + userId);
+      socket.join(userId); // Join the room with the user's ID
     });
-
-    // Event for joining community rooms
-    socket.on('joinCommunityRooms', (communityIds) => {
-      communityIds.forEach((communityId) => socket.join(communityId));
-    });
-
+    // Handle disconnection
     socket.on('disconnect', () => {
-      const userId = userRooms[socket.id];
-      if (userId) {
-        socket.leave(userId);
-        delete userRooms[socket.id];
-      }
-      console.log('User disconnected:', socket.id);
+      console.log('User  disconnected: ' + socket.id);
     });
   });
 };
-// Socket notification
-// exports.sendNotification = ({ recipientId, room, notification }) => {
-//   // If a specific user ID is provided (single user)
-//   if (recipientId) {
-//     io.to(recipientId).emit('newNotification', notification);
-//   }
-//   // If a room name is provided (multiple users)
-//   else if (room) {
-//     console.log(room);
-//     io.to(room).emit('newNotification', notification);
-//   }
-// };
-// module.exports.getIO = () => io;
+
+const getIo = () => {
+  if (!io) {
+    throw new Error('Socket.io not initialized');
+  }
+  return io;
+};
+
+module.exports = { initSocket, getIo };

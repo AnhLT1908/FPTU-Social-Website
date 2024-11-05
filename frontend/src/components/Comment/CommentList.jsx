@@ -32,7 +32,6 @@ const CommentList = () => {
     }
   };
   const handleReplyClick = (comment) => {
-    console.log(comment);
     setReplyTo(comment); // Set the comment being replied to
   };
 
@@ -74,6 +73,27 @@ const CommentList = () => {
           // Return the updated comment object
           return { ...comment, votes: updatedVotes };
         }
+        if (comment.childrens) {
+          return {
+            ...comment,
+            childrens: comment.childrens.map((childComment) => {
+              if (childComment._id === commentId) {
+                const updatedChildVotes = { ...childComment.votes };
+
+                if (vote === true) {
+                  updatedChildVotes[user.id] = true; // User voted up
+                } else if (vote === false) {
+                  updatedChildVotes[user.id] = false; // User voted down
+                } else {
+                  delete updatedChildVotes[user.id]; // User removed their vote
+                }
+
+                return { ...childComment, votes: updatedChildVotes };
+              }
+              return childComment; // Return the child comment unchanged
+            }),
+          };
+        }
         return comment; // Return the comment unchanged if it doesn't match
       })
     );
@@ -85,6 +105,7 @@ const CommentList = () => {
     <div>
       {commentList.map((comment) => (
         <div
+          // id={comment._id}
           key={comment._id}
           className="comment"
           style={{
@@ -94,7 +115,10 @@ const CommentList = () => {
             borderRadius: '5px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <a
+            style={{ display: 'flex', alignItems: 'center' }}
+            href={`/profile/${comment.userId._id}`}
+          >
             <img
               src={'/images/logo.jpg'} // Assuming the avatar URL is stored in comment.author.avatar
               alt={comment.userId.displayName}
@@ -108,7 +132,7 @@ const CommentList = () => {
             <span style={{ fontWeight: 'bold' }}>
               {comment.userId.displayName}
             </span>
-          </div>
+          </a>
           <p>{comment.content}</p>
           {comment.tagInfo && (
             <span className="tagged-user">@{comment.tagInfo.tagName}</span>
@@ -129,7 +153,7 @@ const CommentList = () => {
             >
               <FaArrowUp />
             </Button>
-            <span className="mx-2"></span>
+            <span className="mx-2">{Object.values(comment.votes || {}).filter(vote => vote === true).length}</span>
             <Button
               variant={
                 comment.votes && comment.votes[user.id] === false
@@ -145,7 +169,7 @@ const CommentList = () => {
             >
               <FaArrowDown />
             </Button>
-            <span className="mx-2"></span>
+            <span className="mx-2">{Object.values(comment.votes || {}).filter(vote => vote === false).length}</span>
             <Button
               variant="light"
               onClick={() => handleReplyClick(comment, 'none')}
@@ -175,7 +199,10 @@ const CommentList = () => {
             >
               {comment.childrens.map((childComment) => (
                 <div key={childComment._id}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <a
+                    style={{ display: 'flex', alignItems: 'center' }}
+                    href={`/profile/${childComment?.userId._id}`}
+                  >
                     <img
                       src={'/images/logo.jpg'} // Assuming the avatar URL is stored in comment.author.avatar
                       alt={comment.userId.displayName}
@@ -189,11 +216,14 @@ const CommentList = () => {
                     <span style={{ fontWeight: 'bold' }}>
                       {childComment.userId.displayName}
                     </span>
-                  </div>
+                  </a>
                   <p>
-                    <span className="fw-bold">
+                    <a
+                      className="fw-bold"
+                      href={`/profile/${childComment.tagInfo?.userId}`}
+                    >
                       {childComment.tagInfo && childComment.tagInfo.tagName}
-                    </span>
+                    </a>
                     &nbsp;
                     {childComment.content}
                   </p>
@@ -215,7 +245,7 @@ const CommentList = () => {
                     >
                       <FaArrowUp />
                     </Button>
-                    <span className="mx-2"></span>
+                    <span className="mx-2">{Object.values(childComment.votes || {}).filter(vote => vote === true).length}</span>
                     <Button
                       variant={
                         childComment.votes &&
@@ -233,7 +263,7 @@ const CommentList = () => {
                     >
                       <FaArrowDown />
                     </Button>
-                    <span className="mx-2"></span>
+                    <span className="mx-2">{Object.values(childComment.votes || {}).filter(vote => vote === false).length}</span>
                     <Button
                       variant="light"
                       onClick={() => handleReplyClick(childComment)}
