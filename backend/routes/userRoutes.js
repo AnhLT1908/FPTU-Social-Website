@@ -14,15 +14,18 @@ const {
   checkUsername,
   getAllUsersPaginate,
   checkEmail,
-  checkStudentCode
-
+  checkStudentCode,
+  googleLogin,
+  checkEmailForGoogleLogin
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
 router.post('/check-email', checkEmail);
+router.post('/check-email-for-google-login', checkEmailForGoogleLogin);
 router.post('/check-student-code', checkStudentCode);
 router.post('/check-username', checkUsername);
 router.post('/login', login);
+router.post('/google-login', googleLogin);
 router.get('/logout', logout);
 router.post('/is-logged-in', isLoggedIn);
 router.post('/forgot-password', forgotPassword);
