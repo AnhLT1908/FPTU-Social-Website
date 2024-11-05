@@ -21,6 +21,7 @@ import {
 } from "react-icons/fa";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
+import axios from "axios";
 import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserProfile = () => {
@@ -31,14 +32,44 @@ const UserProfile = () => {
   const [filter, setFilter] = useState("new");
   const token = localStorage.getItem("token");
 
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
-  const { id } = useParams();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    console.log("storedUserData", storedUserData);
+    if (storedUserData) setUser(storedUserData);
+  }, []);
 
+  const userId = user?.id;
+  console.log("UserId", userId)
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user || !user._id) return; 
+      try {
+        const response = await axios.get(
+          `http://localhost:9999/api/v1/users/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUserData(response.data);
+        console.log("User data", response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    if (token && user) {
+      fetchUserData();
+    }
+  }, [token]);
+
+  useEffect(() => {
     const fetchPosts = () => {
       fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
         headers: {
@@ -111,6 +142,7 @@ const UserProfile = () => {
               <Row>
                 <Col md={12} className="d-flex align-items-center">
                   <div style={{ marginRight: "30px" }}>
+                    <Image src={user?.avatar} />
                     <FaUser
                       style={{
                         borderRadius: "100px",
@@ -165,7 +197,7 @@ const UserProfile = () => {
                   >
                     <h6 style={{ marginTop: "5px" }}>Overview</h6>
                   </Button>
-                  <Link to={`/profile/${user._id}/saved`}>
+                  <Link to={`/profile/${user?._id}/saved`}>
                     <Button
                       className="btn"
                       variant="light"

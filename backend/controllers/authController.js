@@ -316,10 +316,31 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 });
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
-  if (!(await user.correctPassword(req.body.oldPassword))) {
+  
+  if (!user) {
+    return next(new AppError('User not found!', 404));
+  }
+  
+  // Check if oldPassword is provided in the request
+  if (!req.body.oldPassword) {
+    return next(new AppError('Please provide your current password!', 400));
+  }
+  
+  // Check if user has a password stored in the database
+  if (!user.password) {
+    return next(new AppError('Your current password is not set. Please contact support.', 500));
+  }
+
+  // Check if current password matches
+  const isMatch = await user.correctPassword(req.body.oldPassword, user.password);
+  if (!isMatch) {
     return next(new AppError('Your current password is wrong!', 401));
   }
+
+  // Update to new password
   user.password = req.body.newPassword;
   await user.save();
+
+  // Send new token
   createSendToken(user, 200, res);
 });

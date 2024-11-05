@@ -6,7 +6,7 @@ import socket from '../services/socketClient';
 function Layout() {
   const user = JSON.parse(localStorage.getItem('user'));
   useEffect(() => {
-    socket?.emit('joinRoom', user.id);
+    socket?.emit('joinRoom', user?.id);
   }, [socket, user]);
   return (
     <>
