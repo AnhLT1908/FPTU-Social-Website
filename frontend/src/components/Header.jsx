@@ -8,6 +8,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { searchCommunities, searchUsers } from "../services/SearchService";
 import { listNotifications } from "../services/NotificationService";
+
 function Header({ socket }) {
   const navigate = useNavigate();
 
@@ -19,30 +20,37 @@ function Header({ socket }) {
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [noResultsMessage, setNoResultsMessage] = useState("");
   const [notifications, setNotifications] = useState([]);
+
   const fetchNotifications = async () => {
     const data = await listNotifications();
     setNotifications(data);
   };
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
       setUser(userData);
       console.log("User: ", userData);
+    } else {
+      // Redirect to login page if no user is found in localStorage
+      navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     socket.on("newNotification", (data) => {
       console.log("New notice: ", data);
-      if (user?.id == data?.userId) setNotifications((prev) => [...prev, data]);
+      if (user?.id === data?.userId) setNotifications((prev) => [...prev, data]);
     });
     return () => {
       socket.off("newNotification");
     };
-  }, [socket]);
+  }, [socket, user]);
+
   useEffect(() => {
     fetchNotifications();
   }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -75,6 +83,7 @@ function Header({ socket }) {
             results = response.data;
 
             if (response.results === 0) {
+              // Handle no results case
             }
           }
 
@@ -251,130 +260,52 @@ function Header({ socket }) {
                       width="20"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <path d="M11 18h1a2 2 0 0 1-4 0h3Zm8-3.792v.673A1.12 1.12 0 0 1 17.883 16H2.117A1.12 1.12 0 0 1 1 14.881v-.673a3.947 3.947 0 0 1 1.738-3.277A2.706 2.706 0 0 0 3.926 8.7V7.087a6.07 6.07 0 0 1 12.138 0l.01 1.613a2.7 2.7 0 0 0 1.189 2.235A3.949 3.949 0 0 1 19 14.208Zm-1.25 0a2.7 2.7 0 0 0-1.188-2.242A3.956 3.956 0 0 1 14.824 8.7V7.088a4.819 4.819 0 1 0-9.638 0v1.615a3.956 3.956 0 0 1-1.738 3.266 2.7 2.7 0 0 0-1.198 2.239v.542h15.5v-.542Z"></path>
+                      <path d="M18 16v-4l-1.5-2V7.5a4.5 4.5 0 1 0-9 0v1.5L2 12v4h16Zm-7-4h-2v4H7v-4H5v-2h2V7.5a2.5 2.5 0 0 1 5 0v4h2v2h-2v4Z"></path>
                     </svg>
                   </span>
                 </button>
                 <ul
-                  className="dropdown-menu dropdown-menu-end"
+                  className="dropdown-menu"
                   aria-labelledby="dropdownMenuButton2"
                 >
-                  <div className="notification-header text-center py-1 mb-2 border-bottom border-primary border-2">
-                    Notifications
-                  </div>
-                  <div className="notification-content">
-                    {/* Repeat Notification Items Here */}
-                    {notifications.map((_, index) => (
-                      <li className="d-flex" key={index}>
-                        <a className="dropdown-item-notification" href="#">
-                          <span className="dropdown-item-icon">
-                            <FontAwesomeIcon icon={faMessage} />
-                          </span>
-                          <span className="dropdown-item-name d-flex flex-column">
-                            <span className="notification-activity">
-                              This user replied to your comment in
-                              r/test-community
-                            </span>
-                            <span className="notification-hints max-lines">
-                              Go see your comments on r/test-community: "This is
-                              just to test limited words length"
-                            </span>
-                          </span>
-                        </a>
-                        <button>
-                          <span>
-                            <FontAwesomeIcon icon={faEllipsisVertical} />
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                    {/* <a
-                      tabIndex="0"
-                      className="btn btn-lg btn-danger"
-                      role="button"
-                      data-bs-toggle="popover"
-                      data-bs-trigger="focus"
-                      title="Dismissible popover"
-                      data-bs-content="And here's some amazing content. It's very engaging. Right?"
-                    >
-                      Dismissible popover
-                    </a> */}
-                  </div>
-                </ul>
-              </div>
-            </div>
-            <div className="profile-settings">
-              <div className="dropdown">
-                <button
-                  className="btn dropdown-toggle profile-btn"
-                  type="button"
-                  id="dropdownMenuButton1"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <span className="d-flex justify-content-center align-items-center">
-                    <img
-                      src="/images/logo.jpg"
-                      width={32}
-                      height={32}
-                      style={{ borderRadius: "50%" }}
-                      alt="User Avatar"
-                    />
-                  </span>
-                </button>
-                <ul
-                  className="dropdown-menu dropdown-menu-end"
-                  aria-labelledby="dropdownMenuButton1"
-                >
-                  <Link to={`/profile/${user.id}`}>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        <span className="dropdown-item-icon">
-                          <img
-                            src="/images/logo.jpg"
-                            alt="User Avatar for u/sjdkdk48"
-                          />
-                        </span>
-                        <span className="dropdown-item-name d-flex flex-column">
-                          <span>View Profile</span>
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              lineHeight: "1rem",
-                              color: "var(--color-secondary-weak)",
-                            }}
-                          >
-                            {user?.displayName
-                              ? "u/" + user?.displayName
-                              : "u/" + user?.username}
-                          </span>
-                        </span>
+                  {notifications.map((notification, idx) => (
+                    <li key={idx}>
+                      <a
+                        className="dropdown-item"
+                        href="#!"
+                      >
+                        {notification.message}
                       </a>
                     </li>
-                  </Link>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={handleLogout}
-                    >
-                      <span className="dropdown-item-icon">
-                        <svg
-                          fill="currentColor"
-                          height="16"
-                          width="16"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M10 3v2h5v10h-5v2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-5Zm2 12v-2h-2v2h2Z"></path>
-                          <path d="M5 1H3v3h2V2h2V1H5Zm0 14H3v3h2v-1h2v-2H5Zm3-5H1v2h7v-2Zm0-5H1v2h7V7Zm1-3H1v2h8V4Z"></path>
-                        </svg>
-                      </span>
-                      <span>Log out</span>
-                    </a>
-                  </li>
+                  ))}
                 </ul>
               </div>
+              <div
+                className="dropdown dropdown-toggle profile-btn"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <img
+                  src={user.avatar || "/images/default-avatar.jpg"}
+                  alt="Avatar"
+                  className="profile-img"
+                  width="32"
+                  height="32"
+                />
+              </div>
+              <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li>
+                  <Link to={`/profile/${user._id}`} className="dropdown-item">
+                    Profile
+                  </Link>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
         )}
