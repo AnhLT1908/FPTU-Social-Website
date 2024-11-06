@@ -30,8 +30,9 @@ const CreatePost = ({ communityData = null }) => {
     }
   }, []);
 
-  useEffect(() => {
+  console.log("Community data", communityData);
 
+  useEffect(() => {
     if (communityData == null) {
       const fetchCommunities = async () => {
         try {
@@ -176,9 +177,17 @@ const CreatePost = ({ communityData = null }) => {
             )}
           </Form.Group>
         )}
-
         <div className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={() => navigate("/")}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (communityData == null) {
+                window.location.href = `/`;
+              } else {
+                window.location.href = `/community/${communityData.id}`;
+              }
+            }}
+          >
             Cancel
           </Button>
           <Button variant="primary" type="submit">

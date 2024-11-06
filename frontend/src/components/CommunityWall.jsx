@@ -14,7 +14,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 import ManageCommunity from "./ManageCommunity";
-import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import CreatePost from "./CreatePost";
 import axios from "axios";
 import img1 from "../images/postImage/images_postId1.jpg";
@@ -34,7 +34,7 @@ const CommunityPage = () => {
   const [community, setCommunity] = useState(null);
   const [rule, setRule] = useState("");
   const { id } = useParams();
-  const [users, setUsers] = useState();
+  const [users, setUsers] = useState([]);
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
   const [user, setUser] = useState(null);
@@ -45,51 +45,42 @@ const CommunityPage = () => {
   const [modalImage, setModalImage] = useState(null);
   const token = localStorage.getItem("token");
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
-  const [postId, setPostId] = useState(null); // Tạo state để lưu post._id
-  const [joinReason, setJoinReason] = useState();
-  const [bookmarks, setBookmarks] = useState();
+  const [postId, setPostId] = useState(null);
+  const [joinReason, setJoinReason] = useState("");
+  const [bookmarks, setBookmarks] = useState([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
-  // Hàm mở modal và lưu postId
+
+  const communityId = id;
+  console.log("Community id route:", communityId);
+
   const openReportModal = (id) => {
-    setPostId(id); // Lưu post._id vào state
+    setPostId(id);
     setShowModal1(true);
   };
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
       setUser(userData);
-      setBookmarks(userData.bookmarks);
+      setBookmarks(userData.bookmarks || []);
     }
-
-    fetch(`http://localhost:9999/api/v1/communities/get-post/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const postsWithReactions = data.map((item) => ({
-          ...item,
-          upVotes: item.upVotes || 0,
-          downVotes: item.downVotes || 0,
-          upVoted: false,
-          downVoted: false,
-        }));
-        setPosts(postsWithReactions);
-      })
-      .catch((error) => console.error("Error fetching posts:", error));
     fetchCommunity();
     fetchUser();
-  }, []);
+  }, [communityId]);
+
+  useEffect(() => {
+    fetch(`http://localhost:9999/api/v1/communities/get-post/${communityId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Community post by id", data);
+        setPosts(data);
+      })
+      .catch((error) => console.error("Error fetching posts:", error));
+  }, [communityId]);
 
   const fetchCommunity = () => {
-    const config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `http://localhost:9999/api/v1/communities/${id}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
     axios
-      .request(config)
+      .get(`http://localhost:9999/api/v1/communities/${id}`)
       .then((response) => {
         setCommunity(response.data);
         setCommunityName(response.data.name);
@@ -100,27 +91,23 @@ const CommunityPage = () => {
         console.log(error);
       });
   };
-  const fetchUser = () => {
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `http://localhost:9999/api/v1/communities/get-user/${id}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
 
+  const fetchUser = () => {
     axios
-      .request(config)
+      .get(`http://localhost:9999/api/v1/communities/get-user/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         const result = response.data?.map((item) => item.userId);
-        console.log(result);
         setUsers(result);
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
   const handleReaction = (index, type) => {
     setPosts((prevPosts) => {
       const updatedPosts = [...prevPosts];
@@ -150,40 +137,32 @@ const CommunityPage = () => {
     setModalImage(image);
     setShowModal(true);
   };
+
   const handleSave = (sid) => {
     if (!user.bookmarks.includes(sid)) {
       user.bookmarks.push(sid);
     }
     localStorage.setItem("user", JSON.stringify(user));
-    const data = JSON.stringify({
-      bookmarks: user.bookmarks,
-    });
-
-    console.log("data", data);
-
-    const config = {
-      method: "patch",
-      maxBodyLength: Infinity,
-      url: "http://localhost:9999/api/v1/users/update-me",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      data: data,
-    };
+    const data = JSON.stringify({ bookmarks: user.bookmarks });
 
     axios
-      .request(config)
+      .patch("http://localhost:9999/api/v1/users/update-me", data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         alert("Save post success!");
-        window.location.href = `/community/${id}`;
+        navigate(`/community/${id}`);
       })
       .catch((error) => {
         console.error("Lỗi khi gửi yêu cầu:", error);
       });
   };
+
   const handleReportPost = (uid, pid) => {
-    let data = JSON.stringify({
+    const data = JSON.stringify({
       userId: uid,
       reportEntityId: pid,
       entityType: "Post",
@@ -191,21 +170,15 @@ const CommunityPage = () => {
       status: "Waiting",
     });
 
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: "http://localhost:9999/api/v1/reports/",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      data: data,
-    };
-
     axios
-      .request(config)
-      .then((response) => {
-        alert("Your report have send to admin success!!");
+      .post("http://localhost:9999/api/v1/reports/", data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(() => {
+        alert("Your report has been sent to admin!");
         setShowModal1(false);
       })
       .catch((error) => {
@@ -214,62 +187,43 @@ const CommunityPage = () => {
   };
 
   const handleJoin = () => {
-    if (community?.privacyType == "public") {
-      const data = JSON.stringify({
-        userId: user.id,
-        communityId: id,
-        role: "member",
-      });
-      const config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: "http://localhost:9999/api/v1/communities/join",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: data,
-      };
+    const joinData = JSON.stringify({
+      userId: user.id,
+      communityId: id,
+      role: "member",
+    });
+    const config = {
+      headers: { "Content-Type": "application/json" },
+    };
+
+    if (community?.privacyType === "public") {
       axios
-        .request(config)
-        .then((response) => {
+        .post("http://localhost:9999/api/v1/communities/join", joinData, config)
+        .then(() => {
           setShowModal2(false);
-          alert("Joined community success!");
+          alert("Joined community successfully!");
+          navigate(`/community/${id}`);
         })
-        .catch((error) => {
-          console.log(error);
-        });
+        .catch((error) => console.log(error));
     } else {
-      let data = JSON.stringify({
-        joinRequests: [
-          {
-            userId: user.id,
-            reason: joinReason,
-          },
-        ],
+      const data = JSON.stringify({
+        joinRequests: [{ userId: user.id, reason: joinReason }],
       });
 
-      let config = {
-        method: "patch",
-        maxBodyLength: Infinity,
-        url: `http://localhost:9999/api/v1/communities/request/${id}`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        data: data,
-      };
-
       axios
-        .request(config)
-        .then((response) => {
-          setShowModal2(false);
-          alert("Your request have send to mod!!");
+        .patch(`http://localhost:9999/api/v1/communities/request/${id}`, data, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         })
-        .catch((error) => {
-          console.log(error);
-        });
+        .then(() => {
+          setShowModal2(false);
+          alert("Your request has been sent to the moderator!");
+          navigate(`/community/${id}`);
+        })
+        .catch((error) => console.log(error));
     }
-    window.location.href = `/community/${id}`;
   };
 
   return (
@@ -279,16 +233,6 @@ const CommunityPage = () => {
         <Col md={8}>
           <Card className="mb-4 p-4">
             <div className="d-flex align-items-center mb-3">
-              <img
-                src={community?.logo}
-                alt="Community Icon"
-                className="rounded-circle"
-                style={{
-                  width: "50px",
-                  height: "50px",
-                  objectFit: "cover",
-                }}
-              />
               <h1 className="ml-3">f/{communityName}</h1>
             </div>
             <div className="d-flex justify-content-between align-items-center">
@@ -302,12 +246,12 @@ const CommunityPage = () => {
                     community?.joinRequests?.some(
                       (request) => request.userId === user.id
                     ) ? (
-                      <Button variant="light" aria-readonly>
+                      <Button variant="secondary" aria-readonly>
                         Process
                       </Button>
                     ) : (
                       <Button
-                        variant="light"
+                        variant="primary"
                         onClick={() => setShowModal2(true)}
                       >
                         Join
@@ -316,7 +260,7 @@ const CommunityPage = () => {
                   ) : (
                     <>
                       <Button
-                        variant="light"
+                        variant="warning"
                         onClick={() => setShowCreatePost(true)}
                       >
                         Create Post
@@ -399,7 +343,7 @@ const CommunityPage = () => {
 
           {showCreatePost && <CreatePost communityData={community} />}
 
-          {posts.map((post, index) => (
+          {posts?.map((post, index) => (
             <Card key={post._id} className="mb-3 p-3">
               <Row>
                 <Col>

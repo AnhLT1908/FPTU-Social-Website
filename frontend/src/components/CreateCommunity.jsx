@@ -65,7 +65,7 @@ const CreateCommunity = () => {
         }
       );
       console.log("Community successfully created:", response.data);
-      user?.moderatorCommunities.push(response?.data.id);
+      user?.moderatorCommunities?.push(response?.data.id);
       localStorage.setItem("user", JSON.stringify(user));
       setShowPreview(false);
       navigate("/");
