@@ -1,6 +1,7 @@
 const express = require('express');
 const userController = require('../controllers/userController');
-const {register} = require('../controllers/userController');
+const authController = require('../controllers/authController');
+const { register } = require('../controllers/userController');
 const {
   signup,
   login,
@@ -14,19 +15,23 @@ const {
   checkUsername,
   getAllUsersPaginate,
   checkEmail,
-  checkStudentCode
-
+  checkStudentCode,
+  googleLogin,
+  checkEmailForGoogleLogin,
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
 router.post('/check-email', checkEmail);
+router.post('/check-email-for-google-login', checkEmailForGoogleLogin);
 router.post('/check-student-code', checkStudentCode);
 router.post('/check-username', checkUsername);
 router.post('/login', login);
+router.post('/google-login', googleLogin);
 router.get('/logout', logout);
 router.post('/is-logged-in', isLoggedIn);
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
+
 // Protect All From This Point
 router.use(protect);
 router.patch('/change-password/', updatePassword);
@@ -37,11 +42,19 @@ router.patch(
   // userController.resizeUserPhoto,
   userController.updateMe
 );
+router.patch(
+  '/upload-image',  
+  userController.uploadUserPhoto,
+  userController.updateUserImage 
+);
+
 router.get('/search', userController.searchUsers);
 router.delete('/delete-me', userController.deleteMe);
 // Restrict To ADMIN Only
-router.get('/list',userController.getAllUsersPaginate)
+
+router.get('/list', userController.getAllUsersPaginate);
 router.patch('/:id/toggle-active', userController.toggleUserActiveStatus);
+router.get('/:id', userController.getUserById);
 router.use(restrictTo('admin'));
 router
   .route('/')
@@ -50,7 +63,6 @@ router
 
 router
   .route('/:id')
-  .get(userController.getUserById)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
 module.exports = router;

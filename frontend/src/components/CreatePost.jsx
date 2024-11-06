@@ -7,10 +7,10 @@ import {
   Tabs,
   Tab,
   FormSelect,
-  FormControl,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const CreatePost = () => {
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ const CreatePost = () => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) {
       setUser(userData);
-      console.log("User data:", userData);
     }
   }, []);
 
@@ -37,8 +36,8 @@ const CreatePost = () => {
         const response = await axios.get(
           "http://localhost:9999/api/v1/communities/"
         );
+        console.log("Communities", community)
         setCommunity(response.data);
-        console.log("Community:", response.data);
       } catch (error) {
         console.error("Fetch error:", error);
       }
@@ -55,36 +54,29 @@ const CreatePost = () => {
     setSelectedTab(key);
   };
 
-  const handleMediaChange = (e) => {
-    setMediaFiles([...e.target.files]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Create the post data object
-    const data = {
-      title: title,
-      content: body,
-      communityId: selectedCommunity,
-      userId: user.id,
-      media: mediaFiles, // Assuming you want to send file names or additional info
-    };
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("content", body);
+    formData.append("communityId", selectedCommunity);
+    Array.from(mediaFiles).forEach((file) => formData.append("images", file));
 
     try {
       const response = await axios.post(
-        "http://localhost:9999/api/v1/posts/",
-        data,
+        "http://localhost:9999/api/v1/posts/upload-images",
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Include the token in headers
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       if (response.status === 201) {
-        navigate(`/community/${selectedCommunity}`); // Redirect on success
+        navigate(`/community/${community.id}`);
       }
     } catch (error) {
       console.error("Error creating post:", error);
@@ -116,7 +108,7 @@ const CreatePost = () => {
           required
         >
           <option value="">Select a community</option>
-          {community?.map((c) => (
+          {community.map((c) => (
             <option key={c.id} value={c.id}>{`f/ ${c.name}`}</option>
           ))}
         </FormSelect>
@@ -138,7 +130,6 @@ const CreatePost = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={300}
-            name="title"
             required
           />
           <Form.Text className="text-muted">{title.length}/300</Form.Text>
@@ -153,7 +144,6 @@ const CreatePost = () => {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Body"
-              name="content"
               required
             />
           </Form.Group>
@@ -161,17 +151,12 @@ const CreatePost = () => {
 
         {selectedTab === "images" && (
           <Form.Group controlId="postMedia" className="mb-3">
-            <div
-              className="border rounded d-flex flex-column align-items-center justify-content-center"
-              style={{ height: "200px", borderStyle: "dashed" }}
-            >
-              <Form.Control
-                type="file"
-                multiple
-                onChange={handleMediaChange}
-                style={{ maxWidth: "200px" }}
-              />
-            </div>
+            <Form.Label>Upload Images</Form.Label>
+            <Form.Control
+              type="file"
+              multiple
+              onChange={(e) => setMediaFiles(Array.from(e.target.files))} // Convert to array
+            />
             {mediaFiles.length > 0 && (
               <div className="mt-3">
                 <strong>Uploaded Files:</strong>
@@ -186,7 +171,7 @@ const CreatePost = () => {
         )}
 
         <div className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={() => navigate("/community")}>
+          <Button variant="secondary" onClick={() => navigate("/")}>
             Cancel
           </Button>
           <Button variant="primary" type="submit">

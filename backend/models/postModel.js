@@ -1,16 +1,18 @@
 const mongoose = require('mongoose');
 const Community = require('./communityModel');
-const Comment = require('./commentModel');
-const Vote = require('./voteModel');
 const postSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.ObjectId, ref: 'User' },
     communityId: { type: mongoose.Schema.ObjectId, ref: 'Community' },
     title: String,
     content: String,
-    media: [],
-    upVotes: { type: Number, default: 0 },
-    downVotes: { type: Number, default: 0 },
+    media: [
+      {
+        type: String,
+      },
+    ],
+    commentCount: { type: Number, default: 0 },
+    votes: { type: Map, of: Boolean, default: {} },
     isEdited: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
@@ -20,9 +22,6 @@ const postSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
-postSchema.virtual('hotnessScore').get(function () {
-  return this.upVotes + this.downVotes + this.commentCount;
-});
 // MIDDLEWARES
 postSchema.pre(/^find/, function (next) {
   this.find({ isActive: { $ne: false } });
@@ -38,25 +37,6 @@ postSchema.post('save', async function (doc, next) {
     next(); // Call next middleware
   } catch (err) {
     next(err); // Handle any errors
-  }
-});
-// After delete a post
-postSchema.post('findOneAndDelete', async function (doc, next) {
-  try {
-    if (doc) {
-      // Check if a document was found and deleted
-      await Community.findByIdAndUpdate(doc.communityId, {
-        $inc: { postCount: -1 },
-      });
-      await Comment.deleteMany({ postId: doc._id });
-      await Vote.deleteMany({
-        entityType: 'Post',
-        voteEntityId: doc._id,
-      });
-    }
-    next();
-  } catch (err) {
-    next(err);
   }
 });
 const Post = mongoose.model('Post', postSchema);

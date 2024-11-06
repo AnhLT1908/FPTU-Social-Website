@@ -27,6 +27,7 @@ const CommunityDetails = ({
             type="text"
             placeholder="Enter community name"
             value={communityName}
+            required
             onChange={(e) => setCommunityName(e.target.value)}
           />
         </Form.Group>
@@ -41,6 +42,7 @@ const CommunityDetails = ({
           <Form.Control
             as="textarea"
             rows={4}
+            required
             placeholder="Enter description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}

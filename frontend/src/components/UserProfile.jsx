@@ -21,6 +21,7 @@ import {
 } from "react-icons/fa";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
+import axios from "axios";
 import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserProfile = () => {
@@ -28,37 +29,73 @@ const UserProfile = () => {
   const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState("new");
+  const token = localStorage.getItem("token");
 
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
-  const { id } = useParams();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) {
-      setUser(userData);
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    console.log("storedUserData", storedUserData);
+    if (storedUserData) {
+      setUser(storedUserData);
     }
-    const userId = userData?._id;
-    const userName = userData?.username;
+  }, []);
 
-    fetch(`http://localhost:9999/api/v1/posts/user/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Post data:", data);
-        const postsWithReactions = data
-          .map((item) => ({
+  const userId = user?._id;
+  console.log("userId", userId);
+
+  useEffect(() => {
+    const fetchPosts = () => {
+      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Post:", data);
+          const postsWithReactions = data.feed.map((item) => ({
             ...item,
             upVotes: item.upVotes || 0,
             downVotes: item.downVotes || 0,
             upVoted: false,
             downVoted: false,
-          }))
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setPosts(postsWithReactions);
-      })
-      .catch((error) => console.error("Error fetching posts:", error));
-  }, []);
+          }));
+          setPosts(postsWithReactions);
+        })
+        .catch((error) => console.error("Error fetching posts:", error));
+    };
 
+    fetchPosts();
+  }, [filter, token]);
+
+  useEffect(() => {
+    if (userId) {
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:9999/api/v1/users/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setUserData(response.data);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      fetchUserData();
+    }
+  }, [token, userId]);
+
+  const userDataGet = userData;
+  console.log("userDataGet", userDataGet);
   const handleReaction = (postIndex, type) => {
     setPosts((prevPosts) => {
       const updatedPosts = [...prevPosts];
@@ -94,6 +131,10 @@ const UserProfile = () => {
     setModalImage(null);
   };
 
+  const handleFilterChange = (selectedFilter) => {
+    setFilter(selectedFilter);
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -103,13 +144,12 @@ const UserProfile = () => {
               <Row>
                 <Col md={12} className="d-flex align-items-center">
                   <div style={{ marginRight: "30px" }}>
-                    <FaUser
+                    <Image
+                      src={userData?.avatar}
                       style={{
                         borderRadius: "100px",
                         width: "100px",
                         height: "100px",
-                        backgroundColor: "#f3752c",
-                        padding: "10px 10px",
                         color: "white",
                       }}
                     />
@@ -135,9 +175,9 @@ const UserProfile = () => {
                     </Button>
                   </div>
                   <div>
-                    <h4>{user?.username || "Username"}</h4>
+                    <h4>{userData?.displayName || "Username"}</h4>
                     <p style={{ fontWeight: "bold", color: "#666666" }}>
-                      u/{user?.username || "Username"}
+                      u/{userData?.username || "Username"}
                     </p>
                   </div>
                 </Col>
@@ -157,20 +197,7 @@ const UserProfile = () => {
                   >
                     <h6 style={{ marginTop: "5px" }}>Overview</h6>
                   </Button>
-                  <Link to={`/profile/${user._id}/posts`}>
-                    <Button
-                      variant="light"
-                      className="btn"
-                      style={{
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("posts")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Posts</h6>
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${user._id}/saved`}>
+                  <Link to={`/profile/${user?._id}/saved`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -196,9 +223,16 @@ const UserProfile = () => {
                         New
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
-                        <Dropdown.Item>Hot</Dropdown.Item>
-                        <Dropdown.Item>New</Dropdown.Item>
-                        <Dropdown.Item>Top</Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleFilterChange("new")}
+                        >
+                          New
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleFilterChange("hot")}
+                        >
+                          Hot
+                        </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>
@@ -208,7 +242,7 @@ const UserProfile = () => {
           </Card>
 
           {posts.map((post, index) => (
-            <Card key={post.id} className="mt-3 p-3">
+            <Card key={index} className="mt-3 p-3">
               <Row>
                 <Col>
                   <Link to={`/community/${post.communityId}`}>
@@ -242,7 +276,7 @@ const UserProfile = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`/post/${post.id}`}>
+                  <Link to={`/post/${post._id}`}>
                     <h2>{post.title}</h2>
                   </Link>
                 </Col>
@@ -280,9 +314,6 @@ const UserProfile = () => {
                 <Button variant="light">
                   <FaComment /> {post.comments || 0}
                 </Button>
-                <Button variant="light">
-                  <FaShare /> Share
-                </Button>
               </div>
             </Card>
           ))}
@@ -290,7 +321,11 @@ const UserProfile = () => {
 
         <Col md={4}>
           <Card>
-            <CardImg variant="top" src={background} />
+            <CardImg
+              variant="top"
+              src={userData?.background}
+              style={{ height: "250px", width: "100%", objectFit: "cover" }}
+            />
             <CardBody>
               <Row>
                 <Col md={12}>
@@ -316,41 +351,29 @@ const UserProfile = () => {
                   </Button>
                   <Row>
                     <Col md={12}>
-                      <h5>{user?.username || "Username"}</h5>
-                      <Button
-                        variant="light"
-                        style={{
-                          backgroundColor: "#c9d7de",
-                          borderRadius: "30px",
-                          marginTop: "5px",
-                        }}
-                      >
-                        <FaShare /> Share
-                      </Button>
+                      <h5>{userData?.displayName || "Username"}</h5>
                     </Col>
                   </Row>
                   <hr />
                   <Row>
                     <Col md={12}>
-                      <h5>Settings</h5>
+                      <h5>Setting</h5>
                     </Col>
                   </Row>
                   <Row className="mt-2">
                     <Col md={12} className="d-flex align-items-center">
-                      <FaUser
+                      <Image
+                        src={userData?.avatar}
                         style={{
                           borderRadius: "100px",
                           width: "40px",
                           height: "40px",
-                          backgroundColor: "#f3752c",
-                          padding: "5px 5px",
-                          color: "white",
                           marginRight: "10px",
                         }}
                       />
                       <div>
                         <p style={{ fontSize: "14px", marginBottom: "0px" }}>
-                          AnhLTHE172031
+                          u/{userData?.username}
                         </p>
                         <p
                           style={{

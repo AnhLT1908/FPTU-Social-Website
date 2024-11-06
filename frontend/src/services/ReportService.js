@@ -79,15 +79,20 @@ export const updateReport = async (reportId, updatedData) => {
 //     }
 // };
 // Hàm vô hiệu hóa bài viết dựa trên reportId
-export const deactivatePost = async (reportId) => {
+export const deactivatePost = async (postId, action) => {
     try {
-        const response = await axios.patch(`http://localhost:9999/api/v1/reports/${reportId}/deactivate-post`, {}, {
-            headers: getAuthHeader()
-        });
-        message.success('Post deactivated successfully.');
+        const response = await axios.patch(
+            `http://localhost:9999/api/v1/reports/deactivate-report-post/${postId}`,
+            { action }, // Gửi `action` trong body
+            { headers: getAuthHeader() }
+        );
+        
+        message.success(`Post ${action === 'Approved' ? 'deactivated and reports approved' : 'reports canceled'} successfully.`);
         return response.data;
     } catch (error) {
-        message.error('Error deactivating post: ' + error.message);
+        const errorMsg = error.response?.data?.error?.message || 'Error deactivating post';
+        message.error(`${errorMsg}: ${error.message}`);
         throw error;
     }
 };
+

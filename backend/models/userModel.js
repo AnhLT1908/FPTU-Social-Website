@@ -54,16 +54,6 @@ const userSchema = new mongoose.Schema(
     moderatorCommunities: [
       { type: mongoose.Schema.ObjectId, ref: 'Community' },
     ],
-    notifications: [
-      {
-        resourceId: String,
-        notifType: { String, enum: ['NewPost', 'NewComment', 'NewFollower'] },
-        title: String,
-        description: String,
-        seen: Boolean,
-        createdAt: Date,
-      },
-    ],
   },
   {
     timestamps: true,
@@ -90,12 +80,10 @@ userSchema.pre(/^find/, function (next) {
   next();
 });
 
-
-
-userSchema.methods.correctPassword = async function (userPassword) {
-  const correct = await bcrypt.compare(userPassword, this.password);
-  return correct;
+userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
+  return await bcrypt.compare(candidatePassword, userPassword);
 };
+
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changeTimeStamp = parseInt(

@@ -11,7 +11,7 @@ router
 router.get('/stats', reportController.getReportStats); // Lấy thống kê báo cáo
 
 // Route để vô hiệu hóa bài viết được báo cáo
-router.patch('/:reportId/deactivate-post', reportController.deactivateReportedPost);
+router.patch('/deactivate-report-post/:postId', reportController.deactivateReportedPost);
 
 // Các route CRUD cơ bản cho báo cáo
 router
@@ -23,6 +23,5 @@ router
   .route('/:id')
   .get(reportController.getReportById) // Lấy báo cáo theo ID
   .patch(protect, reportController.updateReport) // Cập nhật báo cáo (yêu cầu bảo vệ)
-  .delete(protect, reportController.deleteReport); // Xóa báo cáo (yêu cầu bảo vệ)
-
+  .delete(protect, reportController.deleteReport); // Xóa báo cáo (yêu cầu bảo vê)
 module.exports = router;

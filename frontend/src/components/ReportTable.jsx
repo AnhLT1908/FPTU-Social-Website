@@ -81,9 +81,8 @@ const ReportTable = () => {
                         </Form.Select>
                     </Form.Group>
                 </Col>
-                <Col md={3}>
-                    <Form.Group size="sm">
-                        <Form.Label className="me-2" style={{ fontSize: '14px' }}>Loại thực thể:</Form.Label>
+                <Col md={3} className='d-flex align-items-center justify-content-center'>
+                        <Form.Label className="me-2" style={{ fontSize: '14px' , width: '150px',paddingTop:'5px'}} >Loại thực thể:</Form.Label>
                         <Form.Select
                             value={filterEntityType}
                             onChange={handleFilterEntityTypeChange}
@@ -95,7 +94,6 @@ const ReportTable = () => {
                             <option value="Comment">Bình luận</option>
                             <option value="User">Người dùng</option>
                         </Form.Select>
-                    </Form.Group>
                 </Col>
             </Row>
 
