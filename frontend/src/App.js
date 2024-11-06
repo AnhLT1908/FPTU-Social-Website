@@ -24,10 +24,14 @@ import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
 import ReportList from "./components/ReportList";
 import UserWall from "./components/UserWall";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
+      <ToastContainer position="top-center" autoClose={3000} />
         <Routes>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/signup" element={<RegisterForm />} />

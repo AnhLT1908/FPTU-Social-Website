@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode"; // Adjusted import
+import {jwtDecode} from "jwt-decode"; // Adjusted import
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -17,16 +18,13 @@ const LoginForm = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch(
-          "http://localhost:9999/api/v1/users/login",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-          }
-        );
+        const response = await fetch("http://localhost:9999/api/v1/users/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
 
         const data = await response.json();
 
@@ -38,16 +36,18 @@ const LoginForm = () => {
           localStorage.setItem("user", JSON.stringify(data.user));
 
           // Redirect user based on role
-          if (data.user.role === 'student') {
+          if (data.user.role === "student") {
             navigate("/"); // Redirect to home for students
-          } else if (data.user.role === 'admin') {
+          } else if (data.user.role === "admin") {
             navigate("/dashboard"); // Redirect to dashboard for admin
           }
         } else {
           console.error("Login failed", data.message);
+          if (data.message === "Tài khoản của bạn đã bị vô hiệu hóa.") {
+            toast.error(data.message); // Display the error using Toastify
+          }
           setErrors({
-            form:
-              data.message || "Login failed. Please check your credentials.",
+            form: data.message || "Login failed. Please check your credentials.",
           });
         }
       } catch (error) {
@@ -59,31 +59,6 @@ const LoginForm = () => {
     } else {
       setValidated(true);
     }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Email or username validation
-    if (!email) {
-      newErrors.email = "Email or username is required.";
-    } else if (
-      !/^[\w.%+-]+@fpt\.edu\.vn$/.test(email) && // Email format check
-      !/^[a-zA-Z0-9_]+$/.test(email) // Username format check (letters, numbers, underscores)
-    ) {
-      newErrors.email = "Invalid email or username format.";
-    }
-
-    // Password validation
-    if (!password) {
-      newErrors.password = "Password is required.";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters.";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleGoogleSuccess = (credentialResponse) => {
@@ -105,19 +80,45 @@ const LoginForm = () => {
             localStorage.setItem("user", JSON.stringify(data.user));
 
             // Redirect user based on role
-            if (data.user.role === 'student') {
+            if (data.user.role === "student") {
               navigate("/"); // Redirect to home for students
-            } else if (data.user.role === 'admin') {
+            } else if (data.user.role === "admin") {
               navigate("/dashboard"); // Redirect to dashboard for admin
             }
           } else {
             console.error("Google login failed", data.message);
+            if (data.message === "Tài khoản của bạn đã bị vô hiệu hóa.") {
+              toast.error(data.message); // Display the error using Toastify
+            }
             setErrors({ form: data.message });
           }
         });
     } else {
       setErrors({ form: "Email must be a FPT email!" });
     }
+  };
+  
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!email) {
+      newErrors.email = "Email or username is required.";
+    } else if (
+      !/^[\w.%+-]+@fpt\.edu\.vn$/.test(email) &&
+      !/^[a-zA-Z0-9_]+$/.test(email)
+    ) {
+      newErrors.email = "Invalid email or username format.";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required.";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleGoogleFailure = (error) => {
@@ -143,7 +144,6 @@ const LoginForm = () => {
                   style={{ width: "100px" }}
                 />
               </a>
-
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
