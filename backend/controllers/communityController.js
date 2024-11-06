@@ -25,7 +25,16 @@ exports.isModerator = catchAsync(async (req, res, next) => {
 });
 // CRUD
 exports.getCommunityById = factoryGetOne(Community);
-exports.createNewCommunity = factoryCreateOne(Community);
+exports.createNewCommunity = catchAsync(async (req, res, next) => {
+  req.body.memberCount = 1;
+  const newCommunity = await Community.create(req.body);
+  const newSubscription = await Subscription.create({
+    userId: req.user.id,
+    communityId: newCommunity._id,
+    role: 'moderator',
+  });
+  res.status(201).json(newCommunity);
+});
 exports.getAllCommunities = factoryGetAll(Community);
 exports.updateCommunity = factoryUpdateOne(Community);
 exports.deleteCommunity = catchAsync(async (req, res, next) => {
@@ -169,4 +178,23 @@ exports.addRequest = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json(doc);
+});
+exports.getUserCommunites = catchAsync(async (req, res, next) => {
+  const queryObj = { ...req.query };
+  const excludedFields = ['page', 'sort', 'limit', 'fields', '_extend'];
+  excludedFields.forEach((el) => delete queryObj[el]);
+  // 1) Filtering
+  let queryStr = JSON.stringify(queryObj);
+  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+  let parseQuery = JSON.parse(queryStr);
+  const userSubscriptions = await Subscription.find({
+    ...parseQuery,
+    userId: req.user.id,
+  })
+    .select('communityId -_id')
+    .populate('communityId');
+  const userCommuities = userSubscriptions.map((s) => {
+    return s.communityId;
+  });
+  res.status(200).json(userCommuities);
 });
