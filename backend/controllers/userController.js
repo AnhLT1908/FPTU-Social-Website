@@ -5,7 +5,9 @@ const path = require('path');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const Post = require('../models/postModel');
 const APIFeatures = require('../utils/apiFeatures');
+const mongoose = require('mongoose');
 const {
   factoryDeleteOne,
   factoryUpdateOne,
@@ -57,8 +59,12 @@ exports.updateUserImage = catchAsync(async (req, res, next) => {
   const filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
   // Đường dẫn lưu ảnh vào thư mục src/images/userImage
-  const outputPath = path.join(__dirname, '../../frontend/public/images/userImage', filename);
-  console.log("Path", outputPath)
+  const outputPath = path.join(
+    __dirname,
+    '../../frontend/public/images/userImage',
+    filename
+  );
+  console.log('Path', outputPath);
   // Kiểm tra nếu thư mục chưa tồn tại, tạo thư mục
   const dirPath = path.dirname(outputPath);
   if (!fs.existsSync(dirPath)) {
@@ -145,7 +151,10 @@ exports.createUser = (req, res) => {
   });
 };
 // CRUD
-exports.getUserById = factoryGetOne(User);
+exports.getUserById = factoryGetOne(User, {
+  path: 'bookmarks',
+  populate: [{ path: 'communityId' }, { path: 'userId' }],
+});
 exports.getAllUsers = factoryGetAll(User);
 exports.updateUser = factoryUpdateOne(User);
 exports.deleteUser = factoryDeleteOne(User);
@@ -246,3 +255,22 @@ exports.searchUsers = catchAsync(async (req, res, next) => {
     data: users,
   });
 });
+exports.getPostUser = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    console.log('user id', id);
+    const posts = await Post.find({ userId: id})
+      .populate('communityId')
+      .populate('userId')
+      .exec();
+
+    if (posts) {
+      res.status(200).json(posts);
+      console.log('Post found', posts);
+    } else {
+      res.status(404).json({ message: 'No posts found for this user' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};

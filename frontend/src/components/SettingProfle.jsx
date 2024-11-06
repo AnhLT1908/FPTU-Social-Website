@@ -232,7 +232,11 @@ const SettingProfile = () => {
             <Col md={3}>
               <Card>
                 <CardImg
-                  src={userData?.background}
+                  src={
+                    userData?.background === "default.jpg"
+                      ? "/images/background.jpg"
+                      : userData?.background
+                  }
                   style={{ height: "150px", width: "100%", objectFit: "cover" }}
                   variant="top"
                 />
@@ -260,7 +264,11 @@ const SettingProfile = () => {
                   <Row>
                     <Col className="d-flex justify-content-center">
                       <Image
-                        src={userData?.avatar}
+                        src={
+                          userData?.avatar === "default.jpg"
+                            ? "/images/logo.jpg"
+                            : userData?.avatar
+                        }
                         style={{
                           borderRadius: "100px",
                           width: "100px",

@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const Community = require('./communityModel');
-const User = require('./userModel');
 const subscriptionSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.ObjectId, ref: 'User' },

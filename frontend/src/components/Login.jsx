@@ -38,9 +38,9 @@ const LoginForm = () => {
           localStorage.setItem("user", JSON.stringify(data.user));
 
           // Redirect user based on role
-          if (data.user.role === 'student') {
+          if (data.user.role === "student") {
             navigate("/"); // Redirect to home for students
-          } else if (data.user.role === 'admin') {
+          } else if (data.user.role === "admin") {
             navigate("/dashboard"); // Redirect to dashboard for admin
           }
         } else {
@@ -105,9 +105,9 @@ const LoginForm = () => {
             localStorage.setItem("user", JSON.stringify(data.user));
 
             // Redirect user based on role
-            if (data.user.role === 'student') {
+            if (data.user.role === "student") {
               navigate("/"); // Redirect to home for students
-            } else if (data.user.role === 'admin') {
+            } else if (data.user.role === "admin") {
               navigate("/dashboard"); // Redirect to dashboard for admin
             }
           } else {
@@ -134,15 +134,13 @@ const LoginForm = () => {
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <a href="/">
-                <img
-                  src="../images/logo.jpg"
-                  href="/"
-                  alt="Logo"
-                  className="mb-3"
-                  style={{ width: "100px" }}
-                />
-              </a>
+              <img
+                src="../images/logo.jpg"
+                href="/"
+                alt="Logo"
+                className="mb-3"
+                style={{ width: "100px" }}
+              />
 
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>

@@ -36,9 +36,11 @@ const HomePage = () => {
   const [postId, setPostId] = useState(null);
   const [showModal1, setShowModal1] = useState(false);
   const [reportDes, setReportDes] = useState("");
+  const [reportedPosts, setReportedPosts] = useState({});
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
+
   const handleReportPost = (uid, pid) => {
-    let data = JSON.stringify({
+    const data = JSON.stringify({
       userId: uid,
       reportEntityId: pid,
       entityType: "Post",
@@ -46,9 +48,8 @@ const HomePage = () => {
       status: "Waiting",
     });
 
-    let config = {
+    const config = {
       method: "post",
-      maxBodyLength: Infinity,
       url: "http://localhost:9999/api/v1/reports/",
       headers: {
         "Content-Type": "application/json",
@@ -59,14 +60,59 @@ const HomePage = () => {
 
     axios
       .request(config)
-      .then((response) => {
-        alert("Your report have send to admin success!!");
+      .then(() => {
+        alert("Your report has been sent to the admin successfully!");
         setShowModal1(false);
+        setReportedPosts((prev) => ({ ...prev, [pid]: true }));
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
+  const handleUndoReport = (pid) => {
+    const config = {
+      method: "delete",
+      url: `http://localhost:9999/api/v1/reports/by-entity/${pid}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios
+      .request(config)
+      .then(() => {
+        alert("Your report has been undone!");
+        setReportedPosts((prev) => {
+          const updated = { ...prev };
+          delete updated[pid];
+          return updated;
+        });
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          alert(
+            "No report found with this ID. It may have already been deleted."
+          );
+        } else {
+          console.log(error);
+        }
+      });
+  };
+
+  useEffect(() => {
+    const savedReportedPosts = JSON.parse(
+      localStorage.getItem("reportedPosts")
+    );
+    if (savedReportedPosts) {
+      setReportedPosts(savedReportedPosts);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("reportedPosts", JSON.stringify(reportedPosts));
+  }, [reportedPosts]);
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
@@ -222,10 +268,10 @@ const HomePage = () => {
 
           {posts && posts.length > 0 ? (
             posts.map((post, index) => (
-              <Card key={post._id} className="mb-3 p-3">
+              <Card key={post?._id} className="mb-3 p-3">
                 <Row>
                   <Col>
-                    <Link to={`/community/${post?.communityId.id}`}>
+                    <Link to={`/community/${post?.communityId?.id}`}>
                       <p>
                         <strong>
                           {"f/" + post.communityId?.name || "Community Name"}
@@ -251,19 +297,32 @@ const HomePage = () => {
                           >
                             Edit
                           </Dropdown.Item>
-                        ) : (
-                          <>
+                        ) : reportedPosts[post._id] ? (
+                          <div>
+                            <Dropdown.Item
+                              onClick={() => handleUndoReport(post._id)}
+                            >
+                              Undo
+                            </Dropdown.Item>
                             <Dropdown.Item
                               onClick={() => handleSave(post?._id)}
                             >
                               Save
                             </Dropdown.Item>
+                          </div>
+                        ) : (
+                          <div>
                             <Dropdown.Item
-                              onClick={() => openReportModal(post?._id)}
+                              onClick={() => openReportModal(post._id)}
                             >
                               Report
                             </Dropdown.Item>
-                          </>
+                            <Dropdown.Item
+                              onClick={() => handleSave(post?._id)}
+                            >
+                              Save
+                            </Dropdown.Item>
+                          </div>
                         )}
                       </Dropdown.Menu>
                     </Dropdown>
@@ -280,19 +339,17 @@ const HomePage = () => {
                     {post?.media && post.media.length > 0 && post.media[0] ? (
                       <Image
                         src={post.media[0]}
-                        alt={`post-${index + 1}`}
+                        alt=""
                         fluid
                         style={{
                           width: "100%",
-                          height: '200px',
+                          height: "200px",
                           borderRadius: "10px",
                           cursor: "pointer",
                           float: "right",
-                          objectFit: "cover"
+                          objectFit: "cover",
                         }}
-                        onClick={() =>
-                          handleImageClick(post.media[0])
-                        }
+                        onClick={() => handleImageClick(post.media[0])}
                       />
                     ) : (
                       <div></div>
@@ -354,7 +411,7 @@ const HomePage = () => {
           ) : (
             <Row>
               <Col className="text-center">
-                <h3>No posts available</h3>
+                <div></div>
               </Col>
             </Row>
           )}
