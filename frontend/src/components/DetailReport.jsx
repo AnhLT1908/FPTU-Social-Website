@@ -67,20 +67,20 @@ const DetailReport = () => {
                         <Card.Title className="text-center mb-4">Chi tiết bài báo cáo ID: {reportDetail._id}</Card.Title>
                         <Row className="align-items-center">
                             <Col md={6} className="d-flex flex-column align-items-center">
-                                <Card.Text className="text-center">
-                                    <strong>Người dùng đăng bài:</strong> {reportDetail.userId?.username || "N/A"}
+                                <Card.Text className="text-start d-flex " style={{width:"350px"}}>
+                                    <strong className=''>Người dùng đăng bài: </strong> <p> {reportDetail.userId?.username || "N/A"} </p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Tiêu đề bài viết:</strong> {reportDetail.reportEntityId?.title}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Tiêu đề bài viết:</strong> <p>{reportDetail.reportEntityId?.title}</p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Nội dung bài viết:</strong> {reportDetail.reportEntityId?.content}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Nội dung bài viết:</strong> <p>{reportDetail.reportEntityId?.content}</p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Lý do báo cáo:</strong> {reportDetail.description}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Lý do báo cáo:</strong> <p>{reportDetail.description}</p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Trạng thái:</strong> {reportDetail.status}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Trạng thái:</strong><p>{reportDetail.status}</p>
                                 </Card.Text>
                                 
                                 {reportDetail.status === 'Waiting' && ( // Kiểm tra nếu status là 'Waiting'

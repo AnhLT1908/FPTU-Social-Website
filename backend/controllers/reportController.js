@@ -25,7 +25,7 @@ exports.deleteReport = factoryDeleteOne(Report);
 // Hàm lấy tất cả báo cáo với phân trang và lọc theo điều kiện
 exports.getAllReportsPaginate = catchAsync(async (req, res, next) => {
   // Thiết lập bộ lọc cho các trường cần lọc
-  const { page = 1, limit = 10, status, entityType, description } = req.query;
+  const { page = 1, limit = 5, status, entityType, description } = req.query;
 
   // Cấu hình bộ lọc dựa vào query parameters
   let filter = {};
@@ -58,7 +58,8 @@ exports.getAllReportsPaginate = catchAsync(async (req, res, next) => {
 });
 exports.getReportStats = catchAsync(async (req, res, next) => {
   const totalReports = await Report.countDocuments({});
-  const processedReports = await Report.countDocuments({ status: 'Approved' });
+  const processedReports = await Report.countDocuments({ status: { $in: ['Approved', 'Cancel'] } });
+
   const unprocessedReports = await Report.countDocuments({ status: 'Waiting' });
 
   res.status(200).json({
