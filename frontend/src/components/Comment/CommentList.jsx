@@ -32,7 +32,6 @@ const CommentList = () => {
     }
   };
   const handleReplyClick = (comment) => {
-    console.log(comment);
     setReplyTo(comment); // Set the comment being replied to
   };
 
@@ -74,6 +73,27 @@ const CommentList = () => {
           // Return the updated comment object
           return { ...comment, votes: updatedVotes };
         }
+        if (comment.childrens) {
+          return {
+            ...comment,
+            childrens: comment.childrens.map((childComment) => {
+              if (childComment._id === commentId) {
+                const updatedChildVotes = { ...childComment.votes };
+
+                if (vote === true) {
+                  updatedChildVotes[user.id] = true; // User voted up
+                } else if (vote === false) {
+                  updatedChildVotes[user.id] = false; // User voted down
+                } else {
+                  delete updatedChildVotes[user.id]; // User removed their vote
+                }
+
+                return { ...childComment, votes: updatedChildVotes };
+              }
+              return childComment; // Return the child comment unchanged
+            }),
+          };
+        }
         return comment; // Return the comment unchanged if it doesn't match
       })
     );
@@ -85,6 +105,7 @@ const CommentList = () => {
     <div>
       {commentList.map((comment) => (
         <div
+          // id={comment._id}
           key={comment._id}
           className="comment"
           style={{
@@ -94,7 +115,10 @@ const CommentList = () => {
             borderRadius: '5px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <a
+            style={{ display: 'flex', alignItems: 'center' }}
+            href={`/profile/${comment.userId._id}`}
+          >
             <img
               src={'/images/logo.jpg'} // Assuming the avatar URL is stored in comment.author.avatar
               alt={comment.userId.displayName}
@@ -108,7 +132,7 @@ const CommentList = () => {
             <span style={{ fontWeight: 'bold' }}>
               {comment.userId.displayName}
             </span>
-          </div>
+          </a>
           <p>{comment.content}</p>
           {comment.tagInfo && (
             <span className="tagged-user">@{comment.tagInfo.tagName}</span>
@@ -128,6 +152,11 @@ const CommentList = () => {
               aria-label="Vote Up"
             >
               <FaArrowUp />
+              {
+                Object.values(comment.votes || {}).filter(
+                  (vote) => vote === true
+                ).length
+              }
             </Button>
             <span className="mx-2"></span>
             <Button
@@ -144,6 +173,11 @@ const CommentList = () => {
               aria-label="Vote Down"
             >
               <FaArrowDown />
+              {
+                Object.values(comment.votes || {}).filter(
+                  (vote) => vote === false
+                ).length
+              }
             </Button>
             <span className="mx-2"></span>
             <Button
@@ -175,7 +209,10 @@ const CommentList = () => {
             >
               {comment.childrens.map((childComment) => (
                 <div key={childComment._id}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <a
+                    style={{ display: 'flex', alignItems: 'center' }}
+                    href={`/profile/${childComment?.userId._id}`}
+                  >
                     <img
                       src={'/images/logo.jpg'} // Assuming the avatar URL is stored in comment.author.avatar
                       alt={comment.userId.displayName}
@@ -189,11 +226,21 @@ const CommentList = () => {
                     <span style={{ fontWeight: 'bold' }}>
                       {childComment.userId.displayName}
                     </span>
-                  </div>
+                  </a>
                   <p>
-                    <span className="fw-bold">
+                    <a
+                      className="fw-bold"
+                      href={`/profile/${childComment.tagInfo?.userId}`}
+                      style={{ textDecoration: 'none' }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.textDecoration = 'underline')
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.textDecoration = 'none')
+                      }
+                    >
                       {childComment.tagInfo && childComment.tagInfo.tagName}
-                    </span>
+                    </a>
                     &nbsp;
                     {childComment.content}
                   </p>
@@ -214,6 +261,11 @@ const CommentList = () => {
                       aria-label="Vote Up"
                     >
                       <FaArrowUp />
+                      {
+                        Object.values(childComment.votes || {}).filter(
+                          (vote) => vote === true
+                        ).length
+                      }
                     </Button>
                     <span className="mx-2"></span>
                     <Button
@@ -232,6 +284,11 @@ const CommentList = () => {
                       aria-label="Vote Down"
                     >
                       <FaArrowDown />
+                      {
+                        Object.values(childComment.votes || {}).filter(
+                          (vote) => vote === false
+                        ).length
+                      }
                     </Button>
                     <span className="mx-2"></span>
                     <Button
@@ -253,10 +310,14 @@ const CommentList = () => {
             <CommentForm
               postId={id}
               parentId={comment._id} // Pass parentId for the reply
-              tagInfo={{
-                userId: replyTo.userId._id,
-                tagName: replyTo.userId.displayName,
-              }} // Set tag info if needed
+              tagInfo={
+                replyTo.parentId
+                  ? {
+                      userId: replyTo.userId._id,
+                      tagName: replyTo.userId.displayName,
+                    }
+                  : null
+              } // Set tag info if needed
               onCommentSubmit={handleFormSubmit}
             />
           )}

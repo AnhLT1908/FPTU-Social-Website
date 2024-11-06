@@ -29,13 +29,13 @@ const CommentForm = ({ postId, parentId, tagInfo, onCommentSubmit }) => {
         postId,
         content: comment,
         parentId: parentId || null,
+        hasParent: parentId ? true : false,
       };
       if (tagInfo) {
         newComment.tagInfo = {
           userId: tagInfo.userId,
           tagName: tagInfo.tagName,
         };
-        newComment.hasParent = true;
       }
       console.log('Comment submitted:', newComment);
       onCommentSubmit(newComment);

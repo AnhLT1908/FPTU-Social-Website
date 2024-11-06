@@ -4,10 +4,10 @@ import Header from './Header';
 import { Outlet } from 'react-router-dom';
 import socket from '../services/socketClient';
 function Layout() {
-  // const user = JSON.parse(localStorage.getItem('user'));
-  // useEffect(() => {
-  //   socket?.emit('joinUserRoom', user.id);
-  // }, [socket, user]);
+  const user = JSON.parse(localStorage.getItem('user'));
+  useEffect(() => {
+    socket?.emit('joinRoom', user?.id);
+  }, [socket, user]);
   return (
     <>
       <Header socket={socket} />

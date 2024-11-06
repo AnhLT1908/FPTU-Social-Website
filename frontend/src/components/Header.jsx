@@ -32,9 +32,13 @@ function Header({ socket }) {
   }, []);
 
   useEffect(() => {
-    socket.on("getNotification", (data) => {
-      setNotifications((prev) => [...prev, data]);
+    socket.on("newNotification", (data) => {
+      console.log("New notice: ", data);
+      if (user?.id == data?.userId) setNotifications((prev) => [...prev, data]);
     });
+    return () => {
+      socket.off("newNotification");
+    };
   }, [socket]);
   useEffect(() => {
     fetchNotifications();
@@ -284,7 +288,7 @@ function Header({ socket }) {
                         </button>
                       </li>
                     ))}
-                    <a
+                    {/* <a
                       tabIndex="0"
                       className="btn btn-lg btn-danger"
                       role="button"
@@ -294,7 +298,7 @@ function Header({ socket }) {
                       data-bs-content="And here's some amazing content. It's very engaging. Right?"
                     >
                       Dismissible popover
-                    </a>
+                    </a> */}
                   </div>
                 </ul>
               </div>
@@ -322,15 +326,14 @@ function Header({ socket }) {
                   className="dropdown-menu dropdown-menu-end"
                   aria-labelledby="dropdownMenuButton1"
                 >
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      <span className="dropdown-item-icon">
-                        <img
-                          src="/images/logo.jpg"
-                          alt="User Avatar for u/sjdkdk48"
-                        />
-                      </span>
-                      <Link to={`/profile/${user.id}`}>
+                  <Link to={`/profile/${user.id}`}>
+                    <li style={{display: 'flex'}}>
+                        <span className="dropdown-item-icon">
+                          <img
+                            src="/images/logo.jpg"
+                            alt="User Avatar for u/sjdkdk48"
+                          />
+                        </span>
                         <span className="dropdown-item-name d-flex flex-column">
                           <span>View Profile</span>
                           <span
@@ -340,12 +343,13 @@ function Header({ socket }) {
                               color: "var(--color-secondary-weak)",
                             }}
                           >
-                            {"u/" + user?.username}
+                            {user?.displayName
+                              ? "u/" + user?.displayName
+                              : "u/" + user?.username}
                           </span>
                         </span>
-                      </Link>
-                    </a>
-                  </li>
+                    </li>
+                  </Link>
                   <li>
                     <a
                       className="dropdown-item"

@@ -4,6 +4,10 @@ const Post = require('../models/postModel');
 const Subscription = require('../models/subscriptionModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
 
 const {
   factoryDeleteOne,
@@ -120,11 +124,31 @@ exports.getMyFeed = catchAsync(async (req, res, next) => {
         userId: 1,
         title: 1,
         createdAt: 1,
-        upVotes: 1,
-        downVotes: 1,
+        votes: 1,
+        media: 1,
         commentsCount: { $size: '$comments' },
         hotnessScore: {
-          $add: ['$upVotes', '$downVotes', { $size: '$comments' }],
+          $add: [
+            {
+              $size: {
+                $filter: {
+                  input: { $objectToArray: '$votes' },
+                  as: 'vote',
+                  cond: { $eq: ['$$vote.v', true] },
+                },
+              },
+            }, // Count upvotes
+            {
+              $size: {
+                $filter: {
+                  input: { $objectToArray: '$votes' },
+                  as: 'vote',
+                  cond: { $eq: ['$$vote.v', false] },
+                },
+              },
+            }, // Count downvotes
+            { $size: '$comments' },
+          ],
         },
       },
     },
@@ -161,11 +185,12 @@ exports.getPostByUserId = catchAsync(async (req, res, next) => {
 
 exports.votePost = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const post = Post.findById(id).lean();
+  const post = await Post.findById(id);
+  if (!post.votes) post.votes = new Map();
   if (req.body.vote == 'none') {
     post.votes.delete(req.user.id);
   } else {
-    post.votes.set([req.user.id, req.body.vote]);
+    post.votes.set(req.user.id, req.body.vote);
   }
   const updatedPost = await Post.findByIdAndUpdate(
     id,
@@ -174,6 +199,52 @@ exports.votePost = catchAsync(async (req, res, next) => {
   );
   res.status(200).json(updatedPost);
 });
+
+// Setup multer storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Middleware to handle multiple image uploads
+exports.uploadPostPhotos = upload.array('images', 5);  // Adjust the number as needed
+
+// Create new post with images
+exports.createNewPostWithImages = async (req, res, next) => {
+  try {
+    const filenames = [];
+    // Handle image processing
+    for (const file of req.files) {
+      const filename = `post-${req.user.id}-${Date.now()}-${file.originalname}`;
+      const outputPath = path.join(__dirname, '../../frontend/public/images/postImages', filename);
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+      await sharp(file.buffer)
+        .resize(500, 500)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(outputPath);
+      
+      filenames.push(`/images/postImages/${filename}`);
+    }
+
+    // Create post
+    const newPost = await Post.create({
+      userId: req.user.id,
+      communityId: req.body.communityId,
+      title: req.body.title,
+      content: req.body.content,
+      media: filenames,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Post created with images!',
+      post: newPost,
+    });
+  } catch (error) {
+    console.error('Error creating post with images:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to create post.' });
+  }
+};
 // Exporting the postController object
 const postController = {
   getPostById: exports.getPostById,
@@ -185,6 +256,8 @@ const postController = {
   getMyFeed: exports.getMyFeed,
   getPostByUserId: exports.getPostByUserId,
   votePost: exports.votePost,
+  uploadPostPhotos: exports.uploadPostPhotos,
+  createNewPostWithImages: exports.createNewPostWithImages
 };
 
 module.exports = postController;

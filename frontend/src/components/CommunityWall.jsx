@@ -8,10 +8,14 @@ import {
   Dropdown,
   ButtonGroup,
   Image,
+  Modal,
+  Form,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
-import { useNavigate, Link } from "react-router-dom";
+import ManageCommunity from "./ManageCommunity";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
+
 import axios from "axios";
 import img1 from "../images/postImage/images_postId1.jpg";
 import img2 from "../images/postImage/images_postId2.jpg";
@@ -24,23 +28,39 @@ import img8 from "../images/postImage/images_postId8.jpg";
 import img9 from "../images/postImage/images_postId9.jpg";
 import img10 from "../images/postImage/images_postId10.jpg";
 
-
 const CommunityPage = () => {
   const navigate = useNavigate();
-  const [showHighlights, setShowHighlights] = useState(false);
-  const [voteStatus, setVoteStatus] = useState(null);
+  const [reportDes, setReportDes] = useState("");
+  const [community, setCommunity] = useState(null);
+  const [rule, setRule] = useState("");
+  const { id } = useParams();
+  const [users, setUsers] = useState();
+  const [communityName, setCommunityName] = useState("");
+  const [description, setDescription] = useState("");
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showModal2, setShowModal2] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
   const [modalImage, setModalImage] = useState(null);
-
+  const token = localStorage.getItem("token");
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
-
+  const [postId, setPostId] = useState(null); // Tạo state để lưu post._id
+  const [joinReason, setJoinReason] = useState();
+  const [bookmarks, setBookmarks] = useState();
+  // Hàm mở modal và lưu postId
+  const openReportModal = (id) => {
+    setPostId(id); // Lưu post._id vào state
+    setShowModal1(true);
+  };
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
+    if (userData) {
+      setUser(userData);
+      setBookmarks(userData.bookmarks);
+    }
 
-    fetch("http://localhost:9999/api/v1/posts/")
+    fetch(`http://localhost:9999/api/v1/communities/get-post/${id}`)
       .then((res) => res.json())
       .then((data) => {
         const postsWithReactions = data.map((item) => ({
@@ -53,8 +73,53 @@ const CommunityPage = () => {
         setPosts(postsWithReactions);
       })
       .catch((error) => console.error("Error fetching posts:", error));
+    fetchCommunity();
+    fetchUser();
   }, []);
 
+  const fetchCommunity = () => {
+    const config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://localhost:9999/api/v1/communities/${id}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        setCommunity(response.data);
+        setCommunityName(response.data.name);
+        setDescription(response.data.description);
+        setRule(response.data.communityRule);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const fetchUser = () => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://localhost:9999/api/v1/communities/get-user/${id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        const result = response.data?.map((item) => item.userId);
+        console.log(result);
+        setUsers(result);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   const handleReaction = (index, type) => {
     setPosts((prevPosts) => {
       const updatedPosts = [...prevPosts];
@@ -84,38 +149,24 @@ const CommunityPage = () => {
     setModalImage(image);
     setShowModal(true);
   };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setModalImage(null);
-  };
-
-  const handleUpvote = () => {
-    setVoteStatus(voteStatus === "up" ? null : "up");
-  };
-
-  const handleDownvote = () => {
-    setVoteStatus(voteStatus === "down" ? null : "down");
-  };
-
-  const toggleHighlights = () => {
-    setShowHighlights(!showHighlights);
-  };
-
-  const handleJoin = () => {
-    alert("Joined community success!");
+  const handleSave = (sid) => {
+    if (!user.bookmarks.includes(sid)) {
+      user.bookmarks.push(sid);
+    }
+    localStorage.setItem("user", JSON.stringify(user));
     const data = JSON.stringify({
-      userId: "671df2d274687d48d0bdc4ed",
-      communityId: "671de826180594244866bf68",
-      role: "member",
+      bookmarks: user.bookmarks,
     });
 
+    console.log("data", data);
+
     const config = {
-      method: "post",
+      method: "patch",
       maxBodyLength: Infinity,
-      url: "http://localhost:9999/api/v1/communities/join",
+      url: "http://localhost:9999/api/v1/users/update-me",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       data: data,
     };
@@ -123,11 +174,101 @@ const CommunityPage = () => {
     axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        alert("Save post success!");
+        window.location.href = `/community/${id}`;
+      })
+      .catch((error) => {
+        console.error("Lỗi khi gửi yêu cầu:", error);
+      });
+  };
+  const handleReportPost = (uid, pid) => {
+    let data = JSON.stringify({
+      userId: uid,
+      reportEntityId: pid,
+      entityType: "Post",
+      description: reportDes,
+      status: "Waiting",
+    });
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "http://localhost:9999/api/v1/reports/",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        alert("Your report have send to admin success!!");
+        setShowModal1(false);
       })
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  const handleJoin = () => {
+    if (community?.privacyType == "public") {
+      const data = JSON.stringify({
+        userId: user.id,
+        communityId: id,
+        role: "member",
+      });
+      const config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "http://localhost:9999/api/v1/communities/join",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+      axios
+        .request(config)
+        .then((response) => {
+          setShowModal2(false);
+          alert("Joined community success!");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      let data = JSON.stringify({
+        joinRequests: [
+          {
+            userId: user.id,
+            reason: joinReason,
+          },
+        ],
+      });
+
+      let config = {
+        method: "patch",
+        maxBodyLength: Infinity,
+        url: `http://localhost:9999/api/v1/communities/request/${id}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: data,
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          setShowModal2(false);
+          alert("Your request have send to mod!!");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    window.location.href = `/community/${id}`;
   };
 
   return (
@@ -138,7 +279,7 @@ const CommunityPage = () => {
           <Card className="mb-4 p-4">
             <div className="d-flex align-items-center mb-3">
               <img
-                src="https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/anh-dep-thien-nhien-2-1.jpg"
+                src={community?.logo}
                 alt="Community Icon"
                 className="rounded-circle"
                 style={{
@@ -147,69 +288,153 @@ const CommunityPage = () => {
                   objectFit: "cover",
                 }}
               />
-              <h1 className="ml-3">f/FPTU</h1>
+              <h1 className="ml-3">f/{communityName}</h1>
             </div>
             <div className="d-flex justify-content-between align-items-center">
-              <Dropdown>
-                <Dropdown.Toggle variant="light" id="dropdown-basic">
-                  Hot
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item>New</Dropdown.Item>
-                  <Dropdown.Item>Top</Dropdown.Item>
-                  <Dropdown.Item>Rising</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-              <ButtonGroup aria-label="Basic example">
-                <Button variant="light" onClick={() => navigate("/create-post")}>
-                  Create Post
+              {user?.moderatorCommunities?.includes(id) ? (
+                <Button variant="light" onClick={() => setShowModal(true)}>
+                  Manage Comunity
                 </Button>
-                <Button variant="light" onClick={handleJoin}>
-                  Join
-                </Button>
-              </ButtonGroup>
+              ) : (
+                <ButtonGroup aria-label="Basic example">
+                  {!users?.includes(user?.id) ? (
+                    community?.joinRequests?.some(
+                      (request) => request.userId === user.id
+                    ) ? (
+                      <Button variant="light" aria-readonly>
+                        Process
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="light"
+                        onClick={() => setShowModal2(true)}
+                      >
+                        Join
+                      </Button>
+                    )
+                  ) : (
+                    <>
+                      <Button
+                        variant="light"
+                        onClick={() => navigate("/create-post")}
+                      >
+                        Create Post
+                      </Button>
+                      <Button variant="success" aria-readonly>
+                        Joined
+                      </Button>
+                    </>
+                  )}
+                </ButtonGroup>
+              )}
             </div>
           </Card>
-
-          <Card className="mb-3 p-3">
-            <strong onClick={toggleHighlights} style={{ cursor: "pointer" }}>
-              Community highlights
-            </strong>
-            {showHighlights && (
-              <Card className="mt-2 p-2">
-                <p className="mb-0">
-                  THE JAPAN SUBREDDIT DIRECTORY / BASIC QUESTIONS THREAD
-                  (Winter/Spring 2024)
-                </p>
-                <small>51 votes • 314 comments</small>
-              </Card>
-            )}
-          </Card>
-
+          <ManageCommunity
+            showModal={showModal}
+            setShowModal={setShowModal}
+            community={community}
+          ></ManageCommunity>
+          <Modal show={showModal1} onHide={() => setShowModal1(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Reports</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                {/* Block for Community Name */}
+                <Form.Group controlId="report" className="mb-3">
+                  <Form.Label>
+                    Reason <span style={{ color: "red" }}></span>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter report reason"
+                    value={reportDes}
+                    onChange={(e) => setReportDes(e.target.value)}
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal1(false)}>
+                Close
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleReportPost(user.id, postId)}
+              >
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Modal show={showModal2} onHide={() => setShowModal2(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Join Request</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                {/* Block for Community Name */}
+                <Form.Group controlId="report" className="mb-3">
+                  <Form.Label>
+                    Reason <span style={{ color: "red" }}></span>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter reason"
+                    value={joinReason}
+                    onChange={(e) => setJoinReason(e.target.value)}
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal2(false)}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={() => handleJoin()}>
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
           {posts.map((post, index) => (
             <Card key={post._id} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <Link to={`/community/${post.communityId}`}>
+                  <Link to={`/community/${post.communityId.id}`}>
                     <p>
-                      <strong>{"f/" + (post.communityId?.name || "Community Name")}</strong> •{" "}
-                      {new Date(post.createdAt).toLocaleString()}
+                      <strong>
+                        {"f/" + (post?.communityId?.name || "Community Name")}
+                      </strong>{" "}
+                      • {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
-                  <Link to={`/profile/${post.userId}`}>
-                    <p className="mt-n2">{"u/" + (post.userId?.username || "Username")}</p>
+                  <Link to={`/profile/${post?.userId?.id}`}>
+                    <p className="mt-n2">
+                      {"u/" + (post?.userId?.username || "Username")}
+                    </p>
                   </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
                   <Dropdown>
                     <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item>Save</Dropdown.Item>
-                      <Dropdown.Item>Report</Dropdown.Item>
-                      <Dropdown.Item>Hide</Dropdown.Item>
-                      <Dropdown.Item onClick={() => navigate(`/edit-post/${post._id}`)}>
-                        Edit
-                      </Dropdown.Item>
+                      {post?.userId?.id === user?.id ? (
+                        <Dropdown.Item
+                          onClick={() => navigate(`/edit-post/${post?._id}`)}
+                        >
+                          Edit
+                        </Dropdown.Item>
+                      ) : (
+                        <>
+                          <Dropdown.Item onClick={() => handleSave(post?._id)}>
+                            Save
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() => openReportModal(post?._id)}
+                          >
+                            Report
+                          </Dropdown.Item>
+                        </>
+                      )}
                     </Dropdown.Menu>
                   </Dropdown>
                 </Col>
@@ -217,8 +442,8 @@ const CommunityPage = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`/post/${post._id}`}>
-                    <h2>{post.title}</h2>
+                  <Link to={`/post/${post?._id}`}>
+                    <h2>{post?.title}</h2>
                   </Link>
                 </Col>
                 <Col md={4}>
@@ -232,7 +457,9 @@ const CommunityPage = () => {
                       cursor: "pointer",
                       float: "right",
                     }}
-                    onClick={() => handleImageClick(images[index % images.length])}
+                    onClick={() =>
+                      handleImageClick(images[index % images.length])
+                    }
                   />
                 </Col>
               </Row>
@@ -251,16 +478,25 @@ const CommunityPage = () => {
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{post.downVotes}</span>
-                <Button variant="light">
-                  <FaComment /> {post.commentsCount || 0}
-                </Button>
-                <Button variant="light">
-                  <FaShare /> Share
+                <span className="mx-2">{post?.downVotes}</span>
+                <Button
+                  variant="light"
+                  onClick={() => navigate(`/post/${post?._id}`)}
+                >
+                  <FaComment /> {post.commentCount || 0}
                 </Button>
               </div>
             </Card>
           ))}
+          <Row>
+            <Col className="text-center">
+              <h3>
+                <a href="#" style={{ textDecoration: "none" }}>
+                  No more content
+                </a>
+              </h3>
+            </Col>
+          </Row>
         </Col>
 
         {/* Sidebar */}
@@ -269,44 +505,34 @@ const CommunityPage = () => {
             className="mb-4 p-3"
             style={{ height: "85vh", overflowY: "auto" }}
           >
-            <h4>FPTU</h4>
+            <h4>{community?.name}</h4>
             <p>
-              This subreddit serves as a general hub to discuss most things
-              Japanese and exchange information, **as well as to guide users to
-              subs specializing in things such as daily life, travel or language
-              acquisition.**
+              {community?.description === ""
+                ? "This community don't have description"
+                : community?.description}
             </p>
-            <p>
-              Users are strongly encouraged to check the sidebar and stickied
-              general questions thread before posting.
-            </p>
+
             <hr />
             <p>
-              <strong>Created</strong> Jan 25, 2008
+              <strong>Created</strong>{" "}
+              {new Date(community?.createdAt).toLocaleString()}
             </p>
-            <p>Public</p>
+            <p>{community?.privacyType}</p>
             <hr />
             <div className="d-flex justify-content-between">
               <p>
-                <strong>1.3M</strong> Members
+                <strong>{community?.memberCount}</strong> Members
               </p>
-              <p>
-                <strong>68</strong> Online
-              </p>
-              <p>Top 1% Rank by size</p>
             </div>
             <hr />
-            <h5>User Flair</h5>
-            <p>Expert_Post3875</p>
-            <hr />
+
             <h5>Rules</h5>
             <ul>
-              <li>No racism/hatemongering/harassment</li>
-              <li>No blog/vlog/product spam/crowdfunding/begging</li>
-              <li>Check the sidebar for the correct subreddit</li>
-              <li>Submission titles should be relevant & informative</li>
-              <li>Don't be a troll</li>
+              {community?.communityRule.split(".").map((item, index) => (
+                <li key={index}>{item.trim()}</li> // Sử dụng trim() để loại bỏ khoảng trắng ở đầu/cuối
+              ))}
             </ul>
+
             <hr />
             <h5>Moderators</h5>
             <ul>

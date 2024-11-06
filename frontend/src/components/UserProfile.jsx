@@ -21,6 +21,7 @@ import {
 } from "react-icons/fa";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
+import axios from "axios";
 import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserProfile = () => {
@@ -31,14 +32,22 @@ const UserProfile = () => {
   const [filter, setFilter] = useState("new");
   const token = localStorage.getItem("token");
 
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
-  const { id } = useParams();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    console.log("storedUserData", storedUserData);
+    if (storedUserData) {
+      setUser(storedUserData);
+    }
+  }, []);
 
+  const userId = user?._id;
+  console.log("userId", userId);
+
+  useEffect(() => {
     const fetchPosts = () => {
       fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
         headers: {
@@ -63,6 +72,30 @@ const UserProfile = () => {
     fetchPosts();
   }, [filter, token]);
 
+  useEffect(() => {
+    if (userId) {
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:9999/api/v1/users/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setUserData(response.data);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      fetchUserData();
+    }
+  }, [token, userId]);
+
+  const userDataGet = userData;
+  console.log("userDataGet", userDataGet);
   const handleReaction = (postIndex, type) => {
     setPosts((prevPosts) => {
       const updatedPosts = [...prevPosts];
@@ -111,13 +144,12 @@ const UserProfile = () => {
               <Row>
                 <Col md={12} className="d-flex align-items-center">
                   <div style={{ marginRight: "30px" }}>
-                    <FaUser
+                    <Image
+                      src={userData?.avatar}
                       style={{
                         borderRadius: "100px",
                         width: "100px",
                         height: "100px",
-                        backgroundColor: "#f3752c",
-                        padding: "10px 10px",
                         color: "white",
                       }}
                     />
@@ -143,9 +175,9 @@ const UserProfile = () => {
                     </Button>
                   </div>
                   <div>
-                    <h4>{user?.username || "Username"}</h4>
+                    <h4>{userData?.displayName || "Username"}</h4>
                     <p style={{ fontWeight: "bold", color: "#666666" }}>
-                      u/{user?.username || "Username"}
+                      u/{userData?.username || "Username"}
                     </p>
                   </div>
                 </Col>
@@ -165,7 +197,7 @@ const UserProfile = () => {
                   >
                     <h6 style={{ marginTop: "5px" }}>Overview</h6>
                   </Button>
-                  <Link to={`/profile/${user._id}/saved`}>
+                  <Link to={`/profile/${user?._id}/saved`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -289,7 +321,11 @@ const UserProfile = () => {
 
         <Col md={4}>
           <Card>
-            <CardImg variant="top" src={background} />
+            <CardImg
+              variant="top"
+              src={userData?.background}
+              style={{ height: "250px", width: "100%", objectFit: "cover" }}
+            />
             <CardBody>
               <Row>
                 <Col md={12}>
@@ -315,7 +351,7 @@ const UserProfile = () => {
                   </Button>
                   <Row>
                     <Col md={12}>
-                      <h5>{user?.username || "Username"}</h5>
+                      <h5>{userData?.displayName || "Username"}</h5>
                     </Col>
                   </Row>
                   <hr />
@@ -326,20 +362,18 @@ const UserProfile = () => {
                   </Row>
                   <Row className="mt-2">
                     <Col md={12} className="d-flex align-items-center">
-                      <FaUser
+                      <Image
+                        src={userData?.avatar}
                         style={{
                           borderRadius: "100px",
                           width: "40px",
                           height: "40px",
-                          backgroundColor: "#f3752c",
-                          padding: "5px 5px",
-                          color: "white",
                           marginRight: "10px",
                         }}
                       />
                       <div>
                         <p style={{ fontSize: "14px", marginBottom: "0px" }}>
-                          AnhLTHE172031
+                          u/{userData?.username}
                         </p>
                         <p
                           style={{

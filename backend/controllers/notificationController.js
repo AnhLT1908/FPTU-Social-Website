@@ -1,5 +1,4 @@
 const Notification = require('../models/notificationModel');
-const { sendNotification } = require('../socket');
 const catchAsync = require('../utils/catchAsync');
 const {
   factoryUpdateOne,
@@ -17,8 +16,7 @@ exports.getMyNotifications = catchAsync(async (req, res, next) => {
 });
 exports.createNewNotification = catchAsync(async (req, res, next) => {
   const notification = await Notification.create(req.body);
-  const io = req.app.socketio;
-  io.room(req.params.roomId).emit(notification);
+  res.status(200).json(notification);
 });
 exports.updateNotification = factoryUpdateOne(Notification);
 exports.deleteNotification = factoryDeleteOne(Notification);

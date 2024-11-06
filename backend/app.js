@@ -28,6 +28,10 @@ app.use(
     ],
   })
 );
+
+
+const frontendPath = path.dirname("")
+
 app.use(express.static(`${__dirname}/public`));
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -42,7 +46,7 @@ app.use((req, res, next) => {
 });
 // 2) ROUTES
 app.use(express.static(path.join(__dirname, '../frontend/build')));
-
+app.use('/images', express.static(path.join(__dirname, '../frontend/src/images')));
 // Các route API được server xử lý nhé
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/communities', communityRouter);

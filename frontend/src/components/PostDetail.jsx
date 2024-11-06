@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Col,
@@ -9,103 +9,64 @@ import {
   Row,
   Dropdown,
   Card,
-} from 'react-bootstrap';
-import { FaArrowUp, FaArrowDown, FaComment, FaShare } from 'react-icons/fa';
+} from "react-bootstrap";
+import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 
-import img1 from '../images/postImage/images_postId1.jpg';
-import img2 from '../images/postImage/images_postId2.jpg';
-import img3 from '../images/postImage/images_postId3.jpg';
-import img4 from '../images/postImage/images_postId4.jpg';
-import img5 from '../images/postImage/images_postId5.jpg';
-import img6 from '../images/postImage/images_postId6.jpg';
-import img7 from '../images/postImage/images_postId7.jpg';
-import img8 from '../images/postImage/images_postId8.jpg';
-import img9 from '../images/postImage/images_postId9.jpg';
-import img10 from '../images/postImage/images_postId10.jpg';
-import CommentList from './Comment/CommentList';
+import img1 from "../images/postImage/images_postId1.jpg";
+import img2 from "../images/postImage/images_postId2.jpg";
+import img3 from "../images/postImage/images_postId3.jpg";
+import img4 from "../images/postImage/images_postId4.jpg";
+import img5 from "../images/postImage/images_postId5.jpg";
+import img6 from "../images/postImage/images_postId6.jpg";
+import img7 from "../images/postImage/images_postId7.jpg";
+import img8 from "../images/postImage/images_postId8.jpg";
+import img9 from "../images/postImage/images_postId9.jpg";
+import img10 from "../images/postImage/images_postId10.jpg";
+import CommentList from "./Comment/CommentList";
+import { doVotePost, getPostDetail } from "../services/PostService";
 
 const PostDetail = () => {
-  const [postDetail, setPostDetail] = useState({
-    id: "",
-    title: "",
-    content: "",
-    reactions: {
-      upVotes: 0,
-      downVotes: 0,
-    },
-    comments: 0,
-    createdAt: "",
-    userId: "",
-    communityId: "",
-    upVoted: false,
-    downVoted: false,
-    isActive: true,
-  });
-  
+  const [postDetail, setPostDetail] = useState({});
 
-  console.log("Post detail:", postDetail)
   const { id } = useParams();
+  console.log(id);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const fetchPostDetail = async () => {
+    const res = await getPostDetail(id);
+    console.log("Post detail", res);
+    setPostDetail(res);
+  };
   useEffect(() => {
-    fetch(`http://localhost:9999/api/v1/posts/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPostDetail({
-          ...data,
-          reactions: data.reactions || { upVotes: 0, downVotes: 0 },
-          upVoted: false,
-          downVoted: false,
-        });
-      })
-      .catch((error) => console.log(error));
+    fetchPostDetail();
   }, [id]);
 
-  const handleLike = () => {
+  const handleVote = async (postId, vote) => {
+    // Handle the vote up logic
+    const res = await doVotePost(postId, vote);
+    // Update the commentList state with the new vote information
     setPostDetail((prevPost) => {
-      const newupVotes = prevPost.upVoted
-        ? prevPost.reactions?.upVotes - 1
-        : prevPost.reactions?.upVotes + 1;
-      const newdownVotes = prevPost.downVoted
-        ? prevPost.reactions?.downVotes - 1
-        : prevPost.reactions?.downVotes;
+      // Create a new votes object based on the current votes
+      const updatedVotes = { ...prevPost.votes };
 
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          upVotes: newupVotes,
-          downVotes: newdownVotes,
-        },
-        upVoted: !prevPost.upVoted,
-        downVoted: prevPost.downVoted ? false : prevPost.downVoted,
-      };
+      // Update the votes based on the action
+      if (vote === true) {
+        updatedVotes[user.id] = true; // User voted up
+      } else if (vote === false) {
+        updatedVotes[user.id] = false; // User voted down
+      } else {
+        delete updatedVotes[user.id]; // User removed their vote
+      }
+      // Return the updated post object
+      return { ...prevPost, votes: updatedVotes };
     });
   };
-
-  const handleDislike = () => {
-    setPostDetail((prevPost) => {
-      const newdownVotes = prevPost.downVoted
-        ? prevPost.reactions?.downVotes - 1
-        : prevPost.reactions?.downVotes + 1;
-      const newupVotes = prevPost.upVoted
-        ? prevPost.reactions?.upVotes - 1
-        : prevPost.reactions?.upVotes;
-
-      return {
-        ...prevPost,
-        reactions: {
-          ...prevPost.reactions,
-          downVotes: newdownVotes,
-          upVotes: newupVotes,
-        },
-        downVoted: !prevPost.downVoted,
-        upVoted: prevPost.upVoted ? false : prevPost.upVoted,
-      };
-    });
-  };
-
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const navigate = useNavigate();
   const imageIndex = parseInt(id) - 1;
+  const capitalizeFirstLetter = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
 
   return (
     <Container fluid>
@@ -114,7 +75,7 @@ const PostDetail = () => {
           <Link to="/">
             <Button
               className="btn btn-secondary mt-2"
-              style={{ borderRadius: '10px', float: 'right' }}
+              style={{ borderRadius: "10px", float: "right" }}
             >
               Back
             </Button>
@@ -126,37 +87,19 @@ const PostDetail = () => {
               <Col md={12}>
                 <Row className="mb-2">
                   <Col>
-                    <Link to={'/community/2'}>
+                    <Link to={"/community/2"}>
                       <p>
-                        <strong>{"f/" + postDetail.communityId.name}</strong> •{" "}
+                        <strong>{"f/" + postDetail.communityId?.name}</strong> •{" "}
                         {new Date(postDetail.createdAt).toLocaleString()}
-
                       </p>
                     </Link>
-                    <p style={{ marginTop: '-20px' }}>
+                    <p style={{ marginTop: "-20px" }}>
                       <Link to={`/profile/${postDetail.id}`}>
-                        {"u/" + postDetail.userId.username}
+                        u/{postDetail.userId?.username}
                       </Link>
                     </p>
                   </Col>
-                  <Col className="d-flex justify-content-end align-items-center">
-                    <Dropdown>
-                      <Dropdown.Toggle
-                        variant="light"
-                        id="dropdown-basic"
-                      >
-                        Settings
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item>Save</Dropdown.Item>
-                        <Dropdown.Item>Report</Dropdown.Item>
-                        <Dropdown.Item>Hide</Dropdown.Item>
-                        <Dropdown.Item onClick={() => navigate('/edit-post/2')}>
-                          Edit
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Col>
+                  <Col className="d-flex justify-content-end align-items-center"></Col>
                 </Row>
               </Col>
             </Row>
@@ -173,35 +116,65 @@ const PostDetail = () => {
             </Row>
             <Row>
               <Col md={12}>
-                <Image
-                  src={images[0]}
-                  fluid
-                  style={{ width: '100%', borderRadius: '10px' }}
-                />
+                {postDetail?.media &&
+                postDetail.media.length > 0 &&
+                postDetail.media[0] ? (
+                  <Image
+                    src={postDetail.media[0]}
+                    fluid
+                    style={{ width: "100%", borderRadius: "10px" }}
+                  />
+                ) : (
+                  <div></div>
+                )}
               </Col>
             </Row>
             <Row className="mt-4">
               <Col md={12}>
                 <Button
-                  variant={postDetail.upVoted ? "success" : "light"}
-                  onClick={handleLike}
+                  variant={
+                    postDetail.votes && postDetail.votes[user.id] === true
+                      ? "success"
+                      : "light"
+                  }
+                  onClick={() =>
+                    postDetail.votes && postDetail.votes[user.id] === true
+                      ? handleVote(postDetail.id, "none")
+                      : handleVote(postDetail.id, true)
+                  }
+                  aria-label="Vote Up"
                 >
                   <FaArrowUp />
+                  {
+                    Object.values(postDetail.votes || {}).filter(
+                      (vote) => vote === true
+                    ).length
+                  }
                 </Button>
-                <span className="mx-2">{postDetail.reactions?.upVotes}</span>
+                <span className="mx-2"></span>
                 <Button
-                  variant={postDetail.downVoted ? "danger" : "light"}
-
-                  onClick={handleDislike}
+                  variant={
+                    postDetail.votes && postDetail.votes[user.id] === false
+                      ? "danger"
+                      : "light"
+                  }
+                  onClick={() =>
+                    postDetail.votes && postDetail.votes[user.id] === false
+                      ? handleVote(postDetail._id, "none")
+                      : handleVote(postDetail._id, false)
+                  }
+                  aria-label="Vote Down"
                 >
                   <FaArrowDown />
+                  {
+                    Object.values(postDetail.votes || {}).filter(
+                      (vote) => vote === false
+                    ).length
+                  }
                 </Button>
-                <span className="mx-2">{postDetail.reactions?.downVotes}</span>
+                <span className="mx-2"></span>
                 <Button variant="light" className="mr-2">
                   <FaComment /> {postDetail.comments}
-                </Button>
-                <Button variant="light">
-                  <FaShare /> Share
                 </Button>
               </Col>
             </Row>
@@ -216,37 +189,26 @@ const PostDetail = () => {
         <Col md={4}>
           <Card
             className="mb-4 p-3"
-            style={{ height: '85vh', overflowY: 'auto' }}
+            style={{ height: "85vh", overflowY: "auto" }}
           >
-            <h4>{"f/" + postDetail.communityId.name}</h4>
-            <p>
-              This subreddit serves as a general hub to discuss most things
-              Japanese and exchange information, as well as to guide users to
-              subs specializing in things such as daily life, travel or language
-              acquisition.
-            </p>
-            <p>
-              Users are strongly encouraged to check the sidebar and stickied
-              general questions thread before posting.
-            </p>
+            <h3>f/{postDetail.communityId?.name}</h3>
+            <h5>{postDetail.communityId?.description}</h5>
             <hr />
             <p>
-              <strong>Created</strong> Jan 25, 2008
+              <strong>Created</strong>{" "}
+              {new Date(postDetail.communityId?.createdAt).toLocaleString()}
             </p>
-            <p>Public</p>
+            <p>{capitalizeFirstLetter(postDetail.communityId?.privacyType)}</p>
             <hr />
             <div className="d-flex justify-content-between">
               <p>
-                <strong>1.3M</strong> Members
+                <strong>300</strong> Members
               </p>
               <p>
-                <strong>68</strong> Online
+                <strong>1</strong> Online
               </p>
-              <p>Top 1% Rank by size</p>
+              <p>Top 70% Rank by size</p>
             </div>
-            <hr />
-            <h5>User Flair</h5>
-            <p>Expert_Post3875</p>
             <hr />
             <h5>Rules</h5>
             <ul>
