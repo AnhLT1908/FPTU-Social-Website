@@ -12,27 +12,28 @@ import {
 } from "react-bootstrap";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 
-import img1 from '../images/postImage/images_postId1.jpg';
-import img2 from '../images/postImage/images_postId2.jpg';
-import img3 from '../images/postImage/images_postId3.jpg';
-import img4 from '../images/postImage/images_postId4.jpg';
-import img5 from '../images/postImage/images_postId5.jpg';
-import img6 from '../images/postImage/images_postId6.jpg';
-import img7 from '../images/postImage/images_postId7.jpg';
-import img8 from '../images/postImage/images_postId8.jpg';
-import img9 from '../images/postImage/images_postId9.jpg';
-import img10 from '../images/postImage/images_postId10.jpg';
-import CommentList from './Comment/CommentList';
-import { doVotePost, getPostDetail } from '../services/PostService';
+import img1 from "../images/postImage/images_postId1.jpg";
+import img2 from "../images/postImage/images_postId2.jpg";
+import img3 from "../images/postImage/images_postId3.jpg";
+import img4 from "../images/postImage/images_postId4.jpg";
+import img5 from "../images/postImage/images_postId5.jpg";
+import img6 from "../images/postImage/images_postId6.jpg";
+import img7 from "../images/postImage/images_postId7.jpg";
+import img8 from "../images/postImage/images_postId8.jpg";
+import img9 from "../images/postImage/images_postId9.jpg";
+import img10 from "../images/postImage/images_postId10.jpg";
+import CommentList from "./Comment/CommentList";
+import { doVotePost, getPostDetail } from "../services/PostService";
 
 const PostDetail = () => {
   const [postDetail, setPostDetail] = useState({});
 
   const { id } = useParams();
   console.log(id);
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
   const fetchPostDetail = async () => {
     const res = await getPostDetail(id);
+    console.log("Post detail", res);
     setPostDetail(res);
   };
   useEffect(() => {
@@ -62,6 +63,10 @@ const PostDetail = () => {
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const navigate = useNavigate();
   const imageIndex = parseInt(id) - 1;
+  const capitalizeFirstLetter = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
 
   return (
     <Container fluid>
@@ -84,14 +89,13 @@ const PostDetail = () => {
                   <Col>
                     <Link to={"/community/2"}>
                       <p>
-
                         <strong>{"f/" + postDetail.communityId?.name}</strong> •{" "}
                         {new Date(postDetail.createdAt).toLocaleString()}
                       </p>
                     </Link>
                     <p style={{ marginTop: "-20px" }}>
                       <Link to={`/profile/${postDetail.id}`}>
-                        {postDetail.userName}
+                        u/{postDetail.userId?.username}
                       </Link>
                     </p>
                   </Col>
@@ -107,16 +111,22 @@ const PostDetail = () => {
             </Row>
             <Row>
               <Col md={12}>
-                <p>{postDetail.body}</p>
+                <p>{postDetail.content}</p>
               </Col>
             </Row>
             <Row>
               <Col md={12}>
-                <Image
-                  src={images[imageIndex]}
-                  fluid
-                  style={{ width: "100%", borderRadius: "10px" }}
-                />
+                {postDetail?.media &&
+                postDetail.media.length > 0 &&
+                postDetail.media[0] ? (
+                  <Image
+                    src={postDetail.media[0]}
+                    fluid
+                    style={{ width: "100%", borderRadius: "10px" }}
+                  />
+                ) : (
+                  <div></div>
+                )}
               </Col>
             </Row>
             <Row className="mt-4">
@@ -124,12 +134,12 @@ const PostDetail = () => {
                 <Button
                   variant={
                     postDetail.votes && postDetail.votes[user.id] === true
-                      ? 'success'
-                      : 'light'
+                      ? "success"
+                      : "light"
                   }
                   onClick={() =>
                     postDetail.votes && postDetail.votes[user.id] === true
-                      ? handleVote(postDetail.id, 'none')
+                      ? handleVote(postDetail.id, "none")
                       : handleVote(postDetail.id, true)
                   }
                   aria-label="Vote Up"
@@ -145,16 +155,15 @@ const PostDetail = () => {
                 <Button
                   variant={
                     postDetail.votes && postDetail.votes[user.id] === false
-                      ? 'danger'
-                      : 'light'
+                      ? "danger"
+                      : "light"
                   }
                   onClick={() =>
                     postDetail.votes && postDetail.votes[user.id] === false
-                      ? handleVote(postDetail._id, 'none')
+                      ? handleVote(postDetail._id, "none")
                       : handleVote(postDetail._id, false)
                   }
                   aria-label="Vote Down"
-
                 >
                   <FaArrowDown />
                   {
@@ -164,10 +173,7 @@ const PostDetail = () => {
                   }
                 </Button>
                 <span className="mx-2"></span>
-                <Button
-                  variant="light"
-                  className="mr-2"
-                >
+                <Button variant="light" className="mr-2">
                   <FaComment /> {postDetail.comments}
                 </Button>
               </Col>
@@ -185,35 +191,24 @@ const PostDetail = () => {
             className="mb-4 p-3"
             style={{ height: "85vh", overflowY: "auto" }}
           >
-            <h4>{postDetail.communityName}</h4>
-            <p>
-              This subreddit serves as a general hub to discuss most things
-              Japanese and exchange information, as well as to guide users to
-              subs specializing in things such as daily life, travel or language
-              acquisition.
-            </p>
-            <p>
-              Users are strongly encouraged to check the sidebar and stickied
-              general questions thread before posting.
-            </p>
+            <h3>f/{postDetail.communityId?.name}</h3>
+            <h5>{postDetail.communityId?.description}</h5>
             <hr />
             <p>
-              <strong>Created</strong> Jan 25, 2008
+              <strong>Created</strong>{" "}
+              {new Date(postDetail.communityId?.createdAt).toLocaleString()}
             </p>
-            <p>Public</p>
+            <p>{capitalizeFirstLetter(postDetail.communityId?.privacyType)}</p>
             <hr />
             <div className="d-flex justify-content-between">
               <p>
-                <strong>1.3M</strong> Members
+                <strong>300</strong> Members
               </p>
               <p>
-                <strong>68</strong> Online
+                <strong>1</strong> Online
               </p>
-              <p>Top 1% Rank by size</p>
+              <p>Top 70% Rank by size</p>
             </div>
-            <hr />
-            <h5>User Flair</h5>
-            <p>Expert_Post3875</p>
             <hr />
             <h5>Rules</h5>
             <ul>

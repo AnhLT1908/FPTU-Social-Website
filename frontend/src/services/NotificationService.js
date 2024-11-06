@@ -10,7 +10,7 @@ export const listNotifications = async () => {
         headers: getHeader(),
       }
     );
-    return response.data;
+    return response?.data;
   } catch (error) {
     message.error('Error fetching users: ' + error?.message);
     throw error;
