@@ -23,6 +23,5 @@ router
   .route('/:id')
   .get(reportController.getReportById) // Lấy báo cáo theo ID
   .patch(protect, reportController.updateReport) // Cập nhật báo cáo (yêu cầu bảo vệ)
-  .delete(protect, reportController.deleteReport); // Xóa báo cáo (yêu cầu bảo vệ)
-
+  .delete(protect, reportController.deleteReport); // Xóa báo cáo (yêu cầu bảo vê)
 module.exports = router;
