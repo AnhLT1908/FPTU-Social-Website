@@ -1,6 +1,6 @@
 import "./App.css";
-import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
@@ -28,16 +28,27 @@ import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
+  const [isRedirecting, setIsRedirecting] = useState(true); // State để xác định có chuyển hướng không
+
+  useEffect(() => {
+    // Khi app được mount, bạn có thể làm bất kỳ kiểm tra nào trước khi chuyển hướng
+    setTimeout(() => {
+      setIsRedirecting(false); // Sau một thời gian ngắn, không chuyển hướng nữa
+    }, 100); // Set thời gian delay tùy chỉnh (ở đây là 100ms)
+  }, []);
+
   return (
     <div className="App">
       <BrowserRouter>
-      <ToastContainer position="top-center" autoClose={3000} />
+        <ToastContainer position="top-center" autoClose={3000} />
         <Routes>
+          {isRedirecting && <Route path="/" element={<Navigate to="/login" />} />}
+          
           <Route path="/login" element={<LoginForm />} />
           <Route path="/signup" element={<RegisterForm />} />
           <Route path="/activate/:activationCode" element={<ActivationSuccess />} />
           <Route path="/forgot-password" element={<ResetPasswordForm />} />
-          <Route path="/create-username-password" element={<CreateUPForm />}/>
+          <Route path="/create-username-password" element={<CreateUPForm />} />
           
           <Route path="/" element={<Layout />}>
             <Route path="/" element={<HomePage />} />
