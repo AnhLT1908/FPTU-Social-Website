@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Image, Modal } from "react-bootstrap";
 import CommunityDetails from "./SubCMPNTCreateCommunity/CommunityDetails";
 import CommunityStyle from "./SubCMPNTCreateCommunity/CommunityStyle";
@@ -21,7 +21,11 @@ const CreateCommunity = () => {
   const [rule, setRule] = useState("");
   const [error, setError] = useState(null);
   const token = localStorage.getItem("token");
-
+  const [user, setUser] = useState("");
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData) setUser(userData);
+  }, []);
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -40,8 +44,8 @@ const CreateCommunity = () => {
     const data = JSON.stringify({
       name: communityName,
       description: description,
-      createdBy: "67138908290ef9092c172bbf", // replace with actual user ID
-      moderators: ["67138908290ef9092c172bbf"], // replace with actual moderator IDs
+      createdBy: user.id,
+      moderators: [user.id],
       logo: icon,
       background: banner,
       privacyType: communityType,
@@ -61,6 +65,8 @@ const CreateCommunity = () => {
         }
       );
       console.log("Community successfully created:", response.data);
+      user?.moderatorCommunities.push(response?.data.id);
+      localStorage.setItem("user", JSON.stringify(user));
       setShowPreview(false);
       navigate("/");
     } catch (error) {

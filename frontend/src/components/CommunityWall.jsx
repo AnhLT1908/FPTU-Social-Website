@@ -15,7 +15,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 import ManageCommunity from "./ManageCommunity";
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
-
+import CreatePost from "./CreatePost";
 import axios from "axios";
 import img1 from "../images/postImage/images_postId1.jpg";
 import img2 from "../images/postImage/images_postId2.jpg";
@@ -48,6 +48,7 @@ const CommunityPage = () => {
   const [postId, setPostId] = useState(null); // Tạo state để lưu post._id
   const [joinReason, setJoinReason] = useState();
   const [bookmarks, setBookmarks] = useState();
+  const [showCreatePost, setShowCreatePost] = useState(false);
   // Hàm mở modal và lưu postId
   const openReportModal = (id) => {
     setPostId(id); // Lưu post._id vào state
@@ -316,7 +317,7 @@ const CommunityPage = () => {
                     <>
                       <Button
                         variant="light"
-                        onClick={() => navigate("/create-post")}
+                        onClick={() => setShowCreatePost(true)}
                       >
                         Create Post
                       </Button>
@@ -395,6 +396,9 @@ const CommunityPage = () => {
               </Button>
             </Modal.Footer>
           </Modal>
+
+          {showCreatePost && <CreatePost communityData={community} />}
+
           {posts.map((post, index) => (
             <Card key={post._id} className="mb-3 p-3">
               <Row>
