@@ -36,37 +36,46 @@ const HomePage = () => {
   const [postId, setPostId] = useState(null);
   const [showModal1, setShowModal1] = useState(false);
   const [reportDes, setReportDes] = useState("");
+  const [reportedPosts, setReportedPosts] = useState(new Set()); // Sử dụng Set để tránh trùng lặp
+
   const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const handleReportPost = (uid, pid) => {
+    if (reportedPosts.has(pid)) {
+        alert("Bạn đã report bài viết này rồi.");
+        return;
+    }
+
     let data = JSON.stringify({
-      userId: uid,
-      reportEntityId: pid,
-      entityType: "Post",
-      description: reportDes,
-      status: "Waiting",
+        userId: uid,
+        reportEntityId: pid,
+        entityType: "Post",
+        description: reportDes,
+        status: "Waiting",
     });
 
     let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: "http://localhost:9999/api/v1/reports/",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      data: data,
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "http://localhost:9999/api/v1/reports/",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        data: data,
     };
 
     axios
-      .request(config)
-      .then((response) => {
-        alert("Your report have send to admin success!!");
-        setShowModal1(false);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+        .request(config)
+        .then((response) => {
+            alert("Your report has been sent to the admin successfully!");
+            setReportedPosts((prev) => new Set(prev).add(pid)); // Cập nhật state
+            setShowModal1(false);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+};
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
@@ -169,37 +178,35 @@ const HomePage = () => {
   return (
     <Container>
       <Modal show={showModal1} onHide={() => setShowModal1(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Reports</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            {/* Block for Community Name */}
+    <Modal.Header closeButton>
+        <Modal.Title>Reports</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        <Form>
             <Form.Group controlId="report" className="mb-3">
-              <Form.Label>
-                Reason <span style={{ color: "red" }}></span>
-              </Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter report reason"
-                value={reportDes}
-                onChange={(e) => setReportDes(e.target.value)}
-              />
+                <Form.Label>Reason</Form.Label>
+                <Form.Control
+                    type="text"
+                    placeholder="Enter report reason"
+                    value={reportDes}
+                    onChange={(e) => setReportDes(e.target.value)}
+                />
             </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal1(false)}>
+        </Form>
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowModal1(false)}>
             Close
-          </Button>
-          <Button
+        </Button>
+        <Button
             variant="primary"
             onClick={() => handleReportPost(user.id, postId)}
-          >
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        >
+            Submit Report
+        </Button>
+    </Modal.Footer>
+</Modal>
+
       <Row className="mt-2 mb-2">
         <Col md={12}>
           <Row className="mb-2">
@@ -259,10 +266,17 @@ const HomePage = () => {
                               Save
                             </Dropdown.Item>
                             <Dropdown.Item
-                              onClick={() => openReportModal(post?._id)}
-                            >
-                              Report
-                            </Dropdown.Item>
+    onClick={() => {
+        if (reportedPosts.has(post._id)) {
+            alert("Bạn đã report bài viết này.");
+        } else {
+            openReportModal(post._id);
+        }
+    }}
+>
+    Report
+</Dropdown.Item>
+
                           </>
                         )}
                       </Dropdown.Menu>
