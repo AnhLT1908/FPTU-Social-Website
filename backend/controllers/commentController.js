@@ -45,10 +45,10 @@ exports.createNewComment = async (req, res, next) => {
       const io = getIo()
       const notification = await Notification.create({
         userId: doc.tagInfo.userId,
-        resourceId: `comments/${populatedDoc._id}`,
+        resourceId: `post/${populatedDoc.postId}`,
         notifType: 'Tag',
         title: 'Replied',
-        description: `User ${req.user.id} has just tag you in a comment.`,
+        description: `User ${req.user.displayName} has just tag you in a comment.`,
       });
       io.emit('newNotification', notification);
     }

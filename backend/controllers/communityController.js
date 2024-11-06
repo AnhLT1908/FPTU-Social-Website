@@ -3,7 +3,6 @@ const Post = require('../models/postModel');
 const Subscription = require('../models/subscriptionModel');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
-const mongoose = require('mongoose');
 const catchAsync = require('../utils/catchAsync');
 const subscriptionController = require('./subscriptionController');
 const {
@@ -14,6 +13,8 @@ const {
   factoryCreateOne,
 } = require('./handlerFactory');
 const { json } = require('body-parser');
+const { getIo } = require('../socket');
+const Notification = require('../models/notificationModel');
 exports.isModerator = catchAsync(async (req, res, next) => {
   console.log(req.user.moderatorCommunities);
   const exists = req.user.moderatorCommunities.some((m) => m == req.params.id);
@@ -26,7 +27,11 @@ exports.isModerator = catchAsync(async (req, res, next) => {
 });
 // CRUD
 exports.getCommunityById = factoryGetOne(Community);
-exports.createNewCommunity = factoryCreateOne(Community);
+exports.createNewCommunity = catchAsync(async (req, res, next) => {
+  req.body.memberCount = 1;
+  const newCommunity = await Community.create(req.body);
+  res.status(201).json(newCommunity);
+});
 exports.getAllCommunities = factoryGetAll(Community);
 exports.updateCommunity = factoryUpdateOne(Community);
 exports.deleteCommunity = catchAsync(async (req, res, next) => {
@@ -143,7 +148,21 @@ exports.accessRequest = async (req, res, next) => {
         await Community.findByIdAndUpdate(id, {
           $pull: { joinRequests: { _id: { $in: rIds } } }, // Loại bỏ các joinRequests có _id nằm trong mảng rIds
         });
-
+        const io = getIo();
+        community.joinRequests
+          .filter((item) => rIds.includes(item._id.toString())) // Chỉ chọn các yêu cầu có _id nằm trong mảng rIds
+          .map(async (item) => {
+            const notification = await Notification.create({
+              userId: item.userId,
+              resourceId: `community/${id}`,
+              notifType: 'Joined',
+              title: 'Request Accepted',
+              description: `You are now a member of ${community.name}. Explore ${community.name}'s posts `,
+            });
+            console.log(notification);
+            io.emit('newNotification', notification);
+          });
+        rIds.map(async (r) => {});
         // Trả về kết quả
         res.status(201).json(newSubs);
       } else {
@@ -176,4 +195,23 @@ exports.addRequest = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json(doc);
+});
+exports.getUserCommunites = catchAsync(async (req, res, next) => {
+  const queryObj = { ...req.query };
+  const excludedFields = ['page', 'sort', 'limit', 'fields', '_extend'];
+  excludedFields.forEach((el) => delete queryObj[el]);
+  // 1) Filtering
+  let queryStr = JSON.stringify(queryObj);
+  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+  let parseQuery = JSON.parse(queryStr);
+  const userSubscriptions = await Subscription.find({
+    ...parseQuery,
+    userId: req.user.id,
+  })
+    .select('communityId -_id role')
+    .populate('communityId');
+  const userCommuities = userSubscriptions.map((s) => {
+    return s.communityId;
+  });
+  res.status(200).json(userCommuities);
 });
