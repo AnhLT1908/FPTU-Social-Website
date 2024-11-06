@@ -84,27 +84,6 @@ const CreateUPForm = () => {
     >
       <Row>
         <Col>
-          {isSuccess ? (
-            <div className="text-center">
-              <img
-                src="../images/logo.jpg"
-                alt="Confirmation"
-                style={{ width: "150px", marginBottom: "20px" }}
-              />
-              <h2>Registration Successful!</h2>
-              <p>A confirmation email has been sent. Please check your inbox to verify successful registration.</p>
-              <Button
-                onClick={() => navigate("/login")}
-                className="mt-4"
-                style={{
-                  borderRadius: "20px",
-                  backgroundColor: "#ff5e00",
-                }}
-              >
-                Go to Login
-              </Button>
-            </div>
-          ) : (
             <Card className="p-4 shadow-sm" style={{ width: "500px" }}>
               <Card.Body>
                 <div
