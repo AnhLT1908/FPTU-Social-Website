@@ -15,7 +15,7 @@ function Sidebar() {
     const fetchCommunities = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:9999/api/v1/communities/my-communities?userId=${user.id}`,
+          `http://localhost:9999/api/v1/communities/my-communities`,
           {
             signal: controller.signal,
             headers: getHeader(),
@@ -137,9 +137,9 @@ function Sidebar() {
                 </li>
                 <li>
                   {community
-                    ?.filter((c) => c.moderators.includes(user.id))
+                    ?.filter((c) => c?.moderators.includes(user.id))
                     .map((c) => (
-                      <Link to={`/community/${c.id}`}>
+                      <Link to={`/community/${c?.id}`}>
                         <span className="icon">
                           <img
                             src="/images/logo.jpg"
@@ -180,7 +180,7 @@ function Sidebar() {
               <div class="accordion-body">
                 <li>
                   {community?.map((c) => (
-                    <Link to={`/community/${c.id}`}>
+                    <Link to={`/community/${c?.id}`}>
                       <span className="icon">
                         <img
                           src="/images/logo.jpg"
@@ -188,7 +188,7 @@ function Sidebar() {
                           height={32}
                         />
                       </span>
-                      <span className="name">{`f/  ${c.name}`}</span>
+                      <span className="name">{`f/  ${c?.name}`}</span>
                     </Link>
                   ))}
                 </li>

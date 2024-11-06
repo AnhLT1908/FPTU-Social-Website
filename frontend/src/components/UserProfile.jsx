@@ -325,7 +325,7 @@ const UserProfile = () => {
             <Card key={post._id} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <Link to={`/community/${post.communityId.id}`}>
+                  <Link to={`/community/${post.communityId?.id}`}>
                     <p>
                       <strong>
                         {"f/" + (post?.communityId?.name || "Community Name")}

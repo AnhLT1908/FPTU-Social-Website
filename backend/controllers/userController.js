@@ -259,7 +259,7 @@ exports.getPostUser = async (req, res, next) => {
   try {
     const id = req.params.id;
     console.log('user id', id);
-    const posts = await Post.find({ userId: mongoose.Types.ObjectId(id) })
+    const posts = await Post.find({ userId: id})
       .populate('communityId')
       .populate('userId')
       .exec();

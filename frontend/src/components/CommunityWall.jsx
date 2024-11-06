@@ -73,7 +73,7 @@ const CommunityPage = () => {
     fetch(`http://localhost:9999/api/v1/communities/get-post/${communityId}`)
       .then((res) => res.json())
       .then((data) => {
-        // Sort posts from newest to oldest based on `createdAt`
+        console.log("data", data)
         const sortedPosts = data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );

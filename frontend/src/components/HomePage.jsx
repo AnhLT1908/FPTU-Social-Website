@@ -268,10 +268,10 @@ const HomePage = () => {
 
           {posts && posts.length > 0 ? (
             posts.map((post, index) => (
-              <Card key={post._id} className="mb-3 p-3">
+              <Card key={post?._id} className="mb-3 p-3">
                 <Row>
                   <Col>
-                    <Link to={`/community/${post?.communityId.id}`}>
+                    <Link to={`/community/${post?.communityId?.id}`}>
                       <p>
                         <strong>
                           {"f/" + post.communityId?.name || "Community Name"}

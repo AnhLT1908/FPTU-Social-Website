@@ -74,18 +74,17 @@ exports.searchCommunities = catchAsync(async (req, res, next) => {
 });
 // Custom methods
 exports.addUserById = subscriptionController.createNewSubscription;
-exports.getPostInCommunity = async (req, res, next) => {
+exports. getPostInCommunity = async (req, res, next) => {
   try {
     const id = req.params.id;
     console.log('community id', id);
-    const posts = await Post.find({ communityId: mongoose.Types.ObjectId(id) })
+    const posts = await Post.find({ communityId: id })
       .populate('communityId')
       .populate('userId')
       .exec();
-
+      console.log('Post found', posts);
     if (posts) {
       res.status(200).json(posts);
-      console.log('Post found', posts);
     } else {
       res.status(404).json({ message: 'No posts found for this community' });
     }
@@ -204,14 +203,16 @@ exports.getUserCommunites = catchAsync(async (req, res, next) => {
   let queryStr = JSON.stringify(queryObj);
   queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
   let parseQuery = JSON.parse(queryStr);
+  console.log("parseQuery", parseQuery)
   const userSubscriptions = await Subscription.find({
     ...parseQuery,
     userId: req.user.id,
   })
-    .select('communityId -_id role')
     .populate('communityId');
   const userCommuities = userSubscriptions.map((s) => {
     return s.communityId;
   });
+  console.log("userSubscriptions", userSubscriptions)
+  console.log("userCommuities", userCommuities)
   res.status(200).json(userCommuities);
 });
