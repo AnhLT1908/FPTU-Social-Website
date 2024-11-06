@@ -327,8 +327,7 @@ function Header({ socket }) {
                   aria-labelledby="dropdownMenuButton1"
                 >
                   <Link to={`/profile/${user.id}`}>
-                    <li>
-                      <a className="dropdown-item" href="#">
+                    <li style={{display: 'flex'}}>
                         <span className="dropdown-item-icon">
                           <img
                             src="/images/logo.jpg"
@@ -349,7 +348,6 @@ function Header({ socket }) {
                               : "u/" + user?.username}
                           </span>
                         </span>
-                      </a>
                     </li>
                   </Link>
                   <li>

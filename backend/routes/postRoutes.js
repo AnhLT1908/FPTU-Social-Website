@@ -15,6 +15,12 @@ router
   .get(postController.getPostById)
   .patch(protect, postController.updatePost)
   .delete(protect, postController.deletePost);
+router.post(
+  '/upload-images',
+  protect,
+  postController.uploadPostPhotos,
+  postController.createNewPostWithImages
+);
 router.route('/user/:userId').get(postController.getPostByUserId);
 router.patch('/:id/vote', protect, postController.votePost);
 module.exports = router;

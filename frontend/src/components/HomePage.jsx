@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Col,
   Container,
@@ -9,20 +9,20 @@ import {
   Card,
   Dropdown,
   Form,
-} from 'react-bootstrap';
-import { FaArrowUp, FaArrowDown, FaComment, FaShare } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
-import img1 from '../images/postImage/images_postId1.jpg';
-import img2 from '../images/postImage/images_postId2.jpg';
-import img3 from '../images/postImage/images_postId3.jpg';
-import img4 from '../images/postImage/images_postId4.jpg';
-import img5 from '../images/postImage/images_postId5.jpg';
-import img6 from '../images/postImage/images_postId6.jpg';
-import img7 from '../images/postImage/images_postId7.jpg';
-import img8 from '../images/postImage/images_postId8.jpg';
-import img9 from '../images/postImage/images_postId9.jpg';
-import img10 from '../images/postImage/images_postId10.jpg';
-import { doVotePost } from '../services/PostService';
+} from "react-bootstrap";
+import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import img1 from "../images/postImage/images_postId1.jpg";
+import img2 from "../images/postImage/images_postId2.jpg";
+import img3 from "../images/postImage/images_postId3.jpg";
+import img4 from "../images/postImage/images_postId4.jpg";
+import img5 from "../images/postImage/images_postId5.jpg";
+import img6 from "../images/postImage/images_postId6.jpg";
+import img7 from "../images/postImage/images_postId7.jpg";
+import img8 from "../images/postImage/images_postId8.jpg";
+import img9 from "../images/postImage/images_postId9.jpg";
+import img10 from "../images/postImage/images_postId10.jpg";
+import { doVotePost } from "../services/PostService";
 import axios from "axios";
 
 const HomePage = () => {
@@ -68,28 +68,30 @@ const HomePage = () => {
       });
   };
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
 
     const fetchPosts = () => {
-      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      fetch(
+        `http://localhost:9999/api/v1/posts/my-feed?sort=${filter}&limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
-          console.log('Post:', data);
-          const postsWithReactions = data.feed.map((item) => ({
-            ...item,
-          }));
-          setPosts(postsWithReactions);
+          console.log("Post:", data);
+          setPosts(data.feed);
         })
-        .catch((error) => console.error('Error fetching posts:', error));
+        .catch((error) => console.error("Error fetching posts:", error));
     };
 
     fetchPosts();
   }, [filter, token]);
+
+  console.log("token", token);
 
   const handleVote = async (postId, vote) => {
     // Handle the vote up logic
@@ -143,6 +145,9 @@ const HomePage = () => {
         console.error("Lỗi khi gửi yêu cầu:", error);
       });
   };
+
+  console.log("Posts", posts);
+
   const openReportModal = (id) => {
     setPostId(id); // Lưu post._id vào state
     setShowModal1(true);
@@ -204,10 +209,10 @@ const HomePage = () => {
                   {filter.charAt(0).toUpperCase() + filter.slice(1)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => handleFilterChange('new')}>
+                  <Dropdown.Item onClick={() => handleFilterChange("new")}>
                     New
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleFilterChange('hot')}>
+                  <Dropdown.Item onClick={() => handleFilterChange("hot")}>
                     Hot
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -215,139 +220,150 @@ const HomePage = () => {
             </Col>
           </Row>
 
-          {posts.map((post, index) => (
-            <Card
-              key={post._id}
-              className="mb-3 p-3"
-            >
-              <Row>
-                <Col>
-                  <Link to={`/community/${post?.communityId.id}`}>
-                    <p>
-                      <strong>
-
-                        {'f/' + post.communityId?.name || 'Community Name'}
-                      </strong>{' '}
-
-                      • {new Date(post.createdAt).toLocaleString()}
-                    </p>
-                  </Link>
-                  <Link to={`/profile/${post.userId}`}>
-                    <p className="mt-n2">
-                      {'u/' + post.userId?.username || 'Username'}
-
-                    </p>
-                  </Link>
-                </Col>
-                <Col className="d-flex justify-content-end">
-                  <Dropdown>
-                    <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      {post?.userId?.id === user?.id ? (
-                        <Dropdown.Item
-                          onClick={() => navigate(`/edit-post/${post?._id}`)}
-                        >
-                          Edit
-                        </Dropdown.Item>
-                      ) : (
-                        <>
-                          <Dropdown.Item onClick={() => handleSave(post?._id)}>
-                            Save
-                          </Dropdown.Item>
+          {posts && posts.length > 0 ? (
+            posts.map((post, index) => (
+              <Card key={post._id} className="mb-3 p-3">
+                <Row>
+                  <Col>
+                    <Link to={`/community/${post?.communityId.id}`}>
+                      <p>
+                        <strong>
+                          {"f/" + post.communityId?.name || "Community Name"}
+                        </strong>{" "}
+                        • {new Date(post.createdAt).toLocaleString()}
+                      </p>
+                    </Link>
+                    <Link to={`/profile/${post.userId}`}>
+                      <p className="mt-n2">
+                        {"u/" + post.userId?.username || "Username"}
+                      </p>
+                    </Link>
+                  </Col>
+                  <Col className="d-flex justify-content-end">
+                    <Dropdown>
+                      <Dropdown.Toggle variant="light">
+                        Settings
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {post?.userId?.id === user?.id ? (
                           <Dropdown.Item
-                            onClick={() => openReportModal(post?._id)}
+                            onClick={() => navigate(`/edit-post/${post?._id}`)}
                           >
-                            Report
+                            Edit
                           </Dropdown.Item>
-                        </>
-                      )}
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </Col>
-              </Row>
+                        ) : (
+                          <>
+                            <Dropdown.Item
+                              onClick={() => handleSave(post?._id)}
+                            >
+                              Save
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() => openReportModal(post?._id)}
+                            >
+                              Report
+                            </Dropdown.Item>
+                          </>
+                        )}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </Col>
+                </Row>
 
-              <Row>
-                <Col md={8}>
-                  <Link to={`/post/${post._id}`}>
-                    <h2>{post.title}</h2>
-                  </Link>
-                </Col>
-                <Col md={4}>
-                  <Image
-                    src={images[index % images.length]}
-                    alt={`post-${index + 1}`}
-                    fluid
-                    style={{
-                      width: '50%',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      float: 'right',
-                    }}
-                    onClick={() =>
-                      handleImageClick(images[index % images.length])
+                <Row>
+                  <Col md={8}>
+                    <Link to={`/post/${post._id}`}>
+                      <h2>{post.title}</h2>
+                    </Link>
+                  </Col>
+                  <Col md={4}>
+                    {post?.media && post.media.length > 0 && post.media[0] ? (
+                      <Image
+                        src={post.media[0]}
+                        alt={`post-${index + 1}`}
+                        fluid
+                        style={{
+                          width: "100%",
+                          height: '200px',
+                          borderRadius: "10px",
+                          cursor: "pointer",
+                          float: "right",
+                          objectFit: "cover"
+                        }}
+                        onClick={() =>
+                          handleImageClick(post.media[0])
+                        }
+                      />
+                    ) : (
+                      <div></div>
+                    )}
+                  </Col>
+                </Row>
+
+                <div className="d-flex align-items-center">
+                  <Button
+                    variant={
+                      post.votes && post.votes[user.id] === true
+                        ? "success"
+                        : "light"
                     }
-                  />
-                </Col>
-              </Row>
-
-              <div className="d-flex align-items-center">
-                <Button
-                  variant={
-                    post.votes && post.votes[user.id] === true
-                      ? 'success'
-                      : 'light'
-                  }
-                  onClick={() =>
-                    post.votes && post.votes[user.id] === true
-                      ? handleVote(post._id, 'none')
-                      : handleVote(post._id, true)
-                  }
-                  aria-label="Vote Up"
-                >
-                  <FaArrowUp />
-                  {
-                    Object.values(post.votes || {}).filter(
-                      (vote) => vote === true
-                    ).length
-                  }
-                </Button>
-                <span className="mx-2"></span>
-                <Button
-                  variant={
-                    post.votes && post.votes[user.id] === false
-                      ? 'danger'
-                      : 'light'
-                  }
-                  onClick={() =>
-                    post.votes && post.votes[user.id] === false
-                      ? handleVote(post._id, 'none')
-                      : handleVote(post._id, false)
-                  }
-                  aria-label="Vote Down"
-                >
-                  <FaArrowDown />
-                  {
-                    Object.values(post.votes || {}).filter(
-                      (vote) => vote === false
-                    ).length
-                  }
-                </Button>
-                <span className="mx-2"></span>
-                <Button variant="light">
-                  <FaComment /> {post.commentsCount || 0}
-                </Button>
-              </div>
-            </Card>
-          ))}
+                    onClick={() =>
+                      post.votes && post.votes[user.id] === true
+                        ? handleVote(post._id, "none")
+                        : handleVote(post._id, true)
+                    }
+                    aria-label="Vote Up"
+                  >
+                    <FaArrowUp />
+                    {
+                      Object.values(post.votes || {}).filter(
+                        (vote) => vote === true
+                      ).length
+                    }
+                  </Button>
+                  <span className="mx-2"></span>
+                  <Button
+                    variant={
+                      post.votes && post.votes[user.id] === false
+                        ? "danger"
+                        : "light"
+                    }
+                    onClick={() =>
+                      post.votes && post.votes[user.id] === false
+                        ? handleVote(post._id, "none")
+                        : handleVote(post._id, false)
+                    }
+                    aria-label="Vote Down"
+                  >
+                    <FaArrowDown />
+                    {
+                      Object.values(post.votes || {}).filter(
+                        (vote) => vote === false
+                      ).length
+                    }
+                  </Button>
+                  <span className="mx-2"></span>
+                  <Link to={`/post/${post._id}`}>
+                    <Button variant="light">
+                      <FaComment /> {post.commentsCount || 0}
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <Row>
+              <Col className="text-center">
+                <h3>No posts available</h3>
+              </Col>
+            </Row>
+          )}
 
           {/*************************************************** */}
           <Row>
             <Col className="text-center">
               <h3>
-                <a
-                  href="#"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href="#" style={{ textDecoration: "none" }}>
                   No more content
                 </a>
               </h3>
@@ -356,23 +372,12 @@ const HomePage = () => {
         </Col>
       </Row>
 
-      <Modal
-        show={showModal}
-        onHide={handleCloseModal}
-        centered
-      >
+      <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Body>
-          <Image
-            src={modalImage}
-            style={{ width: '100%' }}
-            fluid
-          />
+          <Image src={modalImage} style={{ width: "100%" }} fluid />
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={handleCloseModal}
-          >
+          <Button variant="secondary" onClick={handleCloseModal}>
             Close
           </Button>
         </Modal.Footer>
