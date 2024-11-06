@@ -2,6 +2,7 @@ const express = require('express');
 const { protect } = require('../controllers/authController');
 const communityController = require('../controllers/communityController');
 const router = express.Router();
+router.get('/my-communities', protect, communityController.getUserCommunites);
 router
   .route('/')
   .get(communityController.getAllCommunities)

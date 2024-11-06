@@ -194,7 +194,7 @@ const CommentList = () => {
                 onClick={() => toggleChildrenVisibility(comment._id)}
                 aria-label="Toggle Children"
               >
-                {visibleChildren[comment.id] ? 'Hide' : 'Show'}
+                {visibleChildren[comment._id] ? 'Hide' : 'Show'}
               </Button>
             )}
           </div>
@@ -311,7 +311,7 @@ const CommentList = () => {
               postId={id}
               parentId={comment._id} // Pass parentId for the reply
               tagInfo={
-                replyTo.parentId
+                replyTo.parentId && replyTo.userId._id != user.id
                   ? {
                       userId: replyTo.userId._id,
                       tagName: replyTo.userId.displayName,
