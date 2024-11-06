@@ -2,19 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Container, Card, Button, Row, Col, Image, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import LayoutWithSidebar from './LayoutWithSidebar';
-import { getReportById, updateReport, deactivatePost } from '../services/ReportService'; // Import các hàm cần thiết từ service
+import { getReportById, updateReport, deactivatePost } from '../services/ReportService';
 import { message } from 'antd';
 
 const DetailReport = () => {
     const { id } = useParams();
-    const [reportDetail, setReportDetail] = useState(null); // State để lưu dữ liệu chi tiết
-    const [loading, setLoading] = useState(true); // State để quản lý trạng thái tải dữ liệu
-    const [isActionTaken, setIsActionTaken] = useState(false); // State để theo dõi hành động đã được thực hiện
+    const [reportDetail, setReportDetail] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isActionTaken, setIsActionTaken] = useState(false);
 
     useEffect(() => {
         const fetchReportDetail = async () => {
             try {
-                const data = await getReportById(id); // Gọi API và nhận dữ liệu
+                const data = await getReportById(id);
                 setReportDetail(data);
             } catch (error) {
                 console.error('Error fetching report details:', error);
@@ -28,13 +28,11 @@ const DetailReport = () => {
 
     const handleDeactivateAndApprove = async () => {
         try {
-            // Gọi hàm deactivate bài viết
-            await deactivatePost(id);
-            // Cập nhật trạng thái báo cáo thành "Approved"
+            await deactivatePost(reportDetail.reportEntityId?._id, 'Approved');
             await updateReport(id, { status: 'Approved' });
             message.success('Bài viết đã bị vô hiệu hóa và báo cáo đã được phê duyệt.');
             setReportDetail(prev => ({ ...prev, status: 'Approved' }));
-            setIsActionTaken(true); // Đánh dấu hành động đã được thực hiện
+            setIsActionTaken(true);
         } catch (error) {
             message.error('Lỗi khi xử lý báo cáo: ' + error.message);
         }
@@ -42,10 +40,11 @@ const DetailReport = () => {
 
     const handleCancelReport = async () => {
         try {
+            await deactivatePost(reportDetail.reportEntityId._id, 'Cancel');
             await updateReport(id, { status: 'Cancel' });
             message.success('Báo cáo đã được hủy.');
             setReportDetail(prev => ({ ...prev, status: 'Cancel' }));
-            setIsActionTaken(true); // Đánh dấu hành động đã được thực hiện
+            setIsActionTaken(true);
         } catch (error) {
             message.error('Lỗi khi hủy báo cáo: ' + error.message);
         }
@@ -67,23 +66,23 @@ const DetailReport = () => {
                         <Card.Title className="text-center mb-4">Chi tiết bài báo cáo ID: {reportDetail._id}</Card.Title>
                         <Row className="align-items-center">
                             <Col md={6} className="d-flex flex-column align-items-center">
-                                <Card.Text className="text-center">
-                                    <strong>Người dùng đăng bài:</strong> {reportDetail.userId?.username || "N/A"}
+                                <Card.Text className="text-start d-flex " style={{width:"350px"}}>
+                                    <strong className=''>Người dùng đăng bài: </strong> <p> {reportDetail.userId?.username || "N/A"} </p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Tiêu đề bài viết:</strong> {reportDetail.reportEntityId?.title}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Tiêu đề bài viết:</strong> <p>{reportDetail.reportEntityId?.title}</p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Nội dung bài viết:</strong> {reportDetail.reportEntityId?.content}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Nội dung bài viết:</strong> <p>{reportDetail.reportEntityId?.content}</p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Lý do báo cáo:</strong> {reportDetail.description}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Lý do báo cáo:</strong> <p>{reportDetail.description}</p>
                                 </Card.Text>
-                                <Card.Text className="text-start">
-                                    <strong>Trạng thái:</strong> {reportDetail.status}
+                                <Card.Text className="text-start d-flex" style={{width:"350px"}}>
+                                    <strong className=''>Trạng thái:</strong><p>{reportDetail.status}</p>
                                 </Card.Text>
                                 
-                                {reportDetail.status === 'Waiting' && ( // Kiểm tra nếu status là 'Waiting'
+                                {reportDetail.status === 'Waiting' && (
                                     <div className="d-flex justify-content-center mt-2">
                                         <Button
                                             variant="success"
