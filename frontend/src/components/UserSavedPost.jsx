@@ -19,27 +19,120 @@ import {
   FaArrowDown,
   FaComment,
 } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
+import axios from "axios";
 import image1 from "../images/postImage/images_postId1.jpg";
 
-const UserSavedPost = () => {
-  const [activeTab, setActiveTab] = useState("saved");
-  const [user, setUser] = useState("");
+const UserProfile = () => {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState("new");
+  const token = localStorage.getItem("token");
+
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) {
-      setUser(userData);
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    console.log("storedUserData", storedUserData);
+    if (storedUserData) {
+      setUser(storedUserData);
     }
   }, []);
 
+  const userId = user?.id;
+  console.log("userId", userId);
+
+  useEffect(() => {
+    const fetchPosts = () => {
+      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Post:", data);
+          const postsWithReactions = data.feed.map((item) => ({
+            ...item,
+            upVotes: item.upVotes || 0,
+            downVotes: item.downVotes || 0,
+            upVoted: false,
+            downVoted: false,
+          }));
+          setPosts(postsWithReactions);
+        })
+        .catch((error) => console.error("Error fetching posts:", error));
+    };
+
+    fetchPosts();
+  }, [filter, token]);
+
+  useEffect(() => {
+    if (userId) {
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:9999/api/v1/users/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setUserData(response.data);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      fetchUserData();
+    }
+  }, [token, userId]);
+
+  const userDataGet = userData;
+  console.log("userDataGet", userDataGet);
+  const handleReaction = (postIndex, type) => {
+    setPosts((prevPosts) => {
+      const updatedPosts = [...prevPosts];
+      const post = updatedPosts[postIndex];
+
+      if (type === "upVote") {
+        post.upVoted ? post.upVotes-- : post.upVotes++;
+        if (post.downVoted) {
+          post.downVotes--;
+          post.downVoted = false;
+        }
+        post.upVoted = !post.upVoted;
+      } else {
+        post.downVoted ? post.downVotes-- : post.downVotes++;
+        if (post.upVoted) {
+          post.upVotes--;
+          post.upVoted = false;
+        }
+        post.downVoted = !post.downVoted;
+      }
+
+      return updatedPosts;
+    });
+  };
+
+  const handleImageClick = (image) => {
+    setModalImage(image);
+    setShowModal(true);
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setModalImage(null);
+  };
+
+  const handleFilterChange = (selectedFilter) => {
+    setFilter(selectedFilter);
   };
 
   return (
@@ -51,13 +144,16 @@ const UserSavedPost = () => {
               <Row>
                 <Col md={12} className="d-flex align-items-center">
                   <div style={{ marginRight: "30px" }}>
-                    <FaUser
+                    <Image
+                      src={
+                        userData?.avatar === "default.jpg"
+                          ? "/images/logo.jpg"
+                          : userData?.avatar
+                      }
                       style={{
                         borderRadius: "100px",
                         width: "100px",
                         height: "100px",
-                        backgroundColor: "#f3752c",
-                        padding: "10px 10px",
                         color: "white",
                       }}
                     />
@@ -83,16 +179,18 @@ const UserSavedPost = () => {
                     </Button>
                   </div>
                   <div>
-                    <h4>AnhLTHE172031</h4>
+                    <h4>
+                      {userData?.displayName || "u/" + userData?.username}
+                    </h4>
                     <p style={{ fontWeight: "bold", color: "#666666" }}>
-                      u/AnhLTHE172031
+                      u/{userData?.username || "Username"}
                     </p>
                   </div>
                 </Col>
               </Row>
               <Row className="mt-4">
                 <Col md={12}>
-                <Link to={`/profile/${user._id}`}>
+                  <Link to={`/profile/${userData?._id}`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -107,21 +205,18 @@ const UserSavedPost = () => {
                       </h6>
                     </Button>
                   </Link>
-                  <Link>
-                    <Button
-                      className="btn"
-                      variant="light"
-                      style={{
-                        backgroundColor:
-                          activeTab === "saved" ? "#c9d7de" : "#ffffff",
-                        border: "none",
-                        borderRadius: "30px",
-                      }}
-                      onClick={() => setActiveTab("saved")}
-                    >
-                      <h6 style={{ marginTop: "5px" }}>Saved</h6>
-                    </Button>
-                  </Link>
+
+                  <Button
+                    className="btn"
+                    variant="light"
+                    style={{
+                      border: "none",
+                      borderRadius: "30px",
+                    }}
+                    onClick={() => setActiveTab("saved")}
+                  >
+                    <h6 style={{ marginTop: "5px" }}>Saved</h6>
+                  </Button>
                 </Col>
               </Row>
               <Row className="mt-2">
@@ -154,7 +249,15 @@ const UserSavedPost = () => {
 
         <Col md={4}>
           <Card>
-            <CardImg variant="top" src={background} />
+            <CardImg
+              variant="top"
+              src={
+                userData?.background === "default.jpg"
+                  ? "/images/background.jpg"
+                  : userData?.background
+              }
+              style={{ height: "250px", width: "100%", objectFit: "cover" }}
+            />
             <CardBody>
               <Row>
                 <Col md={12}>
@@ -171,11 +274,18 @@ const UserSavedPost = () => {
                       position: "relative",
                     }}
                   >
-                    <FaPlus />
+                    <Link
+                      to={`/setting`}
+                      className="d-flex justify-content-center align-items-center"
+                    >
+                      <FaPlus style={{ color: "white" }} />
+                    </Link>
                   </Button>
                   <Row>
                     <Col md={12}>
-                      <h5>AnhLTHE172031</h5>
+                      <h5>
+                        {userData?.displayName || "u/" + userData?.username}
+                      </h5>
                     </Col>
                   </Row>
                   <hr />
@@ -186,20 +296,22 @@ const UserSavedPost = () => {
                   </Row>
                   <Row className="mt-2">
                     <Col md={12} className="d-flex align-items-center">
-                      <FaUser
+                      <Image
+                        src={
+                          userData?.avatar === "default.jpg"
+                            ? "/images/logo.jpg"
+                            : userData?.avatar
+                        }
                         style={{
                           borderRadius: "100px",
                           width: "40px",
                           height: "40px",
-                          backgroundColor: "#f3752c",
-                          padding: "5px 5px",
-                          color: "white",
                           marginRight: "10px",
                         }}
                       />
                       <div>
                         <p style={{ fontSize: "14px", marginBottom: "0px" }}>
-                          AnhLTHE172031
+                          u/{userData?.username}
                         </p>
                         <p
                           style={{
@@ -248,4 +360,4 @@ const UserSavedPost = () => {
   );
 };
 
-export default UserSavedPost;
+export default UserProfile;

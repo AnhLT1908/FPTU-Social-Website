@@ -145,7 +145,11 @@ const UserProfile = () => {
                 <Col md={12} className="d-flex align-items-center">
                   <div style={{ marginRight: "30px" }}>
                     <Image
-                      src={userData?.avatar}
+                      src={
+                        userData?.avatar === "default.jpg"
+                          ? "/images/logo.jpg"
+                          : userData?.avatar
+                      }
                       style={{
                         borderRadius: "100px",
                         width: "100px",
@@ -175,7 +179,7 @@ const UserProfile = () => {
                     </Button>
                   </div>
                   <div>
-                    <h4>{userData?.displayName || "Username"}</h4>
+                    <h4>{userData?.displayName || "u/" + userData?.username}</h4>
                     <p style={{ fontWeight: "bold", color: "#666666" }}>
                       u/{userData?.username || "Username"}
                     </p>
@@ -197,7 +201,7 @@ const UserProfile = () => {
                   >
                     <h6 style={{ marginTop: "5px" }}>Overview</h6>
                   </Button>
-                  <Link to={`/profile/${user?._id}/saved`}>
+                  <Link to={`/profile/${userData?._id}/saved`}>
                     <Button
                       className="btn"
                       variant="light"
@@ -323,7 +327,11 @@ const UserProfile = () => {
           <Card>
             <CardImg
               variant="top"
-              src={userData?.background}
+              src={
+                userData?.background === "default.jpg"
+                  ? "/images/background.jpg"
+                  : userData?.background
+              }
               style={{ height: "250px", width: "100%", objectFit: "cover" }}
             />
             <CardBody>
@@ -351,7 +359,7 @@ const UserProfile = () => {
                   </Button>
                   <Row>
                     <Col md={12}>
-                      <h5>{userData?.displayName || "Username"}</h5>
+                      <h5>{userData?.displayName || "u/" + userData?.username}</h5>
                     </Col>
                   </Row>
                   <hr />
@@ -363,7 +371,11 @@ const UserProfile = () => {
                   <Row className="mt-2">
                     <Col md={12} className="d-flex align-items-center">
                       <Image
-                        src={userData?.avatar}
+                        src={
+                          userData?.avatar === "default.jpg"
+                            ? "/images/logo.jpg"
+                            : userData?.avatar
+                        }
                         style={{
                           borderRadius: "100px",
                           width: "40px",
