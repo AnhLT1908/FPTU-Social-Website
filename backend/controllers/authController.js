@@ -7,6 +7,7 @@ const AppError = require('../utils/appError');
 const Email = require('../utils/email');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const nodemailer = require('nodemailer');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,12 +15,20 @@ const signToken = (id) => {
   });
 };
 const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
-  user.password = undefined;
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+  // Sending response back to client
   res.status(statusCode).json({
     status: 'success',
     token,
-    user,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role, // Include user role in the response
+    },
   });
 };
 
@@ -56,15 +65,66 @@ exports.checkStudentCode = catchAsync(async (req, res, next) => {
 // Signup function
 exports.signup = catchAsync(async (req, res, next) => {
   const url = `${req.protocol}://${req.get('host')}/me`;
-  // const randomBytes = await promisify(crypto.randomBytes)(12);
   const newUser = await User.create({
     ...req.body,
     passwordConfirm: req.body.password,
   });
-  await new Email(newUser, url).sendWelcome();
-  createSendToken(newUser, 201, res);
+
+  // Tạo token kích hoạt
+  const activationToken = jwt.sign(
+    { id: newUser._id },
+    process.env.JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+
+  const activationLink = `${req.protocol}://${req.get('host')}/activate/${activationToken}`;
+
+  // Gửi email kích hoạt
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    auth: {
+      user: process.env.SMTP_USERNAME,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  });
+
+  await transporter.sendMail({
+    from: 'FPT University Social Website',
+    to: newUser.email,
+    subject: 'Account Activation Link',
+    html: `<p>Click the following link to activate your account:</p>
+           <a href="${activationLink}">Activate Account</a>`,
+  });
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Account created successfully. Please check your email to activate your account.',
+  });
 });
 
+exports.activateAccount = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return next(new AppError('Invalid token or user not found', 400));
+    }
+
+    user.isActive = true;
+    await user.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Account activated successfully. You can now log in.',
+    });
+  } catch (error) {
+    return next(new AppError('Activation link expired or invalid', 400));
+  }
+});
 
 
 // New function to check if the username is taken
@@ -86,22 +146,22 @@ exports.checkUsername = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  // Kiểm tra nếu yêu cầu không có đủ thông tin
+  // Check for missing fields
   if (!email || !password) {
     return next(new AppError('Vui lòng cung cấp tên người dùng/email và mật khẩu!', 400));
   }
 
-  // Tìm người dùng bằng email hoặc tên người dùng
+  // Find user by email or username
   const user = await User.findOne({
-    $or: [{ email: email }, { username: email }] // `email` có thể là email hoặc tên người dùng
+    $or: [{ email: email }, { username: email }] // `email` could be email or username
   }).select('+password');
 
-  // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không đúng
+  // Check if user does not exist or password is incorrect
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Tên người dùng/email hoặc mật khẩu không đúng', 401));
   }
 
-  // Nếu tìm thấy người dùng và mật khẩu đúng, tạo và gửi token
+  // If user found and password correct, create and send token
   createSendToken(user, 200, res);
 });
 
@@ -162,9 +222,9 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
     idToken: token,
     audience: process.env.GOOGLE_CLIENT_ID,
   });
-  
+
   const payload = ticket.getPayload();
-  
+
   // Kiểm tra xem email có đuôi .edu hay không
   if (!payload.email.endsWith('@fpt.edu.vn')) {
     return next(new AppError('Only @fpt.edu.vn email addresses are allowed', 403));
@@ -180,7 +240,7 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       username: payload.name, // Hoặc bạn có thể xử lý để tạo username từ tên đầy đủ
       password: crypto.randomBytes(16).toString('hex'), // Mật khẩu ngẫu nhiên, vì người dùng sẽ đăng nhập bằng Google
       studentCode: 'auto-generated-or-placeholder', // Có thể tạo mã sinh viên tự động nếu cần
-      
+
     });
   }
 
@@ -278,7 +338,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   // Generate a new random password
   const newPassword = generateRandomPassword();
-  
+
   // Update user's password (assumes you have a method to hash the password in your model)
   user.password = newPassword;
   await user.save();
@@ -316,16 +376,16 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 });
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
-  
+
   if (!user) {
     return next(new AppError('User not found!', 404));
   }
-  
+
   // Check if oldPassword is provided in the request
   if (!req.body.oldPassword) {
     return next(new AppError('Please provide your current password!', 400));
   }
-  
+
   // Check if user has a password stored in the database
   if (!user.password) {
     return next(new AppError('Your current password is not set. Please contact support.', 500));

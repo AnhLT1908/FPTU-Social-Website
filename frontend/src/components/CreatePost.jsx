@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const CreatePost = () => {
+const CreatePost = ({ communityData = null }) => {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -30,20 +30,26 @@ const CreatePost = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:9999/api/v1/communities/"
-        );
-        console.log("Communities", community)
-        setCommunity(response.data);
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
-    };
+  console.log("Community data", communityData);
 
-    fetchCommunities();
+  useEffect(() => {
+    if (communityData == null) {
+      const fetchCommunities = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:9999/api/v1/communities/"
+          );
+          setCommunity(response.data);
+          console.log("Community:", response.data);
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
+      };
+
+      fetchCommunities();
+    } else {
+      setSelectedCommunity(communityData?.id);
+    }
   }, []);
 
   const handleCommunityChange = (e) => {
@@ -76,7 +82,7 @@ const CreatePost = () => {
       );
 
       if (response.status === 201) {
-        navigate(`/community/${community.id}`);
+        window.location.href = `/community/${selectedCommunity}`; // Redirect on success
       }
     } catch (error) {
       console.error("Error creating post:", error);
@@ -99,19 +105,21 @@ const CreatePost = () => {
       </div>
 
       <Form onSubmit={handleSubmit}>
-        <FormSelect
-          className="mb-3"
-          style={{ width: "30%" }}
-          value={selectedCommunity}
-          onChange={handleCommunityChange}
-          name="community"
-          required
-        >
-          <option value="">Select a community</option>
-          {community.map((c) => (
-            <option key={c.id} value={c.id}>{`f/ ${c.name}`}</option>
-          ))}
-        </FormSelect>
+        {communityData == null && (
+          <FormSelect
+            className="mb-3"
+            style={{ width: "30%" }}
+            value={selectedCommunity}
+            onChange={handleCommunityChange}
+            name="community"
+            required
+          >
+            <option value="">Select a community</option>
+            {community?.map((c) => (
+              <option key={c.id} value={c.id}>{`f/ ${c.name}`}</option>
+            ))}
+          </FormSelect>
+        )}
 
         <Tabs
           activeKey={selectedTab}
@@ -169,9 +177,17 @@ const CreatePost = () => {
             )}
           </Form.Group>
         )}
-
         <div className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={() => navigate("/")}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (communityData == null) {
+                window.location.href = `/`;
+              } else {
+                window.location.href = `/community/${communityData.id}`;
+              }
+            }}
+          >
             Cancel
           </Button>
           <Button variant="primary" type="submit">

@@ -8,6 +8,7 @@ const CreateUPForm = () => {
   const [studentCode, setStudentCode] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,7 +17,7 @@ const CreateUPForm = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      setLoading(true); // Set loading to true
+      setLoading(true);
       try {
         const response = await fetch("http://localhost:9999/api/v1/users/check-username", {
           method: "POST",
@@ -41,7 +42,7 @@ const CreateUPForm = () => {
         });
 
         if (!responseStuCode.ok) {
-          const errorData = await response.json();
+          const errorData = await responseStuCode.json();
           setErrors({ studentCode: errorData.message || "Student Code already taken." });
           return;
         }
@@ -57,7 +58,7 @@ const CreateUPForm = () => {
         if (signupResponse.ok) {
           const data = await signupResponse.json();
           console.log("Signup successful:", data);
-          navigate("/login");
+          setIsSuccess(true); // Show success message
         } else {
           const errorData = await signupResponse.json();
           setErrors({ form: errorData.message || "Signup failed. Please try again." });
@@ -66,7 +67,7 @@ const CreateUPForm = () => {
         console.error("Error during signup:", error);
         setErrors({ form: "An error occurred. Please try again later." });
       } finally {
-        setLoading(false); // Reset loading state
+        setLoading(false);
       }
     }
   };
@@ -83,14 +84,13 @@ const CreateUPForm = () => {
     }
     if (!studentCode) {
       newErrors.studentCode = "Student Code is required.";
-    } else if (!/^(HE|HA|HS)/.test(studentCode)) {
-      newErrors.studentCode = "Student Code must start with HE, HA, or HS.";
+    } else if (!/^(HE|HA|HS)\d{6}$/.test(studentCode)) {
+      newErrors.studentCode = "Student Code must start with HE, HA, or HS and have 8 characters";
     }
-  
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
 
   const handleBack = () => {
     navigate("/signup");
@@ -104,132 +104,148 @@ const CreateUPForm = () => {
     >
       <Row>
         <Col>
-          <div className="text-center mb-4">
-            <img src="../images/logo.jpg" alt="Logo" href="/" className="mb-3" style={{ width: "100px" }} />
-            <h1>FPTU Social Website</h1>
-            <p>The Internet Home Place, where many communities reside</p>
-          </div>
-
-          <Card className="p-4 shadow-sm" style={{ width: "500px" }}>
-            <Card.Body>
-              <div
-                className="mb-4"
-                style={{ cursor: "pointer" }}
-                onClick={handleBack}
+          {isSuccess ? (
+            <div className="text-center">
+              <img
+                src="../images/logo.jpg"
+                alt="Confirmation"
+                style={{ width: "150px", marginBottom: "20px" }}
+              />
+              <h2>Registration Successful!</h2>
+              <p>A confirmation email has been sent. Please check your inbox to verify successful registration.</p>
+              <Button
+                onClick={() => navigate("/login")}
+                className="mt-4"
+                style={{
+                  borderRadius: "20px",
+                  backgroundColor: "#ff5e00",
+                }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  style={{ width: "24px", height: "24px" }}
+                Go to Login
+              </Button>
+            </div>
+          ) : (
+            <Card className="p-4 shadow-sm" style={{ width: "500px" }}>
+              <Card.Body>
+                <div
+                  className="mb-4"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleBack}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </div>
-              <h2 className="fw-bold">Create your username and password</h2>
-              <h6 className="mb-4 fw-normal">
-                Your username will be used for login instead of your email and
-                it will be used for your profile. Choose wisely - because once
-                you get a name, you can't change it.
-              </h6>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    style={{ width: "24px", height: "24px" }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </div>
+                <h2 className="fw-bold">Create your username and password</h2>
+                <h6 className="mb-4 fw-normal">
+                  Your username will be used for login instead of your email and
+                  it will be used for your profile. Choose wisely - because once
+                  you get a name, you can't change it.
+                </h6>
 
-              <Form noValidate onSubmit={handleRegister}>
-                {errors.form && (
-                  <div className="text-danger mb-3">{errors.form}</div>
-                )}
+                <Form noValidate onSubmit={handleRegister}>
+                  {errors.form && (
+                    <div className="text-danger mb-3">{errors.form}</div>
+                  )}
 
-                <Form.Group className="mb-3" controlId="formEmail">
-                  <Form.Control
-                    type="email"
-                    value={email}
-                    readOnly={true}
+                  <Form.Group className="mb-3" controlId="formEmail">
+                    <Form.Control
+                      type="email"
+                      value={email}
+                      readOnly={true}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
+                      disabled
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="studentCode" className="mt-3">
+                    <Form.Control
+                      type="text"
+                      placeholder="Student Code *"
+                      value={studentCode}
+                      onChange={(e) => setStudentCode(e.target.value)}
+                      required
+                      isInvalid={!!errors.studentCode}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.studentCode}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+
+                  <Form.Group className="mt-3" controlId="username">
+                    <Form.Control
+                      type="username"
+                      placeholder="Username *"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      isInvalid={!!errors.username}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.username}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+
+                  <Form.Group controlId="formPassword" className="mt-3">
+                    <Form.Control
+                      type="password"
+                      placeholder="Password *"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      isInvalid={!!errors.password}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.password}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+
+                  <Button
+                    type="submit"
+                    className="mt-4 w-100"
+                    disabled={loading}
                     style={{
                       borderRadius: "20px",
-                      height: "60px",
-                      backgroundColor: "#d7d6d6",
+                      height: "45px",
+                      backgroundColor: "#ff5e00",
                     }}
-                    disabled
-                  />
-                </Form.Group>
-
-                <Form.Group controlId="studentCode" className="mt-3">
-                  <Form.Control
-                    type="text"
-                    placeholder="Student Code *"
-                    value={studentCode}
-                    onChange={(e) => setStudentCode(e.target.value)}
-                    required
-                    isInvalid={!!errors.studentCode}
-                    style={{
-                      borderRadius: "20px",
-                      height: "60px",
-                      backgroundColor: "#d7d6d6",
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.studentCode}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mt-3" controlId="username">
-                  <Form.Control
-                    type="username"
-                    placeholder="Username *"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    isInvalid={!!errors.username}
-                    style={{
-                      borderRadius: "20px",
-                      height: "60px",
-                      backgroundColor: "#d7d6d6",
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.username}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group controlId="formPassword" className="mt-3">
-                  <Form.Control
-                    type="password"
-                    placeholder="Password *"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    isInvalid={!!errors.password}
-                    style={{
-                      borderRadius: "20px",
-                      height: "60px",
-                      backgroundColor: "#d7d6d6",
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.password}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Button
-                  type="submit"
-                  className="mt-4 w-100"
-                  disabled={loading} // Disable button while loading
-                  style={{
-                    borderRadius: "20px",
-                    height: "45px",
-                    backgroundColor: "#ff5e00",
-                  }}
-                >
-                  {loading ? "Loading..." : "Continue"}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
+                  >
+                    {loading ? "Loading..." : "Continue"}
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          )}
         </Col>
       </Row>
     </Container>

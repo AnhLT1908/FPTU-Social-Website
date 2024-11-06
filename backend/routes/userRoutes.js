@@ -18,9 +18,11 @@ const {
   checkStudentCode,
   googleLogin,
   checkEmailForGoogleLogin,
+  activateAccount
 } = require('../controllers/authController');
 const router = express.Router();
 router.post('/signup', signup);
+router.get('/activate/:token', activateAccount);
 router.post('/check-email', checkEmail);
 router.post('/check-email-for-google-login', checkEmailForGoogleLogin);
 router.post('/check-student-code', checkStudentCode);
@@ -31,6 +33,8 @@ router.get('/logout', logout);
 router.post('/is-logged-in', isLoggedIn);
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
+router.get('/list', userController.getAllUsersPaginate);
+router.patch('/:id/toggle-active', userController.toggleUserActiveStatus);
 
 // Protect All From This Point
 router.use(protect);
@@ -52,8 +56,6 @@ router.get('/search', userController.searchUsers);
 router.delete('/delete-me', userController.deleteMe);
 // Restrict To ADMIN Only
 
-router.get('/list', userController.getAllUsersPaginate);
-router.patch('/:id/toggle-active', userController.toggleUserActiveStatus);
 router.get('/:id', userController.getUserById);
 router.use(restrictTo('admin'));
 router

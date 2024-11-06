@@ -28,7 +28,7 @@ const DetailReport = () => {
 
     const handleDeactivateAndApprove = async () => {
         try {
-            await deactivatePost(reportDetail.reportEntityId._id, 'Approved');
+            await deactivatePost(reportDetail.reportEntityId?._id, 'Approved');
             await updateReport(id, { status: 'Approved' });
             message.success('Bài viết đã bị vô hiệu hóa và báo cáo đã được phê duyệt.');
             setReportDetail(prev => ({ ...prev, status: 'Approved' }));
