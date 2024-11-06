@@ -6,7 +6,11 @@ const postSchema = new mongoose.Schema(
     communityId: { type: mongoose.Schema.ObjectId, ref: 'Community' },
     title: String,
     content: String,
-    media: String,
+    media: [
+      {
+        type: String,
+      },
+    ],
     commentCount: { type: Number, default: 0 },
     votes: { type: Map, of: Boolean, default: {} },
     isEdited: { type: Boolean, default: false },

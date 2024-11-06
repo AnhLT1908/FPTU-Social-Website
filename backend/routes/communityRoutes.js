@@ -22,4 +22,5 @@ router.route('/get-user/:id').get(communityController.getUserInCommunity);
 router.route('/join').post(communityController.addUserById);
 router.route('/access/:id').patch(communityController.accessRequest);
 router.route('/request/:id').patch(communityController.addRequest);
+
 module.exports = router;

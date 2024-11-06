@@ -8,6 +8,7 @@ import PostDetail from "./components/PostDetail";
 
 import LoginForm from "./components/Login";
 import RegisterForm from "./components/Register";
+import ActivationSuccess from "./components/ActivationSuccess";
 import CreateUPForm from "./components/CreateUsernamePassword";
 import ResetPasswordForm from "./components/ForgotPassword";
 import Layout from "./components/Layout";
@@ -30,6 +31,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/signup" element={<RegisterForm />} />
+          <Route path="/activate/:activationCode" element={<ActivationSuccess />} />
           <Route path="/forgot-password" element={<ResetPasswordForm />} />
           <Route path="/create-username-password" element={<CreateUPForm />}/>
           

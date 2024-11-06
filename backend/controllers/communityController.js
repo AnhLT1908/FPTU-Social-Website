@@ -3,6 +3,7 @@ const Post = require('../models/postModel');
 const Subscription = require('../models/subscriptionModel');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
+const mongoose = require('mongoose');
 const catchAsync = require('../utils/catchAsync');
 const subscriptionController = require('./subscriptionController');
 const {
@@ -80,11 +81,14 @@ exports.addUserById = subscriptionController.createNewSubscription;
 exports.getPostInCommunity = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const posts = await Post.find({ communityId: id })
-      .populate('userId')
-      .populate('communityId');
-    if (posts.length > 0) {
+    console.log("community id", id);
+    const posts = await Post.find({ communityId: mongoose.Types.ObjectId(id) }).exec();
+    
+    if (posts) {
       res.status(200).json(posts);
+      console.log("Post found", posts)
+    } else {
+      res.status(404).json({ message: "No posts found for this community" });
     }
   } catch (error) {
     next(error);
