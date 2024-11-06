@@ -72,14 +72,17 @@ exports.addUserById = subscriptionController.createNewSubscription;
 exports.getPostInCommunity = async (req, res, next) => {
   try {
     const id = req.params.id;
-    console.log("community id", id);
-    const posts = await Post.find({ communityId: mongoose.Types.ObjectId(id) }).exec();
-    
+    console.log('community id', id);
+    const posts = await Post.find({ communityId: mongoose.Types.ObjectId(id) })
+      .populate('communityId')
+      .populate('userId')
+      .exec();
+
     if (posts) {
       res.status(200).json(posts);
-      console.log("Post found", posts)
+      console.log('Post found', posts);
     } else {
-      res.status(404).json({ message: "No posts found for this community" });
+      res.status(404).json({ message: 'No posts found for this community' });
     }
   } catch (error) {
     next(error);

@@ -35,6 +35,8 @@ router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
 router.get('/list', userController.getAllUsersPaginate);
 router.patch('/:id/toggle-active', userController.toggleUserActiveStatus);
+router.route('/get-post/:id').get(userController.getPostUser);
+router.route('/get-post/saved/:id').get(userController.getPostUser);
 
 // Protect All From This Point
 router.use(protect);

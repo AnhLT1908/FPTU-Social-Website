@@ -17,16 +17,6 @@ import ManageCommunity from "./ManageCommunity";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import CreatePost from "./CreatePost";
 import axios from "axios";
-import img1 from "../images/postImage/images_postId1.jpg";
-import img2 from "../images/postImage/images_postId2.jpg";
-import img3 from "../images/postImage/images_postId3.jpg";
-import img4 from "../images/postImage/images_postId4.jpg";
-import img5 from "../images/postImage/images_postId5.jpg";
-import img6 from "../images/postImage/images_postId6.jpg";
-import img7 from "../images/postImage/images_postId7.jpg";
-import img8 from "../images/postImage/images_postId8.jpg";
-import img9 from "../images/postImage/images_postId9.jpg";
-import img10 from "../images/postImage/images_postId10.jpg";
 
 const CommunityPage = () => {
   const navigate = useNavigate();
@@ -43,8 +33,11 @@ const CommunityPage = () => {
   const [showModal2, setShowModal2] = useState(false);
   const [showModal1, setShowModal1] = useState(false);
   const [modalImage, setModalImage] = useState(null);
+  const [reportedPosts, setReportedPosts] = useState(new Set());
   const token = localStorage.getItem("token");
-  const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
+  const reportedPostsLocal = JSON.parse(
+    localStorage.getItem("reportedPosts") || "{}"
+  );
   const [postId, setPostId] = useState(null);
   const [joinReason, setJoinReason] = useState("");
   const [bookmarks, setBookmarks] = useState([]);
@@ -52,6 +45,8 @@ const CommunityPage = () => {
 
   const communityId = id;
   console.log("Community id route:", communityId);
+
+  console.log("reportedPostsLocal", reportedPostsLocal);
 
   const openReportModal = (id) => {
     setPostId(id);
@@ -64,6 +59,7 @@ const CommunityPage = () => {
       setUser(userData);
       setBookmarks(userData.bookmarks || []);
     }
+    setReportedPosts(new Set(Object.keys(reportedPostsLocal)));
     fetchCommunity();
     fetchUser();
   }, [communityId]);
@@ -72,8 +68,11 @@ const CommunityPage = () => {
     fetch(`http://localhost:9999/api/v1/communities/get-post/${communityId}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Community post by id", data);
-        setPosts(data);
+        // Sort posts from newest to oldest based on `createdAt`
+        const sortedPosts = data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setPosts(sortedPosts);
       })
       .catch((error) => console.error("Error fetching posts:", error));
   }, [communityId]);
@@ -139,8 +138,8 @@ const CommunityPage = () => {
   };
 
   const handleSave = (sid) => {
-    if (!user.bookmarks.includes(sid)) {
-      user.bookmarks.push(sid);
+    if (!user.bookmarks?.includes(sid)) {
+      user.bookmarks?.push(sid);
     }
     localStorage.setItem("user", JSON.stringify(user));
     const data = JSON.stringify({ bookmarks: user.bookmarks });
@@ -170,19 +169,55 @@ const CommunityPage = () => {
       status: "Waiting",
     });
 
+    const config = {
+      method: "post",
+      url: "http://localhost:9999/api/v1/reports/",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: data,
+    };
+
     axios
-      .post("http://localhost:9999/api/v1/reports/", data, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .request(config)
       .then(() => {
-        alert("Your report has been sent to admin!");
+        alert("Your report has been sent to the admin successfully!");
         setShowModal1(false);
+        setReportedPosts((prev) => ({ ...prev, [pid]: true }));
       })
       .catch((error) => {
         console.log(error);
+      });
+  };
+
+  const handleUndoReport = (pid) => {
+    const config = {
+      method: "delete",
+      url: `http://localhost:9999/api/v1/reports/by-entity/${pid}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios
+      .request(config)
+      .then(() => {
+        alert("Your report has been undone!");
+        setReportedPosts((prev) => {
+          const updated = { ...prev };
+          delete updated[pid];
+          return updated;
+        });
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          alert(
+            "No report found with this ID. It may have already been deleted."
+          );
+        } else {
+          console.log(error);
+        }
       });
   };
 
@@ -365,24 +400,20 @@ const CommunityPage = () => {
                   <Dropdown>
                     <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
                     <Dropdown.Menu>
-                      {post?.userId?.id === user?.id ? (
+                      {reportedPosts.has(post.id) ? (
                         <Dropdown.Item
-                          onClick={() => navigate(`/edit-post/${post?._id}`)}
+                          onClick={() => handleUndoReport(post.id)}
                         >
-                          Edit
+                          Undo
                         </Dropdown.Item>
                       ) : (
-                        <>
-                          <Dropdown.Item onClick={() => handleSave(post?._id)}>
-                            Save
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() => openReportModal(post?._id)}
-                          >
-                            Report
-                          </Dropdown.Item>
-                        </>
+                        <Dropdown.Item onClick={() => setShowModal1(true)}>
+                          Report
+                        </Dropdown.Item>
                       )}
+                      <Dropdown.Item onClick={() => handleSave(post.id)}>
+                        Save
+                      </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </Col>
@@ -395,20 +426,24 @@ const CommunityPage = () => {
                   </Link>
                 </Col>
                 <Col md={4}>
-                  <Image
-                    src={images[index % images.length]}
-                    alt={`post-${index + 1}`}
-                    fluid
-                    style={{
-                      width: "50%",
-                      borderRadius: "10px",
-                      cursor: "pointer",
-                      float: "right",
-                    }}
-                    onClick={() =>
-                      handleImageClick(images[index % images.length])
-                    }
-                  />
+                  {post?.media && post.media.length > 0 && post.media[0] ? (
+                    <Image
+                      src={post.media[0]}
+                      alt=""
+                      fluid
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        float: "right",
+                        objectFit: "cover",
+                      }}
+                      onClick={() => handleImageClick(post.media[0])}
+                    />
+                  ) : (
+                    <div></div>
+                  )}
                 </Col>
               </Row>
 

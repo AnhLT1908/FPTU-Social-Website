@@ -26,9 +26,12 @@ import image1 from "../images/postImage/images_postId1.jpg";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [reportDes, setReportDes] = useState("");
   const [posts, setPosts] = useState([]);
   const [modalImage, setModalImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
+  const [reportedPosts, setReportedPosts] = useState(new Set());
   const [filter, setFilter] = useState("new");
   const token = localStorage.getItem("token");
 
@@ -48,29 +51,18 @@ const UserProfile = () => {
   console.log("userId", userId);
 
   useEffect(() => {
-    const fetchPosts = () => {
-      fetch(`http://localhost:9999/api/v1/posts/my-feed?sort=${filter}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    fetch(`http://localhost:9999/api/v1/users/get-post/${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // Sort posts from newest to oldest based on `createdAt`
+        const sortedPosts = data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        console.log("Post data fetch:", sortedPosts)
+        setPosts(sortedPosts);
       })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("Post:", data);
-          const postsWithReactions = data.feed.map((item) => ({
-            ...item,
-            upVotes: item.upVotes || 0,
-            downVotes: item.downVotes || 0,
-            upVoted: false,
-            downVoted: false,
-          }));
-          setPosts(postsWithReactions);
-        })
-        .catch((error) => console.error("Error fetching posts:", error));
-    };
-
-    fetchPosts();
-  }, [filter, token]);
+      .catch((error) => console.error("Error fetching posts:", error));
+  }, [userId]);
 
   useEffect(() => {
     if (userId) {
@@ -93,6 +85,90 @@ const UserProfile = () => {
       fetchUserData();
     }
   }, [token, userId]);
+
+  const handleReportPost = (uid, pid) => {
+    const data = JSON.stringify({
+      userId: uid,
+      reportEntityId: pid,
+      entityType: "Post",
+      description: reportDes,
+      status: "Waiting",
+    });
+
+    const config = {
+      method: "post",
+      url: "http://localhost:9999/api/v1/reports/",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(() => {
+        alert("Your report has been sent to the admin successfully!");
+        setShowModal1(false);
+        setReportedPosts((prev) => ({ ...prev, [pid]: true }));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleSave = (sid) => {
+    if (!user.bookmarks?.includes(sid)) {
+      user.bookmarks?.push(sid);
+    }
+    localStorage.setItem("user", JSON.stringify(user));
+    const data = JSON.stringify({ bookmarks: user.bookmarks });
+
+    axios
+      .patch("http://localhost:9999/api/v1/users/update-me", data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        alert("Save post success!");
+        navigate(`/profile/${userId}`);
+      })
+      .catch((error) => {
+        console.error("Lỗi khi gửi yêu cầu:", error);
+      });
+  };
+
+  const handleUndoReport = (pid) => {
+    const config = {
+      method: "delete",
+      url: `http://localhost:9999/api/v1/reports/by-entity/${pid}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios
+      .request(config)
+      .then(() => {
+        alert("Your report has been undone!");
+        setReportedPosts((prev) => {
+          const updated = { ...prev };
+          delete updated[pid];
+          return updated;
+        });
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          alert(
+            "No report found with this ID. It may have already been deleted."
+          );
+        } else {
+          console.log(error);
+        }
+      });
+  };
 
   const userDataGet = userData;
   console.log("userDataGet", userDataGet);
@@ -139,7 +215,7 @@ const UserProfile = () => {
     <Container fluid>
       <Row>
         <Col md={8}>
-          <Card>
+          <Card className="mb-4">
             <CardBody>
               <Row>
                 <Col md={12} className="d-flex align-items-center">
@@ -216,7 +292,7 @@ const UserProfile = () => {
                   </Link>
                 </Col>
               </Row>
-              <Row className="mt-2">
+              {/* <Row className="mt-2">
                 <Col md={12} className="d-flex">
                   <div>
                     <Dropdown>
@@ -241,37 +317,45 @@ const UserProfile = () => {
                     </Dropdown>
                   </div>
                 </Col>
-              </Row>
+              </Row> */}
             </CardBody>
           </Card>
 
-          {posts.map((post, index) => (
-            <Card key={index} className="mt-3 p-3">
+          {posts?.map((post, index) => (
+            <Card key={post._id} className="mb-3 p-3">
               <Row>
                 <Col>
-                  <Link to={`/community/${post.communityId}`}>
+                  <Link to={`/community/${post.communityId.id}`}>
                     <p>
                       <strong>
-                        {"f/" + post.communityId?.name || "Community Name"}
+                        {"f/" + (post?.communityId?.name || "Community Name")}
                       </strong>{" "}
                       • {new Date(post.createdAt).toLocaleString()}
                     </p>
                   </Link>
-                  <p className="mt-n2">
-                    {"u/" + post.userId?.username || "Username"}
-                  </p>
+                  <Link to={`/profile/${post?.userId?.id}`}>
+                    <p className="mt-n2">
+                      {"u/" + (post?.userId?.username || "Username")}
+                    </p>
+                  </Link>
                 </Col>
                 <Col className="d-flex justify-content-end">
                   <Dropdown>
                     <Dropdown.Toggle variant="light">Settings</Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item>Save</Dropdown.Item>
-                      <Dropdown.Item>Report</Dropdown.Item>
-                      <Dropdown.Item>Hide</Dropdown.Item>
-                      <Dropdown.Item
-                        onClick={() => navigate(`/edit-post/${post.id}`)}
-                      >
-                        Edit
+                      {reportedPosts.has(post.id) ? (
+                        <Dropdown.Item
+                          onClick={() => handleUndoReport(post.id)}
+                        >
+                          Undo
+                        </Dropdown.Item>
+                      ) : (
+                        <Dropdown.Item onClick={() => setShowModal1(true)}>
+                          Report
+                        </Dropdown.Item>
+                      )}
+                      <Dropdown.Item onClick={() => handleSave(post.id)}>
+                        Save
                       </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
@@ -280,23 +364,29 @@ const UserProfile = () => {
 
               <Row>
                 <Col md={8}>
-                  <Link to={`/post/${post._id}`}>
-                    <h2>{post.title}</h2>
+                  <Link to={`/post/${post?._id}`}>
+                    <h2>{post?.title}</h2>
                   </Link>
                 </Col>
                 <Col md={4}>
-                  <Image
-                    src={image1}
-                    alt=""
-                    fluid
-                    style={{
-                      width: "75%",
-                      borderRadius: "10px",
-                      cursor: "pointer",
-                      float: "right",
-                    }}
-                    onClick={() => handleImageClick(image1)}
-                  />
+                  {post?.media && post.media.length > 0 && post.media[0] ? (
+                    <Image
+                      src={post.media[0]}
+                      alt=""
+                      fluid
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        float: "right",
+                        objectFit: "cover",
+                      }}
+                      onClick={() => handleImageClick(post.media[0])}
+                    />
+                  ) : (
+                    <div></div>
+                  )}
                 </Col>
               </Row>
 
@@ -314,9 +404,12 @@ const UserProfile = () => {
                 >
                   <FaArrowDown />
                 </Button>
-                <span className="mx-2">{post.downVotes}</span>
-                <Button variant="light">
-                  <FaComment /> {post.comments || 0}
+                <span className="mx-2">{post?.downVotes}</span>
+                <Button
+                  variant="light"
+                  onClick={() => navigate(`/post/${post?._id}`)}
+                >
+                  <FaComment /> {post.commentCount || 0}
                 </Button>
               </div>
             </Card>
