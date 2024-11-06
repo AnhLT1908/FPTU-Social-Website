@@ -44,7 +44,7 @@ const UserProfile = () => {
     }
   }, []);
 
-  const userId = user?._id;
+  const userId = user?.id;
   console.log("userId", userId);
 
   useEffect(() => {

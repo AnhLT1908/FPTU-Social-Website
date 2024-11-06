@@ -120,10 +120,10 @@ const SettingProfile = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!user || !user._id) return;
+      if (!user || !user.id) return;
       try {
         const response = await axios.get(
-          `http://localhost:9999/api/v1/users/${user._id}`,
+          `http://localhost:9999/api/v1/users/${user.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
