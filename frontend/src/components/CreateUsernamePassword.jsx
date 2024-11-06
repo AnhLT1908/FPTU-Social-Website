@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const CreateUPForm = () => {
   const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [studentCode, setStudentCode] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,46 +20,35 @@ const CreateUPForm = () => {
     if (validateForm()) {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:9999/api/v1/users/check-username", {
+        // Check username and student code availability
+        const responseUsername = await fetch("http://localhost:9999/api/v1/users/check-username", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username }),
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          setErrors({ username: errorData.message || "Username already taken." });
-          return;
-        }
-
         const responseStuCode = await fetch("http://localhost:9999/api/v1/users/check-student-code", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ studentCode }),
         });
 
-        if (!responseStuCode.ok) {
-          const errorData = await responseStuCode.json();
-          setErrors({ studentCode: errorData.message || "Student Code already taken." });
+        if (!responseUsername.ok || !responseStuCode.ok) {
+          const errorData = await responseUsername.json();
+          setErrors({ form: errorData.message || "Username or student code already taken." });
           return;
         }
 
+        // Register user
         const signupResponse = await fetch("http://localhost:9999/api/v1/users/signup", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, username, password, studentCode }),
         });
 
         if (signupResponse.ok) {
-          const data = await signupResponse.json();
-          console.log("Signup successful:", data);
-          setIsSuccess(true); // Show success message
+          // Redirect to login page with success message
+          navigate("/login");
+          toast.success("Đăng ký thành công!");
         } else {
           const errorData = await signupResponse.json();
           setErrors({ form: errorData.message || "Signup failed. Please try again." });
@@ -74,19 +64,9 @@ const CreateUPForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!username) {
-      newErrors.username = "Username is required.";
-    }
-    if (!password) {
-      newErrors.password = "Password is required.";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters.";
-    }
-    if (!studentCode) {
-      newErrors.studentCode = "Student Code is required.";
-    } else if (!/^(HE|HA|HS)\d{6}$/.test(studentCode)) {
-      newErrors.studentCode = "Student Code must start with HE, HA, or HS and have 8 characters";
-    }
+    if (!username) newErrors.username = "Username is required.";
+    if (!password || password.length < 6) newErrors.password = "Password must be at least 6 characters.";
+    if (!studentCode || !/^(HE|HA|HS)\d{6}$/.test(studentCode)) newErrors.studentCode = "Invalid student code format.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -211,6 +191,25 @@ const CreateUPForm = () => {
                     </Form.Control.Feedback>
                   </Form.Group>
 
+                  <Form.Group className="mt-3" controlId="displayName">
+                    <Form.Control
+                      type="displayName"
+                      placeholder="Display Name *"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      required
+                      isInvalid={!!errors.displayName}
+                      style={{
+                        borderRadius: "20px",
+                        height: "60px",
+                        backgroundColor: "#d7d6d6",
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.displayName}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+
                   <Form.Group controlId="formPassword" className="mt-3">
                     <Form.Control
                       type="password"
@@ -245,7 +244,6 @@ const CreateUPForm = () => {
                 </Form>
               </Card.Body>
             </Card>
-          )}
         </Col>
       </Row>
     </Container>

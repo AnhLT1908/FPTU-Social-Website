@@ -31,7 +31,10 @@ function Header({ socket }) {
     const userData = JSON.parse(localStorage.getItem('user'));
     if (userData) {
       setUser(userData);
-      console.log('User: ', userData);
+      console.log("User: ", userData);
+    } else {
+      // Redirect to login page if no user is found in localStorage
+      navigate("/login");
     }
   }, []);
 

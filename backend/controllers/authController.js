@@ -64,43 +64,27 @@ exports.checkStudentCode = catchAsync(async (req, res, next) => {
 
 // Signup function
 exports.signup = catchAsync(async (req, res, next) => {
-  const url = `${req.protocol}://${req.get('host')}/me`;
+  const url = `${req.protocol}://${req.get('host')}/me;`
+  // const randomBytes = await promisify(crypto.randomBytes)(12);
   const newUser = await User.create({
     ...req.body,
     passwordConfirm: req.body.password,
   });
+  await new Email(newUser, url);
+  createSendToken(newUser, 201, res);
+});
+// Check if email already exists
+exports.checkEmail = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
 
-  // Tạo token kích hoạt
-  const activationToken = jwt.sign(
-    { id: newUser._id },
-    process.env.JWT_SECRET,
-    { expiresIn: '1d' }
-  );
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new AppError('Email is already registered. Please use a different email.', 400));
+  }
 
-  const activationLink = `${req.protocol}://${req.get('host')}/activate/${activationToken}`;
-
-  // Gửi email kích hoạt
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    auth: {
-      user: process.env.SMTP_USERNAME,
-      pass: process.env.SMTP_PASSWORD,
-    },
-  });
-
-  await transporter.sendMail({
-    from: 'FPT University Social Website',
-    to: newUser.email,
-    subject: 'Account Activation Link',
-    html: `<p>Click the following link to activate your account:</p>
-           <a href="${activationLink}">Activate Account</a>`,
-  });
-
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
-    message: 'Account created successfully. Please check your email to activate your account.',
+    message: 'Email is available.',
   });
 });
 
@@ -153,17 +137,19 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // Find user by email or username
   const user = await User.findOne({
-    $or: [{ email: email }, { username: email }] // `email` could be email or username
+    $or: [{ email: email }, { username: email }] // email could be email or username
   }).select('+password');
 
   // Check if user does not exist or password is incorrect
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Tên người dùng/email hoặc mật khẩu không đúng', 401));
+    return next(new AppError('Sai mật khẩu hoặc người dùng đã bị khóa', 401));
   }
 
   // If user found and password correct, create and send token
   createSendToken(user, 200, res);
 });
+
+
 
 exports.logout = (req, res) => {
   res.status(200).json({ status: 'success' });
@@ -240,8 +226,12 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       username: payload.name, // Hoặc bạn có thể xử lý để tạo username từ tên đầy đủ
       password: crypto.randomBytes(16).toString('hex'), // Mật khẩu ngẫu nhiên, vì người dùng sẽ đăng nhập bằng Google
       studentCode: 'auto-generated-or-placeholder', // Có thể tạo mã sinh viên tự động nếu cần
-
     });
+  }
+
+  // Check if user account is active
+  if (!user.isActive) {
+    return next(new AppError('Tài khoản của bạn đã bị vô hiệu hóa.', 403));
   }
 
   // Tạo và gửi token đến client
