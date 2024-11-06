@@ -112,7 +112,7 @@ const CreateUPForm = () => {
                 style={{ width: "150px", marginBottom: "20px" }}
               />
               <h2>Registration Successful!</h2>
-              <p>An email with a link to activate your account has been sent to your registered email address. Please check your inbox.</p>
+              <p>A confirmation email has been sent. Please check your inbox to verify successful registration.</p>
               <Button
                 onClick={() => navigate("/login")}
                 className="mt-4"
