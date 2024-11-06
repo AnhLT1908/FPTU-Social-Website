@@ -126,13 +126,13 @@ exports.getMyFeed = catchAsync(async (req, res, next) => {
         createdAt: 1,
         votes: 1,
         media: 1,
-        commentsCount: { $size: '$comments' },
+        commentsCount: { $size: { $ifNull: ['$comments', []] } },
         hotnessScore: {
           $add: [
             {
               $size: {
                 $filter: {
-                  input: { $objectToArray: '$votes' },
+                  input: { $objectToArray: { $ifNull: ['$votes', {}] } },
                   as: 'vote',
                   cond: { $eq: ['$$vote.v', true] },
                 },
@@ -141,13 +141,13 @@ exports.getMyFeed = catchAsync(async (req, res, next) => {
             {
               $size: {
                 $filter: {
-                  input: { $objectToArray: '$votes' },
+                  input: { $objectToArray: { $ifNull: ['$votes', {}] } },
                   as: 'vote',
                   cond: { $eq: ['$$vote.v', false] },
                 },
               },
             }, // Count downvotes
-            { $size: '$comments' },
+            { $size: { $ifNull: ['$comments', []] } },
           ],
         },
       },
@@ -205,7 +205,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Middleware to handle multiple image uploads
-exports.uploadPostPhotos = upload.array('images', 5);  // Adjust the number as needed
+exports.uploadPostPhotos = upload.array('images', 5); // Adjust the number as needed
 
 // Create new post with images
 exports.createNewPostWithImages = async (req, res, next) => {
@@ -214,7 +214,11 @@ exports.createNewPostWithImages = async (req, res, next) => {
     // Handle image processing
     for (const file of req.files) {
       const filename = `post-${req.user.id}-${Date.now()}-${file.originalname}`;
-      const outputPath = path.join(__dirname, '../../frontend/public/images/postImages', filename);
+      const outputPath = path.join(
+        __dirname,
+        '../../frontend/public/images/postImages',
+        filename
+      );
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
       await sharp(file.buffer)
@@ -222,7 +226,7 @@ exports.createNewPostWithImages = async (req, res, next) => {
         .toFormat('jpeg')
         .jpeg({ quality: 90 })
         .toFile(outputPath);
-      
+
       filenames.push(`/images/postImages/${filename}`);
     }
 
@@ -242,7 +246,9 @@ exports.createNewPostWithImages = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error creating post with images:', error);
-    res.status(500).json({ status: 'error', message: 'Failed to create post.' });
+    res
+      .status(500)
+      .json({ status: 'error', message: 'Failed to create post.' });
   }
 };
 // Exporting the postController object
@@ -257,7 +263,7 @@ const postController = {
   getPostByUserId: exports.getPostByUserId,
   votePost: exports.votePost,
   uploadPostPhotos: exports.uploadPostPhotos,
-  createNewPostWithImages: exports.createNewPostWithImages
+  createNewPostWithImages: exports.createNewPostWithImages,
 };
 
 module.exports = postController;

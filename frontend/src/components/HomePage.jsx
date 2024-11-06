@@ -24,7 +24,8 @@ import img9 from "../images/postImage/images_postId9.jpg";
 import img10 from "../images/postImage/images_postId10.jpg";
 import { doVotePost } from "../services/PostService";
 import axios from "axios";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -60,7 +61,7 @@ const HomePage = () => {
     axios
       .request(config)
       .then((response) => {
-        alert("Your report have send to admin success!!");
+        toast.success("Your report have send to admin success!!");
         setShowModal1(false);
       })
       .catch((error) => {
@@ -138,7 +139,7 @@ const HomePage = () => {
     axios
       .request(config)
       .then((response) => {
-        alert("Save post success!");
+        toast.success("Save post success!");
         console.log("Phản hồi từ server:", response.data);
       })
       .catch((error) => {
@@ -168,6 +169,7 @@ const HomePage = () => {
 
   return (
     <Container>
+      <ToastContainer />
       <Modal show={showModal1} onHide={() => setShowModal1(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Reports</Modal.Title>
@@ -284,15 +286,13 @@ const HomePage = () => {
                         fluid
                         style={{
                           width: "100%",
-                          height: '200px',
+                          height: "200px",
                           borderRadius: "10px",
                           cursor: "pointer",
                           float: "right",
-                          objectFit: "cover"
+                          objectFit: "cover",
                         }}
-                        onClick={() =>
-                          handleImageClick(post.media[0])
-                        }
+                        onClick={() => handleImageClick(post.media[0])}
                       />
                     ) : (
                       <div></div>

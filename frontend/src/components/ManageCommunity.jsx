@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Button, Tabs, Tab, Table } from "react-bootstrap";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const ManageCommunity = ({ showModal, setShowModal, community }) => {
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
@@ -39,7 +41,7 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
     axios
       .request(config)
       .then((response) => {
-        alert("Add user success!");
+        toast.success("Add user success!");
       })
       .catch((error) => {
         console.log(error);
@@ -91,7 +93,7 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
     axios
       .request(config)
       .then((response) => {
-        alert("Update success!!");
+        toast.success("Update success!!");
       })
       .catch((error) => {
         console.log(error);
@@ -145,25 +147,6 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
                   onChange={(e) => setRule(e.target.value)}
                 />
               </Form.Group>
-              <Button variant="primary" onClick={() => handleUpdate()}>
-                Save Changes
-              </Button>
-            </Form>
-          </Tab>
-          <Tab eventKey="media" title="Media">
-            <Form>
-              <Form.Group controlId="communityName" className="mb-3">
-                <Form.Label>
-                  Logo <span style={{ color: "red" }}>*</span>
-                </Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter logo url"
-                  value={logo}
-                  onChange={(e) => setLogo(e.target.value)}
-                />
-              </Form.Group>
-
               <Form.Group controlId="description" className="mb-3 ">
                 <Form.Label>
                   Comunity Type <span style={{ color: "red" }}>*</span>
@@ -214,12 +197,12 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
                   />
                 </div>
               </Form.Group>
-
               <Button variant="primary" onClick={() => handleUpdate()}>
                 Save Changes
               </Button>
             </Form>
           </Tab>
+
           {/* Tab cho Join Requests */}
           <Tab eventKey="request" title="Join Requests">
             <Table striped bordered hover>

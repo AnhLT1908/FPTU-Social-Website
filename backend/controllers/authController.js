@@ -18,12 +18,13 @@ const createSendToken = (user, statusCode, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-
+  const { password, ...userData } = user._doc;
   // Sending response back to client
   res.status(statusCode).json({
     status: 'success',
     token,
     user: {
+      ...userData,
       id: user._id,
       username: user.username,
       email: user.email,
@@ -38,7 +39,12 @@ exports.checkEmail = catchAsync(async (req, res, next) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(new AppError('Email is already registered. Please use a different email.', 400));
+    return next(
+      new AppError(
+        'Email is already registered. Please use a different email.',
+        400
+      )
+    );
   }
 
   res.status(200).json({
@@ -53,7 +59,12 @@ exports.checkStudentCode = catchAsync(async (req, res, next) => {
 
   const existingStudentCode = await User.findOne({ studentCode });
   if (existingStudentCode) {
-    return next(new AppError('Student code is already registered. Please use a different student code.', 400));
+    return next(
+      new AppError(
+        'Student code is already registered. Please use a different student code.',
+        400
+      )
+    );
   }
 
   res.status(200).json({
@@ -77,7 +88,9 @@ exports.signup = catchAsync(async (req, res, next) => {
     { expiresIn: '1d' }
   );
 
-  const activationLink = `${req.protocol}://${req.get('host')}/activate/${activationToken}`;
+  const activationLink = `${req.protocol}://${req.get(
+    'host'
+  )}/activate/${activationToken}`;
 
   // Gửi email kích hoạt
   const transporter = nodemailer.createTransport({
@@ -100,7 +113,8 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: 'success',
-    message: 'Account created successfully. Please check your email to activate your account.',
+    message:
+      'Account created successfully. Please check your email to activate your account.',
   });
 });
 
@@ -126,14 +140,15 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   }
 });
 
-
 // New function to check if the username is taken
 exports.checkUsername = catchAsync(async (req, res, next) => {
   const { username } = req.body;
 
   const existingUser = await User.findOne({ username });
   if (existingUser) {
-    return next(new AppError('Username is already taken. Please choose another.', 400));
+    return next(
+      new AppError('Username is already taken. Please choose another.', 400)
+    );
   }
 
   res.status(200).json({
@@ -142,23 +157,26 @@ exports.checkUsername = catchAsync(async (req, res, next) => {
   });
 });
 
-
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // Check for missing fields
   if (!email || !password) {
-    return next(new AppError('Vui lòng cung cấp tên người dùng/email và mật khẩu!', 400));
+    return next(
+      new AppError('Vui lòng cung cấp tên người dùng/email và mật khẩu!', 400)
+    );
   }
 
   // Find user by email or username
   const user = await User.findOne({
-    $or: [{ email: email }, { username: email }] // `email` could be email or username
+    $or: [{ email: email }, { username: email }], // `email` could be email or username
   }).select('+password');
 
   // Check if user does not exist or password is incorrect
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Tên người dùng/email hoặc mật khẩu không đúng', 401));
+    return next(
+      new AppError('Tên người dùng/email hoặc mật khẩu không đúng', 401)
+    );
   }
 
   // If user found and password correct, create and send token
@@ -227,7 +245,9 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
 
   // Kiểm tra xem email có đuôi .edu hay không
   if (!payload.email.endsWith('@fpt.edu.vn')) {
-    return next(new AppError('Only @fpt.edu.vn email addresses are allowed', 403));
+    return next(
+      new AppError('Only @fpt.edu.vn email addresses are allowed', 403)
+    );
   }
 
   // Tìm người dùng trong cơ sở dữ liệu
@@ -240,7 +260,6 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       username: payload.name, // Hoặc bạn có thể xử lý để tạo username từ tên đầy đủ
       password: crypto.randomBytes(16).toString('hex'), // Mật khẩu ngẫu nhiên, vì người dùng sẽ đăng nhập bằng Google
       studentCode: 'auto-generated-or-placeholder', // Có thể tạo mã sinh viên tự động nếu cần
-
     });
   }
 
@@ -254,12 +273,14 @@ exports.checkEmailForGoogleLogin = async (req, res) => {
 
     // Kiểm tra xem email có được gửi lên không
     if (!email) {
-      return res.status(400).json({ message: "Email is required." });
+      return res.status(400).json({ message: 'Email is required.' });
     }
 
     // Kiểm tra định dạng email
     if (!/^[\w.%+-]+@fpt\.edu\.vn$/.test(email)) {
-      return res.status(400).json({ message: "Only emails with the domain @fpt.edu.vn are allowed." });
+      return res.status(400).json({
+        message: 'Only emails with the domain @fpt.edu.vn are allowed.',
+      });
     }
 
     // Tìm người dùng theo email
@@ -267,17 +288,23 @@ exports.checkEmailForGoogleLogin = async (req, res) => {
 
     if (user) {
       // Email đã tồn tại, trả về phản hồi thành công
-      return res.status(200).json({ exists: true, message: "Email found. Proceed to login." });
+      return res
+        .status(200)
+        .json({ exists: true, message: 'Email found. Proceed to login.' });
     } else {
       // Email chưa tồn tại, trả về phản hồi không tìm thấy
-      return res.status(200).json({ exists: false, message: "Email not found. Proceed to sign up." });
+      return res.status(200).json({
+        exists: false,
+        message: 'Email not found. Proceed to sign up.',
+      });
     }
   } catch (error) {
-    console.error("Error checking email for Google login:", error);
-    res.status(500).json({ message: "An error occurred while checking the email." });
+    console.error('Error checking email for Google login:', error);
+    res
+      .status(500)
+      .json({ message: 'An error occurred while checking the email.' });
   }
 };
-
 
 // Authentication
 exports.protect = catchAsync(async (req, res, next) => {
@@ -322,10 +349,13 @@ exports.restrictTo = (...roles) => {
 
 const generateRandomPassword = (min = 6, max = 8) => {
   const length = Math.floor(Math.random() * (max - min + 1)) + min;
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let password = '';
   for (let i = 0; i < length; i++) {
-    password += characters.charAt(Math.floor(Math.random() * characters.length));
+    password += characters.charAt(
+      Math.floor(Math.random() * characters.length)
+    );
   }
   return password;
 };
@@ -352,7 +382,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       message: 'A new password has been sent to your email.',
     });
   } catch (error) {
-    return next(new AppError('There was an error sending the email. Try again later!', 500));
+    return next(
+      new AppError(
+        'There was an error sending the email. Try again later!',
+        500
+      )
+    );
   }
 });
 
@@ -388,11 +423,19 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   // Check if user has a password stored in the database
   if (!user.password) {
-    return next(new AppError('Your current password is not set. Please contact support.', 500));
+    return next(
+      new AppError(
+        'Your current password is not set. Please contact support.',
+        500
+      )
+    );
   }
 
   // Check if current password matches
-  const isMatch = await user.correctPassword(req.body.oldPassword, user.password);
+  const isMatch = await user.correctPassword(
+    req.body.oldPassword,
+    user.password
+  );
   if (!isMatch) {
     return next(new AppError('Your current password is wrong!', 401));
   }

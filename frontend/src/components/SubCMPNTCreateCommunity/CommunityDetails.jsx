@@ -49,7 +49,12 @@ const CommunityDetails = ({
           />
         </Form.Group>
         <Form.Group controlId="description" className="mb-3">
-          <Form.Label>Rule </Form.Label>
+          <Form.Label>
+            Rule
+            <small style={{ fontSize: "0.75em", color: "red" }}>
+              (Each line in the rule will be separated by a period.)
+            </small>
+          </Form.Label>
           <Form.Control
             as="textarea"
             rows={4}

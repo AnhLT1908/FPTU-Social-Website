@@ -27,7 +27,8 @@ import img7 from "../images/postImage/images_postId7.jpg";
 import img8 from "../images/postImage/images_postId8.jpg";
 import img9 from "../images/postImage/images_postId9.jpg";
 import img10 from "../images/postImage/images_postId10.jpg";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [reportDes, setReportDes] = useState("");
@@ -153,7 +154,7 @@ const CommunityPage = () => {
         },
       })
       .then((response) => {
-        alert("Save post success!");
+        toast.success("Save post success!");
         navigate(`/community/${id}`);
       })
       .catch((error) => {
@@ -161,29 +162,29 @@ const CommunityPage = () => {
       });
   };
 
-  const handleReportPost = (uid, pid) => {
-    const data = JSON.stringify({
-      userId: uid,
-      reportEntityId: pid,
-      entityType: "Post",
-      description: reportDes,
-      status: "Waiting",
-    });
+  const handleReportPost = async (uid, pid) => {
+    try {
+      const data = JSON.stringify({
+        userId: uid,
+        reportEntityId: pid,
+        entityType: "Post",
+        description: reportDes,
+        status: "Waiting",
+      });
 
-    axios
-      .post("http://localhost:9999/api/v1/reports/", data, {
+      await axios.post("http://localhost:9999/api/v1/reports/", data, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      })
-      .then(() => {
-        alert("Your report has been sent to admin!");
-        setShowModal1(false);
-      })
-      .catch((error) => {
-        console.log(error);
       });
+
+      toast.success("Your report has been sent to admin!");
+      setShowModal1(false);
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast.error("Failed to submit report. Please try again.");
+    }
   };
 
   const handleJoin = () => {
@@ -201,7 +202,7 @@ const CommunityPage = () => {
         .post("http://localhost:9999/api/v1/communities/join", joinData, config)
         .then(() => {
           setShowModal2(false);
-          alert("Joined community successfully!");
+          toast.success("Joined community successfully!");
           navigate(`/community/${id}`);
         })
         .catch((error) => console.log(error));
@@ -219,8 +220,10 @@ const CommunityPage = () => {
         })
         .then(() => {
           setShowModal2(false);
-          alert("Your request has been sent to the moderator!");
-          navigate(`/community/${id}`);
+          toast.success("Your request have send to moderator");
+          setTimeout(() => {
+            navigate(`/community/${id}`);
+          }, 3000);
         })
         .catch((error) => console.log(error));
     }
@@ -228,6 +231,7 @@ const CommunityPage = () => {
 
   return (
     <Container fluid className="mt-4">
+      <ToastContainer />
       <Row>
         {/* Main Content */}
         <Col md={8}>
@@ -237,9 +241,19 @@ const CommunityPage = () => {
             </div>
             <div className="d-flex justify-content-between align-items-center">
               {user?.moderatorCommunities?.includes(id) ? (
-                <Button variant="light" onClick={() => setShowModal(true)}>
-                  Manage Comunity
-                </Button>
+                <>
+                  <ButtonGroup aria-label="Basic example">
+                    <Button
+                      variant="light"
+                      onClick={() => setShowCreatePost(true)}
+                    >
+                      Create Post
+                    </Button>
+                    <Button variant="light" onClick={() => setShowModal(true)}>
+                      Manage Comunity
+                    </Button>
+                  </ButtonGroup>
+                </>
               ) : (
                 <ButtonGroup aria-label="Basic example">
                   {!users?.includes(user?.id) ? (
@@ -252,7 +266,11 @@ const CommunityPage = () => {
                     ) : (
                       <Button
                         variant="primary"
-                        onClick={() => setShowModal2(true)}
+                        onClick={() =>
+                          community?.privacyType === "public"
+                            ? handleJoin()
+                            : setShowModal2(true)
+                        }
                       >
                         Join
                       </Button>
