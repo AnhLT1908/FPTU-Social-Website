@@ -71,24 +71,24 @@ exports.getReportStats = catchAsync(async (req, res, next) => {
 
 
 exports.deactivateReportedPost = catchAsync(async (req, res, next) => {
-    const { reportId } = req.params;
+    const { postId } = req.params;
+    const { action } = req.body; // Nhận `action` từ frontend: 'Approved' hoặc 'Cancel'
 
-    // Lấy report theo reportId
-    const report = await Report.findById(reportId);
-    if (!report) {
+    // Tìm tất cả các report liên quan đến postId
+    const reports = await Report.find({ reportEntityId: postId, entityType: 'Post' });
+
+    if (!reports || reports.length === 0) {
         return res.status(404).json({
             error: {
                 status: 404,
-                message: "Report not found"
+                message: "No reports found for this post"
             }
         });
     }
 
-    // Kiểm tra entityType của report là 'Post' và lấy reportEntityId (là postId)
-    if (report.entityType === 'Post') {
-        const postId = report.reportEntityId;
-
-        // Cập nhật isActive của Post thành false
+    // Kiểm tra `action` để xác định xem cần cập nhật post hay chỉ các report
+    if (action === 'Approved') {
+        // Cập nhật isActive của Post thành false và cập nhật trạng thái của các report
         const updatedPost = await Post.findByIdAndUpdate(postId, { isActive: false }, { new: true });
 
         if (!updatedPost) {
@@ -100,15 +100,32 @@ exports.deactivateReportedPost = catchAsync(async (req, res, next) => {
             });
         }
 
+        await Report.updateMany(
+            { reportEntityId: postId, entityType: 'Post' },
+            { status: 'Approved' }
+        );
+
         res.status(200).json({
-            message: "Post deactivated successfully",
-            post: updatedPost
+            message: "Post deactivated and reports approved successfully",
+            post: updatedPost,
+            reportsUpdated: reports.length
+        });
+    } else if (action === 'Cancel') {
+        // Chỉ cập nhật trạng thái của các report mà không thay đổi isActive của post
+        await Report.updateMany(
+            { reportEntityId: postId, entityType: 'Post' },
+            { status: 'Cancel' }
+        );
+
+        res.status(200).json({
+            message: "Reports canceled successfully",
+            reportsUpdated: reports.length
         });
     } else {
         res.status(400).json({
             error: {
                 status: 400,
-                message: "The report is not associated with a Post entity"
+                message: "Invalid action. Action must be either 'Approved' or 'Cancel'."
             }
         });
     }

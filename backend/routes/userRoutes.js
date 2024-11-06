@@ -47,12 +47,14 @@ router.patch(
   userController.uploadUserPhoto,
   userController.updateUserImage 
 );
-router.get('/:id', userController.getUserById);
+
 router.get('/search', userController.searchUsers);
 router.delete('/delete-me', userController.deleteMe);
 // Restrict To ADMIN Only
+
 router.get('/list', userController.getAllUsersPaginate);
 router.patch('/:id/toggle-active', userController.toggleUserActiveStatus);
+router.get('/:id', userController.getUserById);
 router.use(restrictTo('admin'));
 router
   .route('/')
