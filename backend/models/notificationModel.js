@@ -4,7 +4,7 @@ const notificationSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Types.ObjectId, ref: 'User' },
     resourceId: String,
-    notifType: { type: String, enum: ['communityNewPost', 'Tag'] },
+    notifType: { type: String, enum: ['Joined', 'Tag'] },
     title: String,
     description: String,
     seen: { type: Boolean, default: false },

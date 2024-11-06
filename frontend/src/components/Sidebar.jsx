@@ -179,16 +179,6 @@ function Sidebar() {
             >
               <div class="accordion-body">
                 <li>
-                  <Link to={'/create-community'}>
-                    <span className="icon">
-                      <FaPlus
-                        style={{ marginLeft: '10px', marginRight: '5px' }}
-                      />
-                    </span>
-                    <span className="name">Create a new community</span>
-                  </Link>
-                </li>
-                <li>
                   {community?.map((c) => (
                     <Link to={`/community/${c.id}`}>
                       <span className="icon">

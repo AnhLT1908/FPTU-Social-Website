@@ -1,54 +1,67 @@
-import React, { useEffect, useState } from "react";
-import "../styles/header.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useState } from 'react';
+import '../styles/header.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEllipsisVertical,
   faMessage,
-} from "@fortawesome/free-solid-svg-icons";
-import { useNavigate, Link } from "react-router-dom";
-import { searchCommunities, searchUsers } from "../services/SearchService";
-import { listNotifications } from "../services/NotificationService";
+  faUserCheck,
+} from '@fortawesome/free-solid-svg-icons';
+import { useNavigate, Link } from 'react-router-dom';
+import { searchCommunities, searchUsers } from '../services/SearchService';
+import { listNotifications } from '../services/NotificationService';
+import axios from 'axios';
+import { getHeader } from '../services/api';
 function Header({ socket }) {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState("user");
+  const [query, setQuery] = useState('');
+  const [searchType, setSearchType] = useState('user');
   const [searchResults, setSearchResults] = useState([]);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
-  const [noResultsMessage, setNoResultsMessage] = useState("");
+  const [noResultsMessage, setNoResultsMessage] = useState('');
   const [notifications, setNotifications] = useState([]);
   const fetchNotifications = async () => {
     const data = await listNotifications();
     setNotifications(data);
+    console.log(data);
   };
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
+    const userData = JSON.parse(localStorage.getItem('user'));
     if (userData) {
       setUser(userData);
-      console.log("User: ", userData);
+      console.log('User: ', userData);
     }
   }, []);
 
   useEffect(() => {
-    socket.on("newNotification", (data) => {
-      console.log("New notice: ", data);
+    socket.on('newNotification', (data) => {
+      console.log('New notice: ', data);
       if (user?.id == data?.userId) setNotifications((prev) => [...prev, data]);
     });
     return () => {
-      socket.off("newNotification");
+      socket.off('newNotification');
     };
   }, [socket]);
   useEffect(() => {
     fetchNotifications();
   }, []);
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
-
+  const handleNavigate = async (e, path, id) => {
+    e.preventDefault();
+    await axios.delete(`http://localhost:9999/api/v1/notifications/${id}`, {
+      headers: getHeader(),
+    });
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((notification) => notification._id !== id)
+    );
+    navigate(path);
+  };
   const handleSearch = (e) => {
     const searchQuery = e.target.value;
     setQuery(searchQuery);
@@ -61,9 +74,9 @@ function Header({ socket }) {
       if (searchQuery.length > 2) {
         try {
           let results;
-          let message = "";
+          let message = '';
 
-          if (searchType === "user") {
+          if (searchType === 'user') {
             const response = await searchUsers(searchQuery);
             results = response.data;
 
@@ -82,12 +95,12 @@ function Header({ socket }) {
           setIsDropdownVisible(true);
           setNoResultsMessage(message);
         } catch (error) {
-          console.error("Error fetching search results:", error);
+          console.error('Error fetching search results:', error);
         }
       } else {
         setSearchResults([]);
         setIsDropdownVisible(false);
-        setNoResultsMessage("");
+        setNoResultsMessage('');
       }
     }, 2000);
 
@@ -95,21 +108,28 @@ function Header({ socket }) {
   };
 
   const handleResultClick = (result) => {
-    console.log("Selected result:", result);
+    console.log('Selected result:', result);
     setQuery(result.name || result.username);
     setIsDropdownVisible(false);
 
-    if (searchType === "user") {
+    if (searchType === 'user') {
       navigate(`/profile/${result._id}`);
-    } else if (searchType === "community") {
+    } else if (searchType === 'community') {
       navigate(`/community/${result._id}`);
     }
   };
 
   return (
     <nav className="d-flex px-md-2 align-items-center header-navbar">
-      <Link to="/" className="nav-logo m-0">
-        <img src="/images/logo.jpg" width={50} alt="Logo" />
+      <Link
+        to="/"
+        className="nav-logo m-0"
+      >
+        <img
+          src="/images/logo.jpg"
+          width={50}
+          alt="Logo"
+        />
       </Link>
       <div className="search-bar-section d-flex flex-grow-1 justify-content-stretch py-2">
         <div className="d-flex justify-content-stretch mx-xl-auto d-xl-block">
@@ -164,28 +184,28 @@ function Header({ socket }) {
                         </span>
                       ) : (
                         <>
-                          {searchType === "user" ? (
+                          {searchType === 'user' ? (
                             <>
                               <img
-                                src={result.avatar || "default.jpg"}
+                                src={result.avatar || 'default.jpg'}
                                 alt="Avatar"
                                 className="result-avatar"
                                 width="20"
                                 height="20"
                               />
-                              <span>{result.username}</span> -{" "}
+                              <span>{result.username}</span> -{' '}
                               <span>{result.email}</span>
                             </>
                           ) : (
                             <>
                               <img
-                                src={result.logo || "default.jpg"}
+                                src={result.logo || 'default.jpg'}
                                 alt="Logo"
                                 className="result-logo"
                                 width="20"
                                 height="20"
                               />
-                              <span>{result.name}</span> -{" "}
+                              <span>{result.name}</span> -{' '}
                               <span>{result.description}</span>
                             </>
                           )}
@@ -209,7 +229,10 @@ function Header({ socket }) {
       <div className="header-right-section">
         {/* As Guest */}
         {!user ? (
-          <Link to="/login" className="login-button">
+          <Link
+            to="/login"
+            className="login-button"
+          >
             Log In
           </Link>
         ) : (
@@ -217,7 +240,7 @@ function Header({ socket }) {
             <div className="tools-wrapper">
               <button
                 className="create-button"
-                onClick={() => navigate("/create-post")}
+                onClick={() => navigate('/create-post')}
               >
                 <span className="d-flex align-items-center justify-content-center">
                   <span className="d-flex me-2">
@@ -264,23 +287,38 @@ function Header({ socket }) {
                   </div>
                   <div className="notification-content">
                     {/* Repeat Notification Items Here */}
-                    {notifications.map((_, index) => (
-                      <li className="d-flex" key={index}>
-                        <a className="dropdown-item-notification" href="#">
+                    {notifications.map((notification, index) => (
+                      <li
+                        className="d-flex"
+                        key={index}
+                      >
+                        <Link
+                          className="dropdown-item-notification"
+                          to={''}
+                          onClick={(e) =>
+                            handleNavigate(
+                              e,
+                              notification.resourceId,
+                              notification._id
+                            )
+                          }
+                        >
                           <span className="dropdown-item-icon">
-                            <FontAwesomeIcon icon={faMessage} />
+                            {notification.type === 'Joined' ? (
+                              <FontAwesomeIcon icon={faUserCheck} /> // Replace with the appropriate icon for "joined"
+                            ) : (
+                              <FontAwesomeIcon icon={faMessage} />
+                            )}
                           </span>
                           <span className="dropdown-item-name d-flex flex-column">
                             <span className="notification-activity">
-                              This user replied to your comment in
-                              r/test-community
+                              {notification.title}
                             </span>
                             <span className="notification-hints max-lines">
-                              Go see your comments on r/test-community: "This is
-                              just to test limited words length"
+                              {notification.description}
                             </span>
                           </span>
-                        </a>
+                        </Link>
                         <button>
                           <span>
                             <FontAwesomeIcon icon={faEllipsisVertical} />
@@ -317,7 +355,7 @@ function Header({ socket }) {
                       src="/images/logo.jpg"
                       width={32}
                       height={32}
-                      style={{ borderRadius: "50%" }}
+                      style={{ borderRadius: '50%' }}
                       alt="User Avatar"
                     />
                   </span>
@@ -326,30 +364,33 @@ function Header({ socket }) {
                   className="dropdown-menu dropdown-menu-end"
                   aria-labelledby="dropdownMenuButton1"
                 >
-                  <Link to={`/profile/${user.id}`}>
-                    <li style={{display: 'flex'}}>
-                        <span className="dropdown-item-icon">
-                          <img
-                            src="/images/logo.jpg"
-                            alt="User Avatar for u/sjdkdk48"
-                          />
-                        </span>
+                  <li>
+                    <a
+                      className="dropdown-item"
+                      href="#"
+                    >
+                      <span className="dropdown-item-icon">
+                        <img
+                          src="/images/logo.jpg"
+                          alt="User Avatar for u/sjdkdk48"
+                        />
+                      </span>
+                      <Link to={`/profile/${user.id}`}>
                         <span className="dropdown-item-name d-flex flex-column">
                           <span>View Profile</span>
                           <span
                             style={{
-                              fontSize: "0.75rem",
-                              lineHeight: "1rem",
-                              color: "var(--color-secondary-weak)",
+                              fontSize: '0.75rem',
+                              lineHeight: '1rem',
+                              color: 'var(--color-secondary-weak)',
                             }}
                           >
-                            {user?.displayName
-                              ? "u/" + user?.displayName
-                              : "u/" + user?.username}
+                            {'u/' + user?.username}
                           </span>
                         </span>
-                    </li>
-                  </Link>
+                      </Link>
+                    </a>
+                  </li>
                   <li>
                     <a
                       className="dropdown-item"
