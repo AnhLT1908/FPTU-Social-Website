@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import {jwtDecode} from "jwt-decode"; // Adjusted import
+import { jwtDecode } from "jwt-decode"; // Adjusted import
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -18,13 +18,16 @@ const LoginForm = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:9999/api/v1/users/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
+        const response = await fetch(
+          "http://localhost:9999/api/v1/users/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          }
+        );
 
         const data = await response.json();
 
@@ -47,7 +50,8 @@ const LoginForm = () => {
             toast.error(data.message); // Display the error using Toastify
           }
           setErrors({
-            form: data.message || "Login failed. Please check your credentials.",
+            form:
+              data.message || "Login failed. Please check your credentials.",
           });
         }
       } catch (error) {
@@ -97,7 +101,6 @@ const LoginForm = () => {
       setErrors({ form: "Email must be a FPT email!" });
     }
   };
-  
 
   const validateForm = () => {
     const newErrors = {};
@@ -156,7 +159,7 @@ const LoginForm = () => {
                   that you understand the Privacy Policy
                 </h6>
 
-                <div className="mb-2">
+                {/* <div className="mb-2">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleFailure}
@@ -174,7 +177,7 @@ const LoginForm = () => {
                     className="flex-grow-1 bg-secondary"
                     style={{ height: "1px" }}
                   ></div>
-                </div>
+                </div> */}
 
                 <Form noValidate validated={validated} onSubmit={handleLogin}>
                   <Form.Group className="mb-3" controlId="formEmail">

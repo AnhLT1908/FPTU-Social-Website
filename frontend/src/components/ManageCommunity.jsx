@@ -150,20 +150,8 @@ const ManageCommunity = ({ showModal, setShowModal, community }) => {
               </Button>
             </Form>
           </Tab>
-          <Tab eventKey="media" title="Media">
+          <Tab eventKey="media" title="Privacy">
             <Form>
-              <Form.Group controlId="communityName" className="mb-3">
-                <Form.Label>
-                  Logo <span style={{ color: "red" }}>*</span>
-                </Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter logo url"
-                  value={logo}
-                  onChange={(e) => setLogo(e.target.value)}
-                />
-              </Form.Group>
-
               <Form.Group controlId="description" className="mb-3 ">
                 <Form.Label>
                   Comunity Type <span style={{ color: "red" }}>*</span>

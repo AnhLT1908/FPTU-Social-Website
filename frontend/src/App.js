@@ -26,31 +26,23 @@ import ReportList from "./components/ReportList";
 import UserWall from "./components/UserWall";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { CommunityProvider } from "./context/CommunityContext";
 
 function App() {
-  const [isRedirecting, setIsRedirecting] = useState(true); // State để xác định có chuyển hướng không
 
-  useEffect(() => {
-    // Khi app được mount, bạn có thể làm bất kỳ kiểm tra nào trước khi chuyển hướng
-    setTimeout(() => {
-      setIsRedirecting(false); // Sau một thời gian ngắn, không chuyển hướng nữa
-    }, 100); // Set thời gian delay tùy chỉnh (ở đây là 100ms)
-  }, []);
 
   return (
     <div className="App">
       <BrowserRouter>
         <ToastContainer position="top-center" autoClose={3000} />
         <Routes>
-          {isRedirecting && <Route path="/" element={<Navigate to="/login" />} />}
-          
           <Route path="/login" element={<LoginForm />} />
           <Route path="/signup" element={<RegisterForm />} />
           <Route path="/activate/:activationCode" element={<ActivationSuccess />} />
           <Route path="/forgot-password" element={<ResetPasswordForm />} />
           <Route path="/create-username-password" element={<CreateUPForm />} />
           
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<CommunityProvider><Layout /></CommunityProvider>}>
             <Route path="/" element={<HomePage />} />
             <Route path="/post/:id" element={<PostDetail />} />
           
