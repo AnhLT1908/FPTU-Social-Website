@@ -23,6 +23,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import background from "../images/postImage/background.png";
 import axios from "axios";
 import image1 from "../images/postImage/images_postId1.jpg";
+import { doVotePost } from "../services/PostService";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -113,29 +114,31 @@ const UserProfile = () => {
 
   const userDataGet = userData;
   console.log("userDataGet", userDataGet);
-  const handleReaction = (postIndex, type) => {
-    setPosts((prevPosts) => {
-      const updatedPosts = [...prevPosts];
-      const post = updatedPosts[postIndex];
+  const handleVote = async (postId, vote) => {
+    // Handle the vote up logic
+    const res = await doVotePost(postId, vote);
+    // Update the commentList state with the new vote information
+    setPosts((prevList) =>
+      prevList.map((post) => {
+        if (post._id === postId) {
+          // Create a new votes object based on the current votes
+          const updatedVotes = { ...post.votes };
 
-      if (type === "upVote") {
-        post.upVoted ? post.upVotes-- : post.upVotes++;
-        if (post.downVoted) {
-          post.downVotes--;
-          post.downVoted = false;
-        }
-        post.upVoted = !post.upVoted;
-      } else {
-        post.downVoted ? post.downVotes-- : post.downVotes++;
-        if (post.upVoted) {
-          post.upVotes--;
-          post.upVoted = false;
-        }
-        post.downVoted = !post.downVoted;
-      }
+          // Update the votes based on the action
+          if (vote === true) {
+            updatedVotes[user.id] = true; // User voted up
+          } else if (vote === false) {
+            updatedVotes[user.id] = false; // User voted down
+          } else {
+            delete updatedVotes[user.id]; // User removed their vote
+          }
 
-      return updatedPosts;
-    });
+          // Return the updated comment object
+          return { ...post, votes: updatedVotes };
+        }
+        return post; // Return the comment unchanged if it doesn't match
+      })
+    );
   };
 
   const handleImageClick = (image) => {
@@ -324,17 +327,45 @@ const UserProfile = () => {
 
                 <div className="d-flex align-items-center">
                   <Button
-                    variant={post.upVoted ? "success" : "light"}
-                    onClick={() => handleReaction(index, "upVote")}
+                    variant={
+                      post.votes && post.votes[user?.id] === true
+                        ? "success"
+                        : "light"
+                    }
+                    onClick={() =>
+                      post.votes && post.votes[user?.id] === true
+                        ? handleVote(post._id, "none")
+                        : handleVote(post._id, true)
+                    }
+                    aria-label="Vote Up"
                   >
                     <FaArrowUp />
+                    {
+                      Object.values(post.votes || {}).filter(
+                        (vote) => vote === true
+                      ).length
+                    }
                   </Button>
-                  <span className="mx-2">{post.upVotes}</span>
+                  <span className="mx-2"></span>
                   <Button
-                    variant={post.downVoted ? "danger" : "light"}
-                    onClick={() => handleReaction(index, "downVote")}
+                    variant={
+                      post.votes && post.votes[user?.id] === false
+                        ? "danger"
+                        : "light"
+                    }
+                    onClick={() =>
+                      post.votes && post.votes[user?.id] === false
+                        ? handleVote(post._id, "none")
+                        : handleVote(post._id, false)
+                    }
+                    aria-label="Vote Down"
                   >
                     <FaArrowDown />
+                    {
+                      Object.values(post.votes || {}).filter(
+                        (vote) => vote === false
+                      ).length
+                    }
                   </Button>
                   <span className="mx-2">{post?.downVotes}</span>
                   <Button

@@ -14,7 +14,6 @@ exports.getReportById = factoryGetOne(Report, [
   { path: 'userId', select: 'username' },
   {
     path: 'reportEntityId',
-    select: 'title content ',
   },
 ]);
 

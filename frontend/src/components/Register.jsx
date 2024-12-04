@@ -144,7 +144,7 @@ const RegisterForm = () => {
                   that you understand the Privacy Policy
                 </h6>
 
-                <div className="mb-2">
+                {/* <div className="mb-2">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
@@ -156,7 +156,7 @@ const RegisterForm = () => {
                   <div className="flex-grow-1 bg-secondary" style={{ height: "1px" }}></div>
                   <span className="mx-4 text-muted">OR</span>
                   <div className="flex-grow-1 bg-secondary" style={{ height: "1px" }}></div>
-                </div>
+                </div> */}
 
                 <Form noValidate onSubmit={handleRegister}>
                   <Form.Group className="mb-3" controlId="formEmail">

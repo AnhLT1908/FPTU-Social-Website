@@ -3,6 +3,7 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; // Adjusted import
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -45,6 +46,9 @@ const LoginForm = () => {
           }
         } else {
           console.error("Login failed", data.message);
+          if (data.message === "Tài khoản của bạn đã bị vô hiệu hóa.") {
+            toast.error(data.message); // Display the error using Toastify
+          }
           setErrors({
             form:
               data.message || "Login failed. Please check your credentials.",
@@ -59,31 +63,6 @@ const LoginForm = () => {
     } else {
       setValidated(true);
     }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Email or username validation
-    if (!email) {
-      newErrors.email = "Email or username is required.";
-    } else if (
-      !/^[\w.%+-]+@fpt\.edu\.vn$/.test(email) && // Email format check
-      !/^[a-zA-Z0-9_]+$/.test(email) // Username format check (letters, numbers, underscores)
-    ) {
-      newErrors.email = "Invalid email or username format.";
-    }
-
-    // Password validation
-    if (!password) {
-      newErrors.password = "Password is required.";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters.";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleGoogleSuccess = (credentialResponse) => {
@@ -112,12 +91,37 @@ const LoginForm = () => {
             }
           } else {
             console.error("Google login failed", data.message);
+            if (data.message === "Tài khoản của bạn đã bị vô hiệu hóa.") {
+              toast.error(data.message); // Display the error using Toastify
+            }
             setErrors({ form: data.message });
           }
         });
     } else {
       setErrors({ form: "Email must be a FPT email!" });
     }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!email) {
+      newErrors.email = "Email or username is required.";
+    } else if (
+      !/^[\w.%+-]+@fpt\.edu\.vn$/.test(email) &&
+      !/^[a-zA-Z0-9_]+$/.test(email)
+    ) {
+      newErrors.email = "Invalid email or username format.";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required.";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleGoogleFailure = (error) => {
@@ -134,14 +138,15 @@ const LoginForm = () => {
         <Row>
           <Col>
             <div className="text-center mb-4">
-              <img
-                src="../images/logo.jpg"
-                href="/"
-                alt="Logo"
-                className="mb-3"
-                style={{ width: "100px" }}
-              />
-
+              <a href="/">
+                <img
+                  src="../images/logo.jpg"
+                  href="/"
+                  alt="Logo"
+                  className="mb-3"
+                  style={{ width: "100px" }}
+                />
+              </a>
               <h1>FPTU Social Website</h1>
               <p>The Internet Home Place, where many communities reside</p>
             </div>
@@ -154,7 +159,7 @@ const LoginForm = () => {
                   that you understand the Privacy Policy
                 </h6>
 
-                <div className="mb-2">
+                {/* <div className="mb-2">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleFailure}
@@ -172,7 +177,7 @@ const LoginForm = () => {
                     className="flex-grow-1 bg-secondary"
                     style={{ height: "1px" }}
                   ></div>
-                </div>
+                </div> */}
 
                 <Form noValidate validated={validated} onSubmit={handleLogin}>
                   <Form.Group className="mb-3" controlId="formEmail">
