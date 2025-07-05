@@ -10,6 +10,7 @@ This initiative aims to develop **a social networking platform**, with Phase 1 f
  
 - Phase 2:
   + Mr.AnhLT (PM - BA - FullStackDev)
+
 With Mr.AnhLT serving as the team leader and designated maintainer of the platform moving forward. All related documentation and environment files are managed by Mr.AnhLT.
 
 ## TechStack
