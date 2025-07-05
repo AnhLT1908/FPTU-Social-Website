@@ -1,12 +1,15 @@
 # Project Introduction
 
 This initiative aims to develop **a social networking platform**, with Phase 1 focusing on delivering a Minimum Viable Product (MVP) tailored for **FPT University students**. Subsequent phases will expand the platform’s target audience in alignment with its strategic business objectives. The project is led by a team of five FPT University Hanoi students:
+- Phase 1:
   + Mr.AnhLT (PM - BA - FeDev)
   + Mrs.ThaoTTP (BeDev)
   + Mr.HaiTH (FeDev, Tester)
   + Mr.HieuNT(BeDev)
   + Mr.HaiTT (FeDev)
-
+ 
+- Phase 2:
+  + Mr.AnhLT (PM - BA - FullStackDev)
 With Mr.AnhLT serving as the team leader and designated maintainer of the platform moving forward. All related documentation and environment files are managed by Mr.AnhLT.
 
 ## TechStack
