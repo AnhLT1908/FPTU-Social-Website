@@ -13,7 +13,7 @@ This initiative aims to develop **a social networking platform**, with Phase 1 f
 
 With Mr.AnhLT serving as the team leader and designated maintainer of the platform moving forward. All related documentation and environment files are managed by Mr.AnhLT.
 
-## TechStack
+# TechStack
 - **Frontend**:
 
 ![Static Badge](https://img.shields.io/badge/React-%2361DAFB?logo=react&logoColor=%23FFFFFF)
@@ -36,7 +36,7 @@ With Mr.AnhLT serving as the team leader and designated maintainer of the platfo
 ![Static Badge](https://img.shields.io/badge/Firebase-%23DD2C00?logo=firebase&logoColor=%23FFFFFF)
 ![Static Badge](https://img.shields.io/badge/JSON%20Web%20Tokens-%23000000?logo=jsonwebtokens&logoColor=%23FFFFFF)
 
-### Contact to Mr.AnhLT:
+# Contact to Mr.AnhLT:
 
 ![Static Badge](https://img.shields.io/badge/Gmail-%23EA4335?logo=gmail&logoColor=%23FFFFFF) 
 > anhlt1908.work@gmail.com
