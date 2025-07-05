@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getHeader } from "../services/api";
 
 const CreatePost = ({ communityData = null }) => {
   const navigate = useNavigate();
@@ -37,7 +38,10 @@ const CreatePost = ({ communityData = null }) => {
       const fetchCommunities = async () => {
         try {
           const response = await axios.get(
-            "http://localhost:9999/api/v1/communities/"
+            `http://localhost:9999/api/v1/communities/my-communities`,
+            {
+              headers: getHeader(),
+            }
           );
           setCommunity(response.data);
           console.log("Community:", response.data);

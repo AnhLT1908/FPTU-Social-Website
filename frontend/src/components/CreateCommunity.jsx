@@ -6,6 +6,7 @@ import CommunityTopics from "./SubCMPNTCreateCommunity/CommunityTopics";
 import CommunityType from "./SubCMPNTCreateCommunity/CommunityType";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useCommunity } from "../context/CommunityContext";
 
 const CreateCommunity = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const CreateCommunity = () => {
   const [error, setError] = useState(null);
   const token = localStorage.getItem("token");
   const [user, setUser] = useState("");
+  const { setSidebarCommunity } = useCommunity();
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (userData) setUser(userData);
@@ -65,6 +67,7 @@ const CreateCommunity = () => {
         }
       );
       console.log("Community successfully created:", response.data);
+      setSidebarCommunity((prev) => [...prev, response.data]);
       user?.moderatorCommunities?.push(response?.data.id);
       localStorage.setItem("user", JSON.stringify(user));
       setShowPreview(false);
@@ -104,13 +107,6 @@ const CreateCommunity = () => {
       setDescription={setDescription}
       rule={rule}
       setRule={setRule}
-    />,
-    <CommunityStyle
-      banner={banner}
-      setBanner={setBanner}
-      icon={icon}
-      setIcon={setIcon}
-      handleImageUpload={handleImageUpload}
     />,
     <CommunityType
       communityType={communityType}

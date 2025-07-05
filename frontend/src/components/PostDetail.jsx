@@ -11,17 +11,6 @@ import {
   Card,
 } from "react-bootstrap";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
-
-import img1 from "../images/postImage/images_postId1.jpg";
-import img2 from "../images/postImage/images_postId2.jpg";
-import img3 from "../images/postImage/images_postId3.jpg";
-import img4 from "../images/postImage/images_postId4.jpg";
-import img5 from "../images/postImage/images_postId5.jpg";
-import img6 from "../images/postImage/images_postId6.jpg";
-import img7 from "../images/postImage/images_postId7.jpg";
-import img8 from "../images/postImage/images_postId8.jpg";
-import img9 from "../images/postImage/images_postId9.jpg";
-import img10 from "../images/postImage/images_postId10.jpg";
 import CommentList from "./Comment/CommentList";
 import { doVotePost, getPostDetail } from "../services/PostService";
 
@@ -60,7 +49,6 @@ const PostDetail = () => {
       return { ...prevPost, votes: updatedVotes };
     });
   };
-  const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
   const navigate = useNavigate();
   const imageIndex = parseInt(id) - 1;
   const capitalizeFirstLetter = (str) => {

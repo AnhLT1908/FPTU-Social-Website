@@ -10,9 +10,6 @@ const LayoutWithSidebar = ({ children }) => {
                 <Navbar.Brand href="#">Dashboard</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ml-auto ms-auto"> {/* Use Bootstrap utility class for alignment */}
-                        <Nav.Link href="#logout">Logout</Nav.Link>
-                    </Nav>
                 </Navbar.Collapse>
             </Navbar>
             <Row>

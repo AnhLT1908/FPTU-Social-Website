@@ -1,6 +1,6 @@
 import "./App.css";
-import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
@@ -24,18 +24,25 @@ import CreatePost from "./components/CreatePost";
 import EditPost from "./components/EditPost";
 import ReportList from "./components/ReportList";
 import UserWall from "./components/UserWall";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { CommunityProvider } from "./context/CommunityContext";
+
 function App() {
+
+
   return (
     <div className="App">
       <BrowserRouter>
+        <ToastContainer position="top-center" autoClose={3000} />
         <Routes>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/signup" element={<RegisterForm />} />
           <Route path="/activate/:activationCode" element={<ActivationSuccess />} />
           <Route path="/forgot-password" element={<ResetPasswordForm />} />
-          <Route path="/create-username-password" element={<CreateUPForm />}/>
+          <Route path="/create-username-password" element={<CreateUPForm />} />
           
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<CommunityProvider><Layout /></CommunityProvider>}>
             <Route path="/" element={<HomePage />} />
             <Route path="/post/:id" element={<PostDetail />} />
           

@@ -20,8 +20,7 @@ const CommunityType = ({
       <Container>
         <h3>What kind of community is this?</h3>
         <p>
-          Decide who can view and contribute in your community. Only public
-          communities show up in search.
+          Decide who can view and contribute in your community.
         </p>
         <hr className="my-4" style={{ borderTop: "1px solid black" }} />
         <Form>

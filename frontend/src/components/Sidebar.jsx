@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import '../styles/sidebar.css';
-import { Link, useLocation } from 'react-router-dom';
-import { FaPlus } from 'react-icons/fa';
-import axios from 'axios';
-import { getHeader } from '../services/api';
-const sidebarPath = ['/', '/popular', 'explore'];
+import React, { useEffect, useState } from "react";
+import "../styles/sidebar.css";
+import { Link, useLocation } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
+import axios from "axios";
+import { getHeader } from "../services/api";
+import { useCommunity } from "../context/CommunityContext";
+const sidebarPath = ["/", "/popular", "explore"];
 
 function Sidebar() {
   const { pathname } = useLocation();
   const [community, setCommunity] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
+  const { setSidebarCommunity, sidebarCommunity } = useCommunity();
   useEffect(() => {
     const controller = new AbortController();
     const fetchCommunities = async () => {
@@ -21,11 +23,11 @@ function Sidebar() {
             headers: getHeader(),
           }
         );
-        console.log('Community:', response.data);
+        console.log("Community:", response.data);
         setCommunity(response.data);
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Fetch error:', error);
+        if (error.name !== "AbortError") {
+          console.error("Fetch error:", error);
         }
       }
     };
@@ -39,7 +41,7 @@ function Sidebar() {
         <li>
           <Link
             to={sidebarPath[0]}
-            className={pathname === sidebarPath[0] ? 'selected' : ''}
+            className={pathname === sidebarPath[0] ? "selected" : ""}
           >
             <span className="icon">
               <svg
@@ -60,7 +62,7 @@ function Sidebar() {
         <li>
           <Link
             to={sidebarPath[1]}
-            className={pathname === sidebarPath[1] ? 'selected' : ''}
+            className={pathname === sidebarPath[1] ? "selected" : ""}
           >
             <span className="icon">
               <svg
@@ -81,7 +83,7 @@ function Sidebar() {
         <li>
           <Link
             to={sidebarPath[2]}
-            className={pathname === sidebarPath[2] ? 'selected' : ''}
+            className={pathname === sidebarPath[2] ? "selected" : ""}
           >
             <span className="icon">
               <svg
@@ -104,10 +106,7 @@ function Sidebar() {
       <sidebar-community-section>
         <div className="accordion accordion-flush">
           <div className="accordion-item">
-            <div
-              class="accordion-header"
-              id="flush-headingTwo"
-            >
+            <div class="accordion-header" id="flush-headingTwo">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -126,26 +125,22 @@ function Sidebar() {
             >
               <div class="accordion-body">
                 <li>
-                  <Link to={'/create-community'}>
+                  <Link to={"/create-community"}>
                     <span className="icon">
                       <FaPlus
-                        style={{ marginLeft: '10px', marginRight: '5px' }}
+                        style={{ marginLeft: "10px", marginRight: "5px" }}
                       />
                     </span>
                     <span className="name">Create a new community</span>
                   </Link>
                 </li>
                 <li>
-                  {community
+                  {sidebarCommunity
                     ?.filter((c) => c?.moderators.includes(user.id))
                     .map((c) => (
                       <Link to={`/community/${c?.id}`}>
                         <span className="icon">
-                          <img
-                            src="/images/logo.jpg"
-                            width={32}
-                            height={32}
-                          />
+                          <img src="/images/logo.jpg" width={32} height={32} />
                         </span>
                         <span className="name">{`f/  ${c.name}`}</span>
                       </Link>
@@ -157,10 +152,7 @@ function Sidebar() {
         </div>
         <div className="accordion accordion-flush">
           <div className="accordion-item">
-            <div
-              class="accordion-header"
-              id="flush-headingThree"
-            >
+            <div class="accordion-header" id="flush-headingThree">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -179,14 +171,10 @@ function Sidebar() {
             >
               <div class="accordion-body">
                 <li>
-                  {community?.map((c) => (
+                  {sidebarCommunity?.map((c) => (
                     <Link to={`/community/${c?.id}`}>
                       <span className="icon">
-                        <img
-                          src="/images/logo.jpg"
-                          width={32}
-                          height={32}
-                        />
+                        <img src="/images/logo.jpg" width={32} height={32} />
                       </span>
                       <span className="name">{`f/  ${c?.name}`}</span>
                     </Link>

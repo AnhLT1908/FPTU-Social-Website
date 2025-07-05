@@ -12,18 +12,9 @@ import {
 } from "react-bootstrap";
 import { FaArrowUp, FaArrowDown, FaComment, FaShare } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import img1 from "../images/postImage/images_postId1.jpg";
-import img2 from "../images/postImage/images_postId2.jpg";
-import img3 from "../images/postImage/images_postId3.jpg";
-import img4 from "../images/postImage/images_postId4.jpg";
-import img5 from "../images/postImage/images_postId5.jpg";
-import img6 from "../images/postImage/images_postId6.jpg";
-import img7 from "../images/postImage/images_postId7.jpg";
-import img8 from "../images/postImage/images_postId8.jpg";
-import img9 from "../images/postImage/images_postId9.jpg";
-import img10 from "../images/postImage/images_postId10.jpg";
 import { doVotePost } from "../services/PostService";
 import axios from "axios";
+import { getHeader } from "../services/api";
 
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
@@ -37,7 +28,6 @@ const HomePage = () => {
   const [showModal1, setShowModal1] = useState(false);
   const [reportDes, setReportDes] = useState("");
   const [reportedPosts, setReportedPosts] = useState({});
-  const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
   const handleReportPost = (uid, pid) => {
     const data = JSON.stringify({
@@ -101,6 +91,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
+    fetchMe();
     const savedReportedPosts = JSON.parse(
       localStorage.getItem("reportedPosts")
     );
@@ -114,9 +105,6 @@ const HomePage = () => {
   }, [reportedPosts]);
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
-
     const fetchPosts = () => {
       fetch(
         `http://localhost:9999/api/v1/posts/my-feed?sort=${filter}&limit=10`,
@@ -136,6 +124,16 @@ const HomePage = () => {
 
     fetchPosts();
   }, [filter, token]);
+
+  const fetchMe = async () => {
+    const res = await axios.get("http://localhost:9999/api/v1/users/me", {
+      headers: getHeader(),
+    });
+    if (res.data) {
+      setUser(res.data);
+      console.log("Set User", res.data);
+    }
+  };
 
   console.log("token", token);
 
@@ -167,7 +165,7 @@ const HomePage = () => {
   };
   const handleSave = (id) => {
     const data = JSON.stringify({
-      bookmarks: [id],
+      bookmarks: [...user.bookmarks, id],
     });
 
     const config = {
@@ -271,7 +269,7 @@ const HomePage = () => {
               <Card key={post?._id} className="mb-3 p-3">
                 <Row>
                   <Col>
-                    <Link to={`/community/${post?.communityId?.id}`}>
+                    <Link to={`/community/${post?.communityId?._id}`}>
                       <p>
                         <strong>
                           {"f/" + post.communityId?.name || "Community Name"}

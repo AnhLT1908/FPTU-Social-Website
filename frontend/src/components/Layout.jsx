@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
-import Sidebar from './Sidebar';
-import Header from './Header';
-import { Outlet } from 'react-router-dom';
-import socket from '../services/socketClient';
+import React, { useEffect } from "react";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import { Outlet, Navigate } from "react-router-dom";
+import socket from "../services/socketClient";
 function Layout() {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
   useEffect(() => {
-    socket?.emit('joinRoom', user?.id);
+    socket?.emit("joinRoom", user?.id);
   }, [socket, user]);
-  return (
+  return user ? (
     <>
       <Header socket={socket} />
       <div className="container-fluid">
@@ -22,6 +22,8 @@ function Layout() {
         </main>
       </div>
     </>
+  ) : (
+    <Navigate to="/login" />
   );
 }
 
