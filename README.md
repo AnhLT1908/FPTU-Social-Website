@@ -1,70 +1,41 @@
-# Getting Started with Create React App
+# Project Introduction
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This initiative aims to develop **a social networking platform**, with Phase 1 focusing on delivering a Minimum Viable Product (MVP) tailored for **FPT University students**. Subsequent phases will expand the platform’s target audience in alignment with its strategic business objectives. The project is led by a team of five FPT University Hanoi students:
+  + Mr.AnhLT (PM - BA - FeDev)
+  + Mrs.ThaoTTP (BeDev)
+  + Mr.HaiTH (FeDev, Tester)
+  + Mr.HieuNT(BeDev)
+  + Mr.HaiTT (FeDev)
 
-## Available Scripts
+With Mr.AnhLT serving as the team leader and designated maintainer of the platform moving forward. All related documentation and environment files are managed by Mr.AnhLT.
 
-In the project directory, you can run:
+## TechStack
+- **Frontend**:
 
-### `npm start`
+![Static Badge](https://img.shields.io/badge/React-%2361DAFB?logo=react&logoColor=%23FFFFFF)
+![Static Badge](https://img.shields.io/badge/JavaScript-%23F7DF1E?logo=javascript&logoColor=%23FFFFFF)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Backend**:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+![Static Badge](https://img.shields.io/badge/Node.js-%235FA04E?logo=node.js&logoColor=%23FFFFFF)
+![Static Badge](https://img.shields.io/badge/Express-%23000000?logo=express&logoColor=%23FFFFFF)
 
-### `npm test`
+- **Database**:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![Static Badge](https://img.shields.io/badge/MongoDB-%2347A248?logo=MongoDB&logoColor=%23FFFFFF)
 
-### `npm run build`
+- **Another tech**:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+![Static Badge](https://img.shields.io/badge/Socket.io-%23010101?logo=socketdotio&logoColor=%23FFFFFF)
+![Static Badge](https://img.shields.io/badge/React%20Bootstrap-%2341E0FD?logo=reactbootstrap&logoColor=%23FFFFFF)
+![Static Badge](https://img.shields.io/badge/Nodemon-%2376D04B?logo=nodemon&logoColor=%23FFFFFF)
+![Static Badge](https://img.shields.io/badge/Firebase-%23DD2C00?logo=firebase&logoColor=%23FFFFFF)
+![Static Badge](https://img.shields.io/badge/JSON%20Web%20Tokens-%23000000?logo=jsonwebtokens&logoColor=%23FFFFFF)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Contact to Mr.AnhLT:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![Static Badge](https://img.shields.io/badge/Gmail-%23EA4335?logo=gmail&logoColor=%23FFFFFF) 
+> anhlt1908.work@gmail.com
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+![Static Badge](https://img.shields.io/badge/Linkedin-%230882bd?logo=linkedin&logoColor=%23FFFFFF)
+> www.linkedin.com/in/anhlt1908
